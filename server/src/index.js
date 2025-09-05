@@ -1,15 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
-import router from "./routes";
+import router from "./routes.js";
 
 
 const app = express();
 
 dotenv.config();
-
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-})
 
 app.use(router);
 
