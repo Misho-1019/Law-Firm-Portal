@@ -14,6 +14,8 @@ export const authMiddleware = (req, res, next) => {
 
         next();
     } catch (error) {
-        //TODO:
+        res.clearCookie('auth');
+
+        return res.status(401).json({ message: 'Invalid or expired token' })
     }
 }
