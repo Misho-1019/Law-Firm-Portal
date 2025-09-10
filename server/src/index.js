@@ -1,11 +1,25 @@
-import express from "express";
 import dotenv from "dotenv";
-import router from "./routes.js";
 
+dotenv.config();
+
+import express from "express";
+import mongoose from "mongoose";
+import router from "./routes.js";
 
 const app = express();
 
-dotenv.config();
+try {
+    const uri = process.env.MONGO_URI;
+
+    await mongoose.connect(uri)
+    console.log('Successfully connected to the database');
+    
+} catch (error) {
+    console.log('Could not connect to the database');
+    console.log(error.message);
+}
+
+app.use(express.json());
 
 app.use(router);
 
