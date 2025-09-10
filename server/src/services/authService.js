@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js"
 
+const SECRET = process.env.SECRET_KEY || 'BASICSECRET';
+
 export default {
     async register(authData) {
         
@@ -26,7 +28,7 @@ export default {
             email: user.email,
         }
 
-        const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' })
+        const token = jwt.sign(payload, SECRET, { expiresIn: '2h' })
 
         return { token }
     }

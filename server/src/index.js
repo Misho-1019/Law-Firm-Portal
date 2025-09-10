@@ -6,6 +6,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import router from "./routes.js";
+import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 const app = express();
 
@@ -23,6 +24,7 @@ try {
 app.use(express.json());
 
 app.use(cookieParser());
+app.use(authMiddleware)
 app.use(router);
 
 const port = process.env.PORT || 3000;
