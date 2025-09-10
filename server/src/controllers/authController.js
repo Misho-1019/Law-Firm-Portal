@@ -11,4 +11,19 @@ authController.post('/register', async (req, res) => {
     res.end();
 })
 
+authController.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const token = await authService.login(email, password);
+
+        console.log(token);  
+    } catch (err) {
+        console.log(err.message);
+        
+    }
+
+    res.end();
+})
+
 export default authController;
