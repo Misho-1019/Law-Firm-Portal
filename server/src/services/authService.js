@@ -6,6 +6,11 @@ const SECRET = process.env.SECRET_KEY || 'BASICSECRET';
 
 export default {
     async register(authData) {
+        const userCount = await User.countDocuments({ email: authData.email })
+
+        if (userCount > 0) {
+            throw new Error('Email already exists!')
+        }
         
         return User.create(authData)
     },
