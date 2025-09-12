@@ -15,7 +15,7 @@ const userSchema = new Schema({
         unique: true,
         lowercase: true,
         match: /\@[a-zA-Z]+.[a-zA-Z]+$/,
-        minLength: 8, 
+        minLength: 6, 
     },
     password: { 
         type: String, 
