@@ -1,10 +1,10 @@
 import { Router } from "express";
 import authService from "../services/authService.js";
-import { isAuth } from "../middlewares/authMiddleware.js";
+import { isAuth, isGuest } from "../middlewares/authMiddleware.js";
 
 const authController = Router();
 
-authController.post('/register', async (req, res) => {
+authController.post('/register', isGuest, async (req, res) => {
     const authData = req.body;
 
     try {
@@ -16,7 +16,7 @@ authController.post('/register', async (req, res) => {
     }
 })
 
-authController.post('/login', async (req, res) => {
+authController.post('/login', isGuest, async (req, res) => {
     const { email, password } = req.body;
 
     try {
