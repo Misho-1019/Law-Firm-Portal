@@ -12,7 +12,17 @@ export default {
             throw new Error('Email already exists!')
         }
         
-        return User.create(authData)
+        const user = await User.create(authData)
+
+        const payload = {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+        }
+
+        const token = jwt.sign(payload, SECRET, { expiresIn: '2h' })
+
+        return token
     },
     async login(email, password) {
         const user = await User.findOne({ email })
@@ -35,6 +45,6 @@ export default {
 
         const token = jwt.sign(payload, SECRET, { expiresIn: '2h' })
 
-        return { token }
+        return token 
     }
 }
