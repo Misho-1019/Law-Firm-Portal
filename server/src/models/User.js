@@ -23,7 +23,21 @@ const userSchema = new Schema({
         minLength: 6,
         match: /^\w+$/,
         trim: true,
+    },
+    role: {
+        type: String,
+        required: true,
+        enum: ['Client', 'Admin'],
+        default: 'Client'
+    },
+    phone: {
+        type: String,
+        trim: true,
     }
+}, 
+{
+    timestamps: { createdAt: 'createdAt'},
+    versionKey: false,
 })
 
 userSchema.pre('save', async function() {
