@@ -2,7 +2,7 @@ import { Schema, model, Types } from "mongoose";
 
 const appointmentSchema = new Schema(
   {
-    clientId: {
+    creator: {
       type: Types.ObjectId,
       ref: "User",
       required: true,

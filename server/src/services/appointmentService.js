@@ -6,5 +6,13 @@ export default {
     },
     getOne(appointmentId) {
         return Appointment.findById(appointmentId);
+    },
+    create(appointmentData, creatorId) {
+        const result = Appointment.create({
+            ...appointmentData,
+            creator: creatorId,
+        })
+
+        return result
     }
 }
