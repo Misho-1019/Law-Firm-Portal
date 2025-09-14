@@ -39,4 +39,26 @@ appointmentController.post('/create', isAuth, async (req, res) => {
     }
 })
 
+appointmentController.put('/:appointmentId', isAuth, async (req, res) => {
+    const appointmentId = req.params.appointmentId;
+    const appointmentData = req.body;
+    const userId = req.user?.id;
+
+    try {
+        const existingAppointment = await appointmentService.getOne(appointmentId)
+
+        if (!existingAppointment) return res.status(404).json({ message: 'Appointment not found!' })
+        
+        if (existingAppointment.creator.toString() !== userId) {
+            return res.status(403).json({ message: 'You are not authorized to update this appointment!' })
+        }
+
+        const updatedAppointment = await appointmentService.update(appointmentData, appointmentId)
+
+        res.status(200).json(updatedAppointment)
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+    }
+})
+
 export default appointmentController

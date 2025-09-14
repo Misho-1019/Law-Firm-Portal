@@ -14,5 +14,8 @@ export default {
         })
 
         return result
+    },
+    async update(appointmentData, appointmentId) {
+        return await Appointment.findByIdAndUpdate(appointmentId, appointmentData)
     }
 }
