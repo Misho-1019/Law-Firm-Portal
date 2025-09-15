@@ -61,4 +61,27 @@ appointmentController.put('/:appointmentId', isAuth, async (req, res) => {
     }
 })
 
+appointmentController.delete('/:appointmentId', isAuth, async (req, res) => {
+    const appointmentId = req.params.appointmentId;
+    const userId = req.user?.id;
+
+    try {
+        const existingAppointment = await appointmentService.getOne(appointmentId)
+
+        if (!existingAppointment) {
+            return res.status(404).json({ message: 'Appointment not found!' })
+        }
+
+        if (existingAppointment.creator.toString() !== userId) {
+            return res.status(403).json({ message: 'You are not authorized to delete this appointment!' })
+        }
+
+        await appointmentService.delete(appointmentId)
+
+        res.status(200).json({ message: 'Appointment deleted successfully!' })
+    } catch (error) {
+        res.status(404).json({ message: error.message })
+    }
+})
+
 export default appointmentController

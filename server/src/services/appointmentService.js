@@ -17,5 +17,8 @@ export default {
     },
     async update(appointmentData, appointmentId) {
         return await Appointment.findByIdAndUpdate(appointmentId, appointmentData)
+    },
+    async delete(appointmentId) {
+        return await Appointment.findByIdAndDelete(appointmentId)
     }
 }
