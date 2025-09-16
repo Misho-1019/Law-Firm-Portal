@@ -1,6 +1,8 @@
 import { Router } from "express";
+import { validationResult } from "express-validator";
 import appointmentService from "../services/appointmentService.js";
 import { isAuth } from "../middlewares/authMiddleware.js";
+import { idParamCheck, createAppointmentChecks, updateAppointmentChecks } from "../validators/appointment.js";
 
 const appointmentController = Router();
 
@@ -14,7 +16,13 @@ appointmentController.get('/', async (req, res) => {
     }
 })
 
-appointmentController.get('/:appointmentId', async (req, res) => {
+appointmentController.get('/:appointmentId', idParamCheck, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
+
     const appointmentId = req.params.appointmentId;
 
     try {
@@ -26,7 +34,13 @@ appointmentController.get('/:appointmentId', async (req, res) => {
     }
 })
 
-appointmentController.post('/create', isAuth, async (req, res) => {
+appointmentController.post('/create', isAuth, createAppointmentChecks, async (req, res) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
+
     const appointmentData = req.body;
     const creatorId = req.user?.id
 
@@ -39,7 +53,13 @@ appointmentController.post('/create', isAuth, async (req, res) => {
     }
 })
 
-appointmentController.put('/:appointmentId', isAuth, async (req, res) => {
+appointmentController.put('/:appointmentId', isAuth, idParamCheck, updateAppointmentChecks, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
+
     const appointmentId = req.params.appointmentId;
     const appointmentData = req.body;
     const userId = req.user?.id;
@@ -61,7 +81,13 @@ appointmentController.put('/:appointmentId', isAuth, async (req, res) => {
     }
 })
 
-appointmentController.delete('/:appointmentId', isAuth, async (req, res) => {
+appointmentController.delete('/:appointmentId', isAuth, idParamCheck, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
+
     const appointmentId = req.params.appointmentId;
     const userId = req.user?.id;
 
