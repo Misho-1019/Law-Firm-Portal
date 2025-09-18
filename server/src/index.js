@@ -6,6 +6,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import router from "./routes.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 
@@ -30,6 +31,14 @@ try {
 app.use(express.json());
 
 app.use(cookieParser());
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Too many requests from this IP, please try again later.'
+})
+
+app.use(limiter)
 app.use(authMiddleware)
 app.use(router);
 
