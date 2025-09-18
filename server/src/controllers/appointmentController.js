@@ -53,7 +53,7 @@ appointmentController.post('/create', isAuth, createAppointmentChecks, async (re
     }
 })
 
-appointmentController.put('/:appointmentId', isAuth, idParamCheck, updateAppointmentChecks, async (req, res) => {
+appointmentController.patch('/:appointmentId', isAuth, idParamCheck, updateAppointmentChecks, async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -69,8 +69,12 @@ appointmentController.put('/:appointmentId', isAuth, idParamCheck, updateAppoint
 
         if (!existingAppointment) return res.status(404).json({ message: 'Appointment not found!' })
         
-        if (existingAppointment.creator.toString() !== userId) {
+        if (existingAppointment.creator.toString() !== userId && req.user?.role !== 'Admin') {
             return res.status(403).json({ message: 'You are not authorized to update this appointment!' })
+        }
+
+        if (req.user?.role !== 'Admin' && Object.prototype.hasOwnProperty.call(appointmentData, 'status')) {
+            return res.status(403).json({ message: 'Only admins can update the status of an appointment!' })
         }
 
         const updatedAppointment = await appointmentService.update(appointmentData, appointmentId)
