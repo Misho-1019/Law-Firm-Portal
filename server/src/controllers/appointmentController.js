@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { validationResult } from "express-validator";
 import appointmentService from "../services/appointmentService.js";
-import { isAuth } from "../middlewares/authMiddleware.js";
+import { isAdmin, isAuth } from "../middlewares/authMiddleware.js";
 import { idParamCheck, createAppointmentChecks, updateAppointmentChecks } from "../validators/appointment.js";
 
 const appointmentController = Router();
@@ -85,7 +85,7 @@ appointmentController.patch('/:appointmentId', isAuth, idParamCheck, updateAppoi
     }
 })
 
-appointmentController.delete('/:appointmentId', isAuth, idParamCheck, async (req, res) => {
+appointmentController.delete('/:appointmentId', isAuth, isAdmin, idParamCheck, async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
