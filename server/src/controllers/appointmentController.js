@@ -6,7 +6,7 @@ import { idParamCheck, createAppointmentChecks, updateAppointmentChecks } from "
 
 const appointmentController = Router();
 
-appointmentController.get('/', async (req, res) => {
+appointmentController.get('/', isAdmin, async (req, res) => {
     try {
         const appointments = await appointmentService.getAll()
 
@@ -53,7 +53,7 @@ appointmentController.post('/create', isAuth, createAppointmentChecks, async (re
     }
 })
 
-appointmentController.patch('/:appointmentId', isAuth, idParamCheck, updateAppointmentChecks, async (req, res) => {
+appointmentController.patch('/:appointmentId', isAuth, isAdmin, idParamCheck, updateAppointmentChecks, async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {

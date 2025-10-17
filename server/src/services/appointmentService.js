@@ -4,6 +4,29 @@ export default {
     getAll() {
         return Appointment.find({});
     },
+    async listMine(userId, { status, from, to, limit = 20, skip = 0, sort = 'asc'} = {}) {
+        const query = { creator: userId }
+
+        if (status) query.status = status;
+
+        if (from || to) {
+            query.startsAt = {}
+
+            if (from) query.startsAt.$gte = new Date(from)
+            if (to) query.startsAt.$lte = new Date(to)
+        }
+
+        const sortObj = { startsAt: sort === 'desc' ? -1 : 1 }
+        const lim = Math.max(0, Number(limit) || 20)
+        const skp = Math.max(0, Number(skip) || 0)
+
+        const [ appointments, total ] = await Promise.all([
+            (await Appointment.find(query)).toSorted(sortObj).skip(skp).limit(lim).lean(),
+            Appointment.countDocuments(query),
+        ])
+
+        return { appointments, total, limit: lim, skip: skp }
+    },
     getOne(appointmentId) {
         return Appointment.findById(appointmentId);
     },
