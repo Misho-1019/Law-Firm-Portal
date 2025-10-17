@@ -31,12 +31,21 @@ export default {
         return Appointment.findById(appointmentId);
     },
     create(appointmentData, creatorId) {
-        const result = Appointment.create({
-            ...appointmentData,
-            creator: creatorId,
-        })
-
-        return result
+        try {
+            const result = Appointment.create({
+                ...appointmentData,
+                creator: creatorId,
+            })
+    
+            return result
+        } catch (error) {
+            if (error && error.code === 11000) {
+                const err = new Error('Time slot is no longer available!');
+                err.status = 409;
+                throw err;
+            }
+            throw error;
+        }
     },
     async update(appointmentData, appointmentId) {
         const update = {};
