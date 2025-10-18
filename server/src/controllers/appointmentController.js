@@ -6,17 +6,37 @@ import { idParamCheck, createAppointmentChecks, updateAppointmentChecks } from "
 
 const appointmentController = Router();
 
-appointmentController.get('/', isAdmin, async (req, res) => {
+appointmentController.get('/', isAuth, isAdmin, async (req, res) => {
+    console.log(req.user);
     try {
+        
         const appointments = await appointmentService.getAll()
 
-        res.status(200).json(appointments)
+        res.status(200).json({ appointments })
     } catch (error) {
         res.status(404).json({ message: error.message })
     }
 })
 
-appointmentController.get('/:appointmentId', idParamCheck, async (req, res) => {
+appointmentController.get('/mine', isAuth, async (req, res) => {
+    try {
+        const { status, from, to, limit, skip, sort } = req.query;
+        const result = await appointmentService.listMine(req.user.id, {
+            status,
+            from,
+            to,
+            limit,
+            skip,
+            sort,
+        });
+
+        return res.status(200).json(result)
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+})
+
+appointmentController.get('/:appointmentId', isAuth, idParamCheck, async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -47,7 +67,7 @@ appointmentController.post('/create', isAuth, createAppointmentChecks, async (re
     try {
         const newAppointment = await appointmentService.create(appointmentData, creatorId)
 
-        res.status(201).json(newAppointment)
+        res.status(201).json({ newAppointment })
     } catch (error) {
         res.status(400).json({ message: error.message })
     }
@@ -74,12 +94,16 @@ appointmentController.patch('/:appointmentId', isAuth, isAdmin, idParamCheck, up
         }
 
         if (req.user?.role !== 'Admin' && Object.prototype.hasOwnProperty.call(appointmentData, 'status')) {
-            return res.status(403).json({ message: 'Only admins can update the status of an appointment!' })
+            return res.status(403).json({ message: 'Only admin can update the status of an appointment!' })
         }
 
         const updatedAppointment = await appointmentService.update(appointmentData, appointmentId)
 
-        res.status(200).json(updatedAppointment)
+        if(!updatedAppointment) {
+            return res.status(404).json({ message: 'Appointment not found!' })
+        }
+
+        res.status(200).json({ updatedAppointment })
     } catch (error) {
         res.status(400).json({ message: error.message })
     }
