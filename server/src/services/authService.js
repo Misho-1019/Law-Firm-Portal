@@ -18,6 +18,7 @@ export default {
             id: user._id,
             username: user.username,
             email: user.email,
+            role: user.role,
         }
 
         const token = jwt.sign(payload, SECRET, { expiresIn: '2h' })
@@ -41,6 +42,7 @@ export default {
             id: user._id,
             username: user.username,
             email: user.email,
+            role: user.role,
         }
 
         const token = jwt.sign(payload, SECRET, { expiresIn: '2h' })
