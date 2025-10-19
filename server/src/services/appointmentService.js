@@ -1,5 +1,7 @@
 import Appointment from "../models/Appointment.js";
 
+const day_ms = 24 * 60 * 60 * 1000;
+
 export default {
     getAll() {
         return Appointment.find({});
@@ -91,6 +93,42 @@ export default {
           }
           throw error;
         }
+    },
+    async updateStatus(appointmentId, user) {
+        const appointment = await Appointment.findById(appointmentId);
+
+        if (!appointment) {
+            const err = new Error('Appointment not found!');
+            err.status = 404;
+            throw err;
+        }
+
+        const isOwner = appointment.creator?.toString() === user || appointment.creator === user;
+        const isAdmin = user.role === 'Admin';
+
+        if (!isOwner && !isAdmin) {
+            const err = new Error('You are not authorized to update this appointment!');
+            err.status = 403;
+            throw err;
+        }
+
+        if (!isAdmin) {
+            const msUntilAppointment = appointment.startsAt.getTime() - Date.now();
+
+            if (msUntilAppointment < day_ms) {
+                const err = new Error('Too late to cancel: less than 24 hours before the appointment.');
+                err.status = 422;
+                throw err;
+            }
+        }
+
+        const updatedAppointment = await Appointment.findByIdAndUpdate(
+            appointmentId,
+            { status: 'CANCELLED' },
+            { new: true, runValidators: true }
+        )
+
+        return updatedAppointment;
     },
     async delete(appointmentId) {
         return await Appointment.findByIdAndDelete(appointmentId)

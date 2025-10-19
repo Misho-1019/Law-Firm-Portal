@@ -109,6 +109,23 @@ appointmentController.patch('/:appointmentId', isAuth, isAdmin, idParamCheck, up
     }
 })
 
+appointmentController.patch('/:appointmentId/status', isAuth, idParamCheck, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const appointmentId = req.params.appointmentId;
+    const user = req.user;
+    
+    try {
+        const updatedAppointment = await appointmentService.updateStatus(appointmentId, user)
+
+        res.status(200).json({ updatedAppointment })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+})
+
 appointmentController.delete('/:appointmentId', isAuth, isAdmin, idParamCheck, async (req, res) => {
     const errors = validationResult(req);
 
