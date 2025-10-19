@@ -7,14 +7,14 @@ import { idParamCheck, createAppointmentChecks, updateAppointmentChecks } from "
 const appointmentController = Router();
 
 appointmentController.get('/', isAuth, isAdmin, async (req, res) => {
-    console.log(req.user);
     try {
-        
-        const appointments = await appointmentService.getAll()
+        const { status, from, to, limit, skip, sort, clientId } = req.query;
 
-        res.status(200).json({ appointments })
+        const result = await appointmentService.getAll({ status, from, to, clientId, limit, skip, sort })
+
+        return res.status(200).json(result)
     } catch (error) {
-        res.status(404).json({ message: error.message })
+        return res.status(500).json({ message: error.message })
     }
 })
 

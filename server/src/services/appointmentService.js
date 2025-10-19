@@ -3,8 +3,41 @@ import Appointment from "../models/Appointment.js";
 const day_ms = 24 * 60 * 60 * 1000;
 
 export default {
-    getAll() {
-        return Appointment.find({});
+    async getAll({ status, from, to, clientId, limit = 20, skip = 0, sort = "startsAt:asc" } = {}) {
+        const query = {}
+
+        if (status) query.status = status;
+        if (clientId) query.creator = clientId;
+
+        if (from || to) {
+            query.startsAt = {}
+
+            if (from) query.startsAt.$gte = new Date(from);
+            if (to) query.startsAt.$lte = new Date(to)
+        }
+
+        let sortField = 'startsAt';
+        let sortDir = 1;
+
+        if (typeof sort === 'string') {
+            const [field, dir] = sort.split(':')
+
+            if (field === 'startsAt' || field === 'createdAt') sortField = field;
+            if (dir === 'desc') sortDir = -1;
+        }
+
+        const sortObj = { [sortField]: sortDir }
+
+        const lim = Math.max(0, Number(limit) || 20)
+        const skp = Math.max(0, Number(skip) || 0)
+
+        const [appointments, total] = await Promise.all([
+            Appointment.find(query).sort(sortObj).skip(skp).limit(lim).lean(),
+            Appointment.countDocuments(query),
+        ])
+
+        return { appointments, total, limit: lim, skip: skp }
+
     },
     async listMine(userId, { status, from, to, limit = 20, skip = 0, sort = 'asc'} = {}) {
         const query = { creator: userId }
