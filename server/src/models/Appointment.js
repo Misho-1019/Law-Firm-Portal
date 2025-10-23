@@ -102,8 +102,7 @@ const appointmentSchema = new Schema(
 );
 
 // Recompute reminder targets when startsAt changes; reset sent flags
-// appointmentSchema.pre("save", function () {
-// });
+appointmentSchema.pre("save", function () {});
 
 // Indexes
 appointmentSchema.index({ startsAt: 1 }, { unique: true });      // one booking per slot

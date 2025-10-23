@@ -3,9 +3,14 @@ import Appointment from "../models/Appointment.js";
 import { leanSofiaTransform } from "../lib/leanSofia.js";
 import {
   SOFIA_TZ,
+  toSofiaISO,
   localIsoToUtcDate,
   buildSofiaReminders,
 } from "../lib/time.js";
+import { sendEmail } from "../lib/mailer.js";
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || null;
+const EMAILS_DISABLED = process.env.EMAILS_DISABLED === "1"; // optional toggle
 
 const day_ms = 24 * 60 * 60 * 1000;
 
@@ -35,7 +40,8 @@ function normalizeStartsAt(payload) {
 }
 
 // Detect if a string has an explicit timezone (Z or ±HH:MM)
-const hasExplicitTZ = (s) => typeof s === "string" && /[Zz]|[+\-]\d{2}:\d{2}$/.test(s);
+const hasExplicitTZ = (s) =>
+  typeof s === "string" && /[Zz]|[+\-]\d{2}:\d{2}$/.test(s);
 
 // Normalize `from`/`to` range to UTC Date objects for querying.
 // Supports:
@@ -48,7 +54,9 @@ function normalizeRange({ from, to, fromLocal, toLocal, timezone }) {
   if (fromLocal) {
     range.from = localIsoToUtcDate(fromLocal, zone);
   } else if (from) {
-    range.from = hasExplicitTZ(from) ? new Date(from) : localIsoToUtcDate(from, zone);
+    range.from = hasExplicitTZ(from)
+      ? new Date(from)
+      : localIsoToUtcDate(from, zone);
   }
 
   if (toLocal) {
@@ -58,6 +66,95 @@ function normalizeRange({ from, to, fromLocal, toLocal, timezone }) {
   }
 
   return range;
+}
+
+function buildApptSummary(appt) {
+  const when =
+    typeof appt.startsAt === "string"
+      ? appt.startsAt
+      : toSofiaISO(appt.startsAt);
+  const parts = [
+    `<p><strong>When:</strong> ${when}</p>`,
+    `<p><strong>Mode:</strong> ${appt.mode}</p>`,
+    `<p><strong>Service:</strong> ${appt.service}</p>`,
+    `<p><strong>Status:</strong> ${appt.status}</p>`,
+  ];
+  if (appt.notes) parts.push(`<p><strong>Notes:</strong> ${appt.notes}</p>`);
+  return parts.join("\n");
+}
+
+async function emailCreated(apptDoc) {
+  if (EMAILS_DISABLED) return;
+  const appt = apptDoc.populate
+    ? await apptDoc.populate("creator", "email username")
+    : apptDoc;
+
+  const clientEmail = appt.creator?.email || null;
+  const clientName = appt.creator?.username || "there";
+  const when = toSofiaISO(appt.startsAt);
+
+  const subjectClient = `✅ Appointment created — ${when}`;
+  const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was created successfully.</p>${buildApptSummary(
+    appt
+  )}`;
+
+  const subjectAdmin = `📥 New appointment — ${clientName} @ ${when}`;
+  const textAdmin = `New appointment for ${clientName}\nWhen: ${when}\nMode: ${appt.mode}\nService: ${appt.service}\nStatus: ${appt.status}`;
+
+  const tasks = [];
+  if (clientEmail)
+    tasks.push(
+      sendEmail({ to: clientEmail, subject: subjectClient, html: htmlClient })
+    );
+  if (ADMIN_EMAIL)
+    tasks.push(
+      sendEmail({ to: ADMIN_EMAIL, subject: subjectAdmin, text: textAdmin })
+    );
+  await Promise.allSettled(tasks);
+}
+
+async function emailUpdated(prev, next) {
+  if (EMAILS_DISABLED) return;
+  const appt = next.populate
+    ? await next.populate("creator", "email username")
+    : next;
+
+  const clientEmail = appt.creator?.email || null;
+  const clientName = appt.creator?.username || "there";
+
+  const timeChanged =
+    prev?.startsAt &&
+    new Date(prev.startsAt).getTime() !== new Date(appt.startsAt).getTime();
+  const statusChanged = prev?.status !== appt.status;
+  const when = toSofiaISO(appt.startsAt);
+
+  let subjectClient = `Appointment updated — ${when}`;
+  if (statusChanged)
+    subjectClient = `Status: ${prev?.status ?? "?"} → ${appt.status} — ${when}`;
+  if (statusChanged && appt.status === "CONFIRMED")
+    subjectClient = `✅ Appointment confirmed — ${when}`;
+  if (statusChanged && appt.status === "CANCELLED")
+    subjectClient = `❌ Appointment cancelled — ${when}`;
+  if (timeChanged && !statusChanged)
+    subjectClient = `🗓️ Time changed — ${when}`;
+
+  const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was updated.</p>${buildApptSummary(
+    appt
+  )}`;
+
+  const subjectAdmin = `✏️ Appointment updated — ${clientName} @ ${when}`;
+  const textAdmin = `Updated appointment for ${clientName}\nWhen: ${when}\nMode: ${appt.mode}\nStatus: ${appt.status}`;
+
+  const tasks = [];
+  if (clientEmail)
+    tasks.push(
+      sendEmail({ to: clientEmail, subject: subjectClient, html: htmlClient })
+    );
+  if (ADMIN_EMAIL)
+    tasks.push(
+      sendEmail({ to: ADMIN_EMAIL, subject: subjectAdmin, text: textAdmin })
+    );
+  await Promise.allSettled(tasks);
 }
 
 export default {
@@ -79,11 +176,17 @@ export default {
     if (clientId) query.creator = clientId;
 
     // Sofia-aware filters
-    const { from: fromUtc, to: toUtc } = normalizeRange({ from, to, fromLocal, toLocal, timezone });
+    const { from: fromUtc, to: toUtc } = normalizeRange({
+      from,
+      to,
+      fromLocal,
+      toLocal,
+      timezone,
+    });
     if (fromUtc || toUtc) {
       query.startsAt = {};
       if (fromUtc) query.startsAt.$gte = fromUtc;
-      if (toUtc)   query.startsAt.$lte = toUtc;
+      if (toUtc) query.startsAt.$lte = toUtc;
     }
 
     let sortField = "startsAt";
@@ -113,17 +216,33 @@ export default {
 
   async listMine(
     userId,
-    { status, from, to, fromLocal, toLocal, timezone, limit = 20, skip = 0, sort = "asc" } = {}
+    {
+      status,
+      from,
+      to,
+      fromLocal,
+      toLocal,
+      timezone,
+      limit = 20,
+      skip = 0,
+      sort = "asc",
+    } = {}
   ) {
     const query = { creator: userId };
     if (status) query.status = status;
 
     // Sofia-aware filters
-    const { from: fromUtc, to: toUtc } = normalizeRange({ from, to, fromLocal, toLocal, timezone });
+    const { from: fromUtc, to: toUtc } = normalizeRange({
+      from,
+      to,
+      fromLocal,
+      toLocal,
+      timezone,
+    });
     if (fromUtc || toUtc) {
       query.startsAt = {};
       if (fromUtc) query.startsAt.$gte = fromUtc;
-      if (toUtc)   query.startsAt.$lte = toUtc;
+      if (toUtc) query.startsAt.$lte = toUtc;
     }
 
     const sortObj = { startsAt: sort === "desc" ? -1 : 1 };
@@ -153,7 +272,9 @@ export default {
     // Normalize input time and compute Sofia-based reminders
     const whenUtc = normalizeStartsAt(appointmentData);
     if (!whenUtc) {
-      const err = new Error("Provide startsAtLocal (+timezone) or startsAt (UTC).");
+      const err = new Error(
+        "Provide startsAtLocal (+timezone) or startsAt (UTC)."
+      );
       err.status = 400;
       throw err;
     }
@@ -163,10 +284,14 @@ export default {
     try {
       const result = await Appointment.create({
         ...appointmentData,
-        startsAt: whenUtc,   // store UTC instant
-        reminders,           // DST-safe, computed in Sofia zone
+        startsAt: whenUtc, // store UTC instant
+        reminders, // DST-safe, computed in Sofia zone
         creator: creatorId,
       });
+
+      emailCreated(result).catch((e) =>
+        console.error("[email] create failed:", e?.message || e)
+      );
 
       return result;
     } catch (error) {
@@ -203,6 +328,13 @@ export default {
         new: true,
         runValidators: true,
       });
+
+      const prev = await Appointment.findById(appointmentId).lean(); // for email diff
+
+      emailUpdated(prev, doc).catch((e) =>
+        console.error("[email] update failed:", e?.message || e)
+      );
+
       return doc;
     } catch (error) {
       if (error && error.code === 11000) {
@@ -224,11 +356,14 @@ export default {
     }
 
     const isOwner =
-      appointment.creator?.toString() === user || appointment.creator === user;
+      appointment.creator?.toString() === user.id ||
+      appointment.creator === user.id;
     const isAdmin = user.role === "Admin";
 
-    if (!isOwner && !isAdmin) {
-      const err = new Error("You are not authorized to update this appointment!");
+    if (!isOwner) {
+      const err = new Error(
+        "You are not authorized to update this appointment!"
+      );
       err.status = 403;
       throw err;
     }
@@ -244,13 +379,28 @@ export default {
       }
     }
 
-    const updatedAppointment = await Appointment.findByIdAndUpdate(
-      appointmentId,
-      { status: "CANCELLED" },
-      { new: true, runValidators: true }
-    );
+    try {
+      const updatedAppointment = await Appointment.findByIdAndUpdate(
+        appointmentId,
+        { status: "CANCELLED" },
+        { new: true, runValidators: true }
+      );
 
-    return updatedAppointment;
+      const prev = appointment.toObject();
+      emailUpdated(prev, updatedAppointment).catch((e) =>
+        console.error("[email] status update failed:", e?.message || e)
+      );
+
+      return updatedAppointment;
+    } catch (error) {
+      if (error && error.code === 11000) {
+        const err = new Error("Time slot is no longer available!");
+        err.status = 409;
+        throw err;
+      }
+      throw error;
+    }
+
   },
 
   async delete(appointmentId) {
