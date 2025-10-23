@@ -10,6 +10,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import router from "./routes.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
+import { startReminderCron } from "./jobs/reminders.js";
 
 const app = express();
 
@@ -49,4 +50,4 @@ const port = process.env.PORT || 3000;
 
 app.listen(port, () => console.log(`Server is running on: http://localhost:${port}`))
 
-    
+startReminderCron();

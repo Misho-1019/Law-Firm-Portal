@@ -1,4 +1,6 @@
+// src/models/Appointment.js
 import { Schema, model, Types } from "mongoose";
+import { toSofiaISO } from "../lib/time.js"; // 👈 uses the helper we wrote earlier
 
 const appointmentSchema = new Schema(
   {
@@ -25,36 +27,74 @@ const appointmentSchema = new Schema(
     mode: {
       type: String,
       required: true,
-      enum: ["In-Person", "Online"], // if your API uses lowercase, align here too
+      enum: ["In-Person", "Online"],
     },
+
+    // Stored as UTC in DB (do not change this)
     startsAt: {
       type: Date,
-      required: true, // UTC
+      required: true,
+      index: true,
     },
+
     status: {
       type: String,
       enum: ["PENDING", "CONFIRMED", "DECLINED", "CANCELLED"],
       default: "PENDING",
       index: true,
     },
-    notes: {
-      type: String,
-      trim: true,
-    },
+
+    notes: { type: String, trim: true },
+
     reminders: {
-      send24hAt: { type: Date },           // computed: startsAt - 24h
+      // Stored as UTC; we’ll format to Sofia on output
+      send24hAt: { type: Date, index: true }, // startsAt - 24h
       sent24hAt: { type: Date, default: null },
-      send1hAt:  { type: Date },           // computed: startsAt - 1h
+      send1hAt:  { type: Date, index: true }, // startsAt - 1h
       sent1hAt:  { type: Date, default: null },
     },
   },
   {
-    timestamps: true,
+    timestamps: true,        // createdAt / updatedAt (UTC in DB)
     versionKey: false,
     toJSON: {
+      virtuals: true,
       transform: (doc, ret) => {
+        // keep your existing shaping
         ret.id = ret._id.toString();
         delete ret._id;
+
+        // 👇 convert all date fields to Sofia local: "YYYY-MM-DDTHH:mm:ss"
+        ret.startsAt  = toSofiaISO(ret.startsAt);
+        ret.createdAt = toSofiaISO(ret.createdAt);
+        ret.updatedAt = toSofiaISO(ret.updatedAt);
+
+        if (ret.reminders) {
+          ret.reminders.send24hAt = toSofiaISO(ret.reminders.send24hAt);
+          ret.reminders.sent24hAt = toSofiaISO(ret.reminders.sent24hAt);
+          ret.reminders.send1hAt  = toSofiaISO(ret.reminders.send1hAt);
+          ret.reminders.sent1hAt  = toSofiaISO(ret.reminders.sent1hAt);
+        }
+        return ret;
+      },
+    },
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        // mirror the same transform for toObject (useful in some code paths)
+        ret.id = ret._id.toString();
+        delete ret._id;
+
+        ret.startsAt  = toSofiaISO(ret.startsAt);
+        ret.createdAt = toSofiaISO(ret.createdAt);
+        ret.updatedAt = toSofiaISO(ret.updatedAt);
+
+        if (ret.reminders) {
+          ret.reminders.send24hAt = toSofiaISO(ret.reminders.send24hAt);
+          ret.reminders.sent24hAt = toSofiaISO(ret.reminders.sent24hAt);
+          ret.reminders.send1hAt  = toSofiaISO(ret.reminders.send1hAt);
+          ret.reminders.sent1hAt  = toSofiaISO(ret.reminders.sent1hAt);
+        }
         return ret;
       },
     },
@@ -62,27 +102,16 @@ const appointmentSchema = new Schema(
 );
 
 // Recompute reminder targets when startsAt changes; reset sent flags
-appointmentSchema.pre("save", function () {
-  if (this.isModified("startsAt")) {
-    const start = this.startsAt instanceof Date ? this.startsAt : new Date(this.startsAt);
-    const time = start.getTime();
-    if (!this.reminders) {
-      this.reminders = {};
-    }
-    this.reminders.send24hAt = new Date(time - 24 * 60 * 60 * 1000);
-    this.reminders.send1hAt = new Date(time - 60 * 60 * 1000);
-    this.reminders.sent24hAt = null;
-    this.reminders.sent1hAt = null;
-  }
-});
+// appointmentSchema.pre("save", function () {
+// });
 
 // Indexes
 appointmentSchema.index({ startsAt: 1 }, { unique: true });      // one booking per slot
 appointmentSchema.index({ status: 1, startsAt: 1 });              // admin lists
-appointmentSchema.index({ creator: 1, startsAt: 1 });             // owner lists (fix: was clientId)
+appointmentSchema.index({ creator: 1, startsAt: 1 });             // owner lists
 appointmentSchema.index({ "reminders.send24hAt": 1 });            // 24h scheduler
 appointmentSchema.index({ "reminders.send1hAt": 1 });             // 1h scheduler
-appointmentSchema.index({ role: 1 });                             // optional: filter by creator role
+appointmentSchema.index({ role: 1 });                             // optional
 
 const Appointment = model("Appointment", appointmentSchema);
 export default Appointment;
