@@ -4,6 +4,7 @@ import { validationResult } from "express-validator";
 import appointmentService from "../services/appointmentService.js";
 import { isAdmin, isAuth } from "../middlewares/authMiddleware.js";
 import { idParamCheck, createAppointmentChecks, updateAppointmentChecks } from "../validators/appointment.js";
+import availabilityService from "../services/availabilityService.js";
 
 const appointmentController = Router();
 
@@ -123,6 +124,15 @@ appointmentController.post("/create", isAuth, createAppointmentChecks, async (re
     const creatorId = req.user?.id;
 
     try {
+      const dateISO = new Date(startsAt).toISOString().slice(0,10)
+      const allowed = await availabilityService.getSlotsForDate({ dateISO, durationMin })
+
+      const chosenISO = new Date(startsAt).toISOString();
+
+      if (!allowed.includes(chosenISO)) {
+        return res.status(409).json({ message: 'Selected start time is no longer available.'})
+      }
+
       const newAppointment = await appointmentService.create(
         appointmentData,
         creatorId
