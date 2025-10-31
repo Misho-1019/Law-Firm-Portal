@@ -91,8 +91,8 @@ async function getDayAppointments(dateISO) {
     }
 }
 
-export default {
-    async getBookableSlotsForDate({ dateISO, durationMin = DEFAULT_DURATION_MIN}) {
+
+export async function getBookableSlotsForDate({ dateISO, durationMin = DEFAULT_DURATION_MIN}) {
         if (await isTimeOff(dateISO)) return [];
 
         const allowed = await getAllowedIntervals(dateISO);
@@ -118,8 +118,9 @@ export default {
             }
         }
         return slots;
-    },
-    async getCalendarForMonth({ month, durationMin = DEFAULT_DURATION_MIN}) {
+}
+
+export async function getCalendarForMonth({ month, durationMin = DEFAULT_DURATION_MIN}) {
         const start = DateTime.fromISO(`${month}-01`, { zone: TZ }).startOf('month');
 
         const end = start.endOf('month');
@@ -139,9 +140,10 @@ export default {
 
             if (isOff(dateISO)) {
                 days.push({ date: dateISO, hasSlots: false, count: 0 })
+                continue;
             }
 
-            const allowed = IntervalsForDay(dateISO, schedule)
+            let allowed = IntervalsForDay(dateISO, schedule)
 
             if (!allowed.length) {
                 allowed = defaultIntervals(dateISO)
@@ -149,6 +151,7 @@ export default {
 
             if (!allowed.length) {
                 days.push({ date: dateISO, hasSlots: false, count: 0 })
+                continue;
             }
 
             const slots = await getBookableSlotsForDate({ dateISO, durationMin });
@@ -157,5 +160,6 @@ export default {
         }
 
         return { days };
-    }
 }
+
+export default { getBookableSlotsForDate, getCalendarForMonth }

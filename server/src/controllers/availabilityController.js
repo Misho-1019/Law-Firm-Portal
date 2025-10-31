@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { query, validationResult } from "express-validator";
-import availabilityService from "../services/availabilityService";
+import { getBookableSlotsForDate, getCalendarForMonth } from "../services/availabilityService.js";
 
 const availabilityController = Router();
 
@@ -18,7 +18,7 @@ availabilityController.get('/calendar', [
 
     const durationMin = req.query.durationMin || undefined;
 
-    const data = await availabilityService.getCalendarForMonth({ month, durationMin });
+    const data = await getCalendarForMonth({ month, durationMin });
 
     res.json(data);
 })
@@ -36,7 +36,7 @@ availabilityController.get('/slots', [
     const { date } = req.query;
     const durationMin = req.query.durationMin || undefined;
 
-    const slots = await availabilityService.getBookableSlotsForDate({ dateISO: date, durationMin })
+    const slots = await getBookableSlotsForDate({ dateISO: date, durationMin })
 
     res.json({ slots })
 })
