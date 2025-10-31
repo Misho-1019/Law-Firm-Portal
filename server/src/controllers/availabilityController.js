@@ -36,7 +36,7 @@ availabilityController.get('/slots', [
     const { date } = req.query;
     const durationMin = req.query.durationMin || undefined;
 
-    const slots = await availabilityService.getSlotsForDate({ dateISO: date, durationMin })
+    const slots = await availabilityService.getBookableSlotsForDate({ dateISO: date, durationMin })
 
     res.json({ slots })
 })
