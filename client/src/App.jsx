@@ -15,10 +15,10 @@ function App() {
       <Header/>
       {/* <AdminDashboard /> */}
       {/* <ClientDashboard /> */}
-      {/* <Register /> */}
-      {/* <Login /> */}
       <Routes>
         <Route path='/' element={<Home />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/login' element={<Login />} />
       </Routes>
     </div>
     </>
