@@ -1,6 +1,6 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Mail, Lock, ArrowRight, Eye, EyeOff, Monitor, Moon, Sun } from "lucide-react";
+import { Calendar as CalendarIcon, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router";
 
 const MotionSection = motion.section;
@@ -10,20 +10,20 @@ const MotionSection = motion.section;
 ---------------------------------------------------------- */
 function useThemeMode() {
   const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-  const [mode, setMode] = React.useState(getInitial);
-  const [systemDark, setSystemDark] = React.useState(() =>
+  const [mode, setMode] = useState(getInitial);
+  const [systemDark, setSystemDark] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
       : false
   );
-  React.useEffect(() => {
+  useEffect(() => {
     if (!window.matchMedia) return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = (e) => setSystemDark(e.matches);
     try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
   }, []);
-  React.useEffect(() => {
+  useEffect(() => {
     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
     else localStorage.removeItem('theme-mode');
   }, [mode]);
@@ -58,9 +58,9 @@ function validate(values) {
 ---------------------------------------------------------- */
 export default function Login() {
   const { isDark } = useThemeMode();
-  const [values, setValues] = React.useState({ email: '', password: '' });
-  const [showPwd, setShowPwd] = React.useState(false);
-  const [touched, setTouched] = React.useState({});
+  const [values, setValues] = useState({ email: '', password: '' });
+  const [showPwd, setShowPwd] = useState(false);
+  const [touched, setTouched] = useState({});
 
   const errors = validate(values);
   const isValid = Object.keys(errors).length === 0;
@@ -118,7 +118,7 @@ export default function Login() {
                 />
 
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-[#334155] dark:text-[#94A3B8]">Forgot your password? <a href="/forgot" className="text-[#2F80ED] hover:underline">Reset</a></span>
+                  <span className="text-[#334155] dark:text-[#94A3B8]">Forgot your password? <Link to="/forgot" className="text-[#2F80ED] hover:underline">Reset</Link></span>
                 </div>
 
                 <button

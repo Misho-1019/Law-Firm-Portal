@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -25,14 +25,14 @@ const MotionAside = motion.aside;
 function useThemeMode() {
   const getInitial = () =>
     (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-  const [mode, setMode] = React.useState(getInitial);
-  const [systemDark, setSystemDark] = React.useState(() =>
+  const [mode, setMode] = useState(getInitial);
+  const [systemDark, setSystemDark] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
       : false
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!window.matchMedia) return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = (e) => setSystemDark(e.matches);
@@ -40,7 +40,7 @@ function useThemeMode() {
     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
     else localStorage.removeItem('theme-mode');
   }, [mode]);
@@ -48,20 +48,6 @@ function useThemeMode() {
   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
   return { mode, isDark, cycle };
-}
-
-function ThemeToggle() {
-  const { mode, cycle } = useThemeMode();
-  const Icon = mode === 'system' ? Monitor : mode === 'dark' ? Moon : Sun;
-  return (
-    <button
-      onClick={cycle}
-      className="inline-flex items-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-1.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
-      title={`Theme: ${mode} (click to change)`}
-    >
-      <Icon className="h-4 w-4" /> <span className="capitalize">{mode}</span>
-    </button>
-  );
 }
 
 /* --- Status pill (UI only) --- */
@@ -110,9 +96,9 @@ const sampleUpcoming = [
 export default function AdminDashboard(){
   const { isDark } = useThemeMode();
   const now = new Date();
-  const [current, setCurrent] = React.useState({ y: now.getFullYear(), m: now.getMonth() });
-  const [selected, setSelected] = React.useState(now);
-  const weeks = React.useMemo(()=>getWeeks(current.y, current.m), [current]);
+  const [current, setCurrent] = useState({ y: now.getFullYear(), m: now.getMonth() });
+  const [selected, setSelected] = useState(now);
+  const weeks = useMemo(()=>getWeeks(current.y, current.m), [current]);
 
   const headerLabel = new Intl.DateTimeFormat(undefined, { month:'long', year:'numeric' }).format(new Date(current.y, current.m, 1));
 

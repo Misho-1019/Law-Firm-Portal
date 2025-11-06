@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Menu, X, Plus } from "lucide-react";
 import { Link } from "react-router";
@@ -11,8 +11,8 @@ const MotionSpan = motion.span;
  * Responsive with a mobile drawer. Pure JSX (no TypeScript).
  */
 export default function Header({ initialActive = "Home" }) {
-  const [open, setOpen] = React.useState(false);
-  const [active, setActive] = React.useState(initialActive);
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(initialActive);
 
   const items = [
     { label: "Home", href: "/" },
@@ -73,15 +73,15 @@ export default function Header({ initialActive = "Home" }) {
 
         {/* Right side actions */}
         <div className="hidden md:flex items-center gap-2">
-          <a
-            href="#create"
+          <Link
+            to="/create"
             onClick={() => setActive("Create appointment")}
             className="relative inline-flex items-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-1.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
           >
             <Plus className="h-4 w-4" />
             Create appointment
             <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]" />
-          </a>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -105,26 +105,26 @@ export default function Header({ initialActive = "Home" }) {
           <ul className="mx-auto max-w-7xl px-5 py-3 grid gap-2 text-sm">
             {items.map((it) => (
               <li key={it.label}>
-                <a
+                <Link
                   className="block py-2"
-                  href={it.href}
+                  to={it.href}
                   onClick={() => {
                     setActive(it.label);
                     setOpen(false);
                   }}
                 >
                   {it.label}
-                </a>
+                </Link>
               </li>
             ))}
             <li>
-              <a
-                href="#create"
+              <Link
+                to="/create"
                 onClick={() => setActive("Create appointment")}
                 className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-2 font-semibold text-white hover:bg-[#266DDE]"
               >
                 <Plus className="h-4 w-4" /> Create appointment
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>

@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -18,6 +18,7 @@ import {
   Sun,
   X
 } from "lucide-react";
+import { Link } from "react-router";
 
 const MotionDiv = motion.div;
 const MotionSection = motion.section;
@@ -28,14 +29,14 @@ const MotionAside = motion.aside;
 ---------------------------------------------------------- */
 function useThemeMode() {
   const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-  const [mode, setMode] = React.useState(getInitial);
-  const [systemDark, setSystemDark] = React.useState(() =>
+  const [mode, setMode] = useState(getInitial);
+  const [systemDark, setSystemDark] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
       : false
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!window.matchMedia) return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = (e) => setSystemDark(e.matches);
@@ -43,7 +44,7 @@ function useThemeMode() {
     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
     else localStorage.removeItem('theme-mode');
   }, [mode]);
@@ -51,20 +52,6 @@ function useThemeMode() {
   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
   return { mode, isDark, cycle };
-}
-
-function ThemeToggle() {
-  const { mode, cycle } = useThemeMode();
-  const Icon = mode === 'system' ? Monitor : mode === 'dark' ? Moon : Sun;
-  return (
-    <button
-      onClick={cycle}
-      className="inline-flex items-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-1.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
-      title={`Theme: ${mode} (click to change)`}
-    >
-      <Icon className="h-4 w-4" /> <span className="capitalize">{mode}</span>
-    </button>
-  );
 }
 
 /* ----------------------------------------------------------
@@ -146,7 +133,7 @@ function QuickBookModal({ open, onClose }) {
                 Request booking <ArrowRight className="h-4 w-4"/>
                 <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
               </button>
-              <a href="/app/schedule" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">Go to schedule</a>
+              <Link to="/app/schedule" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">Go to schedule</Link>
             </div>
           </form>
         </ModalShell>
@@ -185,8 +172,8 @@ function RescheduleModal({ open, onClose, appt }){
 ---------------------------------------------------------- */
 export default function ClientDashboard(){
   const { isDark } = useThemeMode();
-  const [openBook, setOpenBook] = React.useState(false);
-  const [openResched, setOpenResched] = React.useState(false);
+  const [openBook, setOpenBook] = useState(false);
+  const [openResched, setOpenResched] = useState(false);
 
   const nextAppt = {
     id: 'n1',

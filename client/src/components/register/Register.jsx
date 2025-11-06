@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Mail, Lock, User, Phone as PhoneIcon, ArrowRight, Eye, EyeOff, Monitor, Moon, Sun } from "lucide-react";
 import { Link } from "react-router";
@@ -11,40 +11,26 @@ const MotionSection = motion.section;
 ---------------------------------------------------------- */
 function useThemeMode() {
   const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-  const [mode, setMode] = React.useState(getInitial);
-  const [systemDark, setSystemDark] = React.useState(() =>
+  const [mode, setMode] = useState(getInitial);
+  const [systemDark, setSystemDark] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
       : false
   );
-  React.useEffect(() => {
+  useEffect(() => {
     if (!window.matchMedia) return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = (e) => setSystemDark(e.matches);
     try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
   }, []);
-  React.useEffect(() => {
+  useEffect(() => {
     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
     else localStorage.removeItem('theme-mode');
   }, [mode]);
   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
   return { mode, isDark, cycle };
-}
-
-function ThemeToggle() {
-  const { mode, cycle } = useThemeMode();
-  const Icon = mode === 'system' ? Monitor : mode === 'dark' ? Moon : Sun;
-  return (
-    <button
-      onClick={cycle}
-      className="inline-flex items-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-1.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
-      title={`Theme: ${mode} (click to change)`}
-    >
-      <Icon className="h-4 w-4" /> <span className="capitalize">{mode}</span>
-    </button>
-  );
 }
 
 /* ----------------------------------------------------------
@@ -88,7 +74,7 @@ function validate(values) {
 export default function Register() {
   const { isDark } = useThemeMode();
 
-  const [values, setValues] = React.useState({
+  const [values, setValues] = useState({
     username: '',
     email: '',
     password: '',
@@ -96,8 +82,8 @@ export default function Register() {
     phone: '',
     role: 'Client', // locked
   });
-  const [showPwd, setShowPwd] = React.useState(false);
-  const [touched, setTouched] = React.useState({});
+  const [showPwd, setShowPwd] = useState(false);
+  const [touched, setTouched] = useState({});
 
   const errors = validate(values);
   const isValid = Object.keys(errors).length === 0;
