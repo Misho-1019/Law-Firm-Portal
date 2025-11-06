@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Mail, Lock, ArrowRight, Eye, EyeOff, Monitor, Moon, Sun } from "lucide-react";
+import { Link } from "react-router";
 
 const MotionSection = motion.section;
 
@@ -29,20 +30,6 @@ function useThemeMode() {
   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
   return { mode, isDark, cycle };
-}
-
-function ThemeToggle() {
-  const { mode, cycle } = useThemeMode();
-  const Icon = mode === 'system' ? Monitor : mode === 'dark' ? Moon : Sun;
-  return (
-    <button
-      onClick={cycle}
-      className="inline-flex items-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-1.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
-      title={`Theme: ${mode} (click to change)`}
-    >
-      <Icon className="h-4 w-4" /> <span className="capitalize">{mode}</span>
-    </button>
-  );
 }
 
 /* ----------------------------------------------------------
@@ -143,7 +130,7 @@ export default function Login() {
                   <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
                 </button>
 
-                <p className="text-sm text-[#334155] dark:text-[#94A3B8]">No account? <a className="text-[#2F80ED] hover:underline" href="/register">Register</a>.</p>
+                <p className="text-sm text-[#334155] dark:text-[#94A3B8]">No account? <Link className="text-[#2F80ED] hover:underline" to="/register">Register</Link>.</p>
               </form>
             </div>
           </MotionSection>

@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Mail, Lock, User, Phone as PhoneIcon, ArrowRight, Eye, EyeOff, Monitor, Moon, Sun } from "lucide-react";
+import { Link } from "react-router";
 
 // Motion aliases
 const MotionSection = motion.section;
@@ -156,7 +157,7 @@ export default function Register() {
 
                   {/* Legal + link */}
                   <p className="text-xs text-[#334155] dark:text-[#94A3B8]">By continuing, you agree to our Terms and Privacy Policy.</p>
-                  <p className="text-sm text-[#334155] dark:text-[#94A3B8]">Already have an account? <a className="text-[#2F80ED] hover:underline" href="/login">Sign in</a>.</p>
+                  <p className="text-sm text-[#334155] dark:text-[#94A3B8]">Already have an account? <Link className="text-[#2F80ED] hover:underline" to="/login">Sign in</Link>.</p>
                 </form>
               </div>
 

@@ -1,3 +1,4 @@
+import { Route, Routes } from 'react-router'
 import './App.css'
 import AdminDashboard from './components/adminDash/Dashboard'
 import ClientDashboard from './components/clientsDash/ClientDashboard'
@@ -12,11 +13,13 @@ function App() {
     <>
     <div>
       <Header/>
-      {/* <Home /> */}
       {/* <AdminDashboard /> */}
       {/* <ClientDashboard /> */}
       {/* <Register /> */}
-      <Login />
+      {/* <Login /> */}
+      <Routes>
+        <Route path='/' element={<Home />} />
+      </Routes>
     </div>
     </>
   )

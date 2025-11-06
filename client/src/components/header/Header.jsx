@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Menu, X, Plus } from "lucide-react";
+import { Link } from "react-router";
 
 // Concrete motion element to enable the animated underline (and keep ESLint happy)
 const MotionSpan = motion.span;
@@ -14,11 +15,11 @@ export default function Header({ initialActive = "Home" }) {
   const [active, setActive] = React.useState(initialActive);
 
   const items = [
-    { label: "Home", href: "#home" },
-    { label: "Register", href: "#register" },
-    { label: "Login", href: "#login" },
-    { label: "Appointments", href: "#appointments" },
-    { label: "Create appointment", href: "#create" },
+    { label: "Home", href: "/" },
+    { label: "Register", href: "/register" },
+    { label: "Login", href: "/login" },
+    { label: "Appointments", href: "/appointments" },
+    { label: "Create appointment", href: "/create" },
     { label: "More…", href: "#more" },
   ];
 
@@ -26,15 +27,15 @@ export default function Header({ initialActive = "Home" }) {
     const isActive = active === label;
     return (
       <li className="relative py-2">
-        <a
-          href={href}
+        <Link
+          to={href}
           onClick={() => setActive(label)}
           className={`px-1 transition-colors ${
             isActive ? "text-white" : "text-white/80 hover:text-white"
           }`}
         >
           {label}
-        </a>
+        </Link>
         {isActive && (
           <MotionSpan
             layoutId="active-underline"
@@ -51,7 +52,7 @@ export default function Header({ initialActive = "Home" }) {
       {/* Top bar */}
       <div className="mx-auto max-w-7xl px-5 py-3 flex items-center justify-between">
         {/* Brand */}
-        <a href="/" className="flex items-center gap-2 font-semibold select-none">
+        <Link to="/" className="flex items-center gap-2 font-semibold select-none">
           <CalendarIcon className="h-5 w-5" />
           <span className="relative leading-tight">
             <span className="bg-gradient-to-r from-[#2F80ED] via-[#06B6D4] to-[#7C3AED] bg-clip-text text-transparent font-semibold">
@@ -59,7 +60,7 @@ export default function Header({ initialActive = "Home" }) {
             </span>
             <span className="pointer-events-none absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
           </span>
-        </a>
+        </Link>
 
         {/* Desktop nav */}
         <nav className="hidden md:block">
