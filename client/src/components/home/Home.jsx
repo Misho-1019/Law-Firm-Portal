@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -22,32 +22,32 @@ const MotionSection = motion.section;
 /* ----------------------------------------------------------
    Tri-state theme hook (system / light / dark)
 ---------------------------------------------------------- */
-function useThemeMode() {
-  const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-  const [mode, setMode] = useState(getInitial);
-  const [systemDark, setSystemDark] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-      : false
-  );
+// function useThemeMode() {
+//   const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
+//   const [mode, setMode] = useState(getInitial);
+//   const [systemDark, setSystemDark] = useState(() =>
+//     typeof window !== 'undefined' && window.matchMedia
+//       ? window.matchMedia('(prefers-color-scheme: dark)').matches
+//       : false
+//   );
 
-  useEffect(() => {
-    if (!window.matchMedia) return;
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = (e) => setSystemDark(e.matches);
-    try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
-    return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
-  }, []);
+//   useEffect(() => {
+//     if (!window.matchMedia) return;
+//     const mql = window.matchMedia('(prefers-color-scheme: dark)');
+//     const onChange = (e) => setSystemDark(e.matches);
+//     try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
+//     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
+//   }, []);
 
-  useEffect(() => {
-    if (mode !== 'system') localStorage.setItem('theme-mode', mode);
-    else localStorage.removeItem('theme-mode');
-  }, [mode]);
+//   useEffect(() => {
+//     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
+//     else localStorage.removeItem('theme-mode');
+//   }, [mode]);
 
-  const isDark = mode === 'dark' || (mode === 'system' && systemDark);
-  const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
-  return { mode, isDark, cycle };
-}
+//   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
+//   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
+//   return { mode, isDark, cycle };
+// }
 
 /* ----------------------------------------------------------
    Quick Book Modal (UI only)
@@ -127,11 +127,12 @@ function Field({ id, label, placeholder = "", type = "text", as }) {
    Public Home Page (unauthenticated)
 ---------------------------------------------------------- */
 export default function Home() {
-  const { isDark } = useThemeMode();
+  // const { isDark } = useThemeMode();
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={isDark ? "dark" : ""}>
+    // <div className={isDark ? "dark" : ""}>
+    <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
 
         {/* Hero */}

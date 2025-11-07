@@ -1,36 +1,36 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const MotionSection = motion.section;
 
 /* ----------------------------------------------------------
    Tri-state theme hook (system / light / dark)
 ---------------------------------------------------------- */
-function useThemeMode() {
-  const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-  const [mode, setMode] = useState(getInitial);
-  const [systemDark, setSystemDark] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-      : false
-  );
-  useEffect(() => {
-    if (!window.matchMedia) return;
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = (e) => setSystemDark(e.matches);
-    try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
-    return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
-  }, []);
-  useEffect(() => {
-    if (mode !== 'system') localStorage.setItem('theme-mode', mode);
-    else localStorage.removeItem('theme-mode');
-  }, [mode]);
-  const isDark = mode === 'dark' || (mode === 'system' && systemDark);
-  const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
-  return { mode, isDark, cycle };
-}
+// function useThemeMode() {
+//   const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
+//   const [mode, setMode] = useState(getInitial);
+//   const [systemDark, setSystemDark] = useState(() =>
+//     typeof window !== 'undefined' && window.matchMedia
+//       ? window.matchMedia('(prefers-color-scheme: dark)').matches
+//       : false
+//   );
+//   useEffect(() => {
+//     if (!window.matchMedia) return;
+//     const mql = window.matchMedia('(prefers-color-scheme: dark)');
+//     const onChange = (e) => setSystemDark(e.matches);
+//     try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
+//     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
+//   }, []);
+//   useEffect(() => {
+//     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
+//     else localStorage.removeItem('theme-mode');
+//   }, [mode]);
+//   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
+//   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
+//   return { mode, isDark, cycle };
+// }
 
 /* ----------------------------------------------------------
    Validation (mirror model expectations for password)
@@ -56,11 +56,25 @@ function validate(values) {
 /* ----------------------------------------------------------
    Login page (email + password only)
 ---------------------------------------------------------- */
-export default function Login() {
-  const { isDark } = useThemeMode();
+export default function Login({
+  onLogin,
+}) {
+  const navigate = useNavigate();
+  // const { isDark } = useThemeMode();
   const [values, setValues] = useState({ email: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [touched, setTouched] = useState({});
+
+  const loginAction = (formData) => {
+    const email = formData.get('email')
+
+    console.log(email);
+    
+
+    onLogin(email)
+
+    navigate('/')
+  }
 
   const errors = validate(values);
   const isValid = Object.keys(errors).length === 0;
@@ -68,14 +82,9 @@ export default function Login() {
   const set = (k) => (e) => setValues((v) => ({ ...v, [k]: e.target.value }));
   const onBlur = (k) => () => setTouched((t) => ({ ...t, [k]: true }));
 
-  const onSubmit = (e) => {
-    e.preventDefault();
-    // Wire to your API here:
-    // await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(values) })
-  };
-
   return (
-    <div className={isDark ? 'dark' : ''}>
+    // <div className={isDark ? 'dark' : ''}>
+    <div className='dark'>
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
         
         {/* Card */}
@@ -90,12 +99,13 @@ export default function Login() {
               <h1 className="text-2xl font-semibold">Sign in</h1>
               <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">Use your email and password.</p>
 
-              <form className="mt-6 space-y-5" onSubmit={onSubmit} noValidate>
+              <form className="mt-6 space-y-5" action={loginAction} noValidate>
                 {/* Email */}
                 <Field
                   label="Email"
                   id="email"
                   type="email"
+                  name="email"
                   icon={<Mail className="h-4 w-4" />}
                   placeholder="name@domain.tld"
                   value={values.email}
@@ -108,6 +118,7 @@ export default function Login() {
                 <PasswordField
                   label="Password"
                   id="password"
+                  name='password'
                   placeholder="••••••••"
                   value={values.password}
                   onChange={set('password')}
@@ -147,7 +158,7 @@ export default function Login() {
 /* ----------------------------------------------------------
    Fields
 ---------------------------------------------------------- */
-function Field({ id, label, icon, type = 'text', placeholder = '', value, onChange, onBlur, error }) {
+function Field({ id, label, icon, type = 'text', name, placeholder = '', value, onChange, onBlur, error }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
@@ -157,6 +168,7 @@ function Field({ id, label, icon, type = 'text', placeholder = '', value, onChan
           <input
             id={id}
             type={type}
+            name={name}
             placeholder={placeholder}
             value={value}
             onChange={onChange}
@@ -170,7 +182,7 @@ function Field({ id, label, icon, type = 'text', placeholder = '', value, onChan
   );
 }
 
-function PasswordField({ id, label, placeholder, value, onChange, onBlur, error, show, setShow }) {
+function PasswordField({ id, label, name, placeholder, value, onChange, onBlur, error, show, setShow }) {
   const ToggleIcon = show ? Eye : EyeOff;
   return (
     <div className="space-y-1.5">
@@ -181,6 +193,7 @@ function PasswordField({ id, label, placeholder, value, onChange, onBlur, error,
           <input
             id={id}
             type={show ? 'text' : 'password'}
+            name={name}
             placeholder={placeholder}
             value={value}
             onChange={onChange}
