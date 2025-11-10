@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
+import { useLogin } from "../../api/authApi";
 
 const MotionSection = motion.section;
 
@@ -13,24 +14,22 @@ export default function Login({
   onLogin,
 }) {
   const navigate = useNavigate();
+  const { login } = useLogin()
 
-  const loginHandler = (previousState, formDate) => {
-    const values = Object.fromEntries(formDate)
+  const loginHandler = async(_, formData) => {
+    const values = Object.fromEntries(formData)
 
-    console.log(values);
-    
-    onLogin(values.email)
+    const authData = await login(values.email, values.password)
+  
+    onLogin(authData)
 
     navigate('/')
 
-    return values
   }
 
-  const [values, loginAction, isPending] = useActionState(loginHandler, {
+  const [_, loginAction, isPending] = useActionState(loginHandler, {
     email: '', password: ''
   })
-
-  console.log(values);
   
   return (
     <div className="dark">
