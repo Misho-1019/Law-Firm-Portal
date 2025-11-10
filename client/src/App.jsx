@@ -7,27 +7,28 @@ import Home from './components/home/Home'
 import Login from './components/login/Login'
 import Register from './components/register/Register'
 import { useState } from 'react'
+import { UserContext } from './context/UserContext'
 
 function App() {
-  const [_authData, setAuthData] = useState({})
+  const [authData, setAuthData] = useState({})
 
   const userLoginHandler = (resultData) => {
     setAuthData(resultData)
   }
 
   return (
-    <>
-    <div>
+    <UserContext.Provider value={{...authData, userLoginHandler}}>
+      <div>
       <Header/>
       {/* <AdminDashboard /> */}
       {/* <ClientDashboard /> */}
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/register' element={<Register />} />
-        <Route path='/login' element={<Login onLogin={userLoginHandler} />} />
+        <Route path='/login' element={<Login />} />
       </Routes>
     </div>
-    </>
+    </UserContext.Provider>
   )
 }
 
