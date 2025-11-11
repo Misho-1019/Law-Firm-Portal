@@ -16,7 +16,7 @@ authController.post('/register', isGuest, async (req, res) => {
 
         res.status(201).json({ message: 'User registered successfully' })
     } catch (error) {
-        res.status(400).json({ message: error.message })
+        res.status(400).json({ message: error.message }).end();
     }
 })
 
@@ -30,15 +30,20 @@ authController.post('/login', isGuest, async (req, res) => {
 
         res.status(200).json({ message: 'Logged in successfully' });
     } catch (err) {
-        res.status(400).json({ message: err.message })
+        res.status(400).json({ message: err.message }).end()
     }
 
     res.end();
 })
 
 authController.get('/logout', isAuth, (req, res) => {
-    res.clearCookie('auth');
-    res.status(200).json({ message: 'Logged out successfully' });
+    try {
+        res.clearCookie('auth', { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax'  });
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 })
 
 export default authController;

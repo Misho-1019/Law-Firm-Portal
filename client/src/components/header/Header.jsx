@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Menu, X, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, Menu, X, Plus, LogOut } from "lucide-react";
 import { Link } from "react-router";
 
 // Concrete motion element to enable the animated underline (and keep ESLint happy)
@@ -18,6 +18,7 @@ export default function Header({ initialActive = "Home" }) {
     { label: "Home", href: "/" },
     { label: "Register", href: "/register" },
     { label: "Login", href: "/login" },
+    { label: "Logout", href: "/logout" },
     { label: "Appointments", href: "/appointments" },
     { label: "Create appointment", href: "/create" },
     { label: "More…", href: "#more" },
