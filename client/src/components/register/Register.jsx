@@ -23,7 +23,7 @@ export default function Register() {
   const registerHandler = async (formData) => {
     const values = Object.fromEntries(formData);
 
-    const confirmPassword = formData.get("confirm-password");
+    const confirmPassword = formData.get("confirmPassword");
 
     if (confirmPassword !== values.password) {
       console.log("Password mismatch!");
@@ -35,10 +35,7 @@ export default function Register() {
       values.username,
       values.email,
       values.password,
-      values.phone,
     );
-
-    console.log(authData);
 
     userLoginHandler(authData);
 
@@ -71,7 +68,6 @@ export default function Register() {
                 <form
                   className="mt-6 space-y-5"
                   action={registerHandler}
-                  method="post"
                 >
                   {/* Username */}
                   <Field
@@ -107,7 +103,7 @@ export default function Register() {
                   <PasswordField
                     label="Confirm password"
                     id="confirm"
-                    name="confirm-password"
+                    name="confirmPassword"
                     placeholder="••••••••"
                   />
 

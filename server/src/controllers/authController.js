@@ -10,11 +10,12 @@ authController.post('/register', isGuest, async (req, res) => {
     const authData = req.body;
 
     try {
-        const token = await authService.register(authData);
+        const result = await authService.register(authData);
 
-        res.cookie('auth', token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
+        // res.cookie('auth', result.token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
+        res.cookie('auth', result.token, { httpOnly: true }); // 2 hours
 
-        res.status(201).json({ message: 'User registered successfully' })
+        res.status(201).json(result)
     } catch (error) {
         res.status(400).json({ message: error.message }).end();
     }
@@ -24,11 +25,12 @@ authController.post('/login', isGuest, async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const token = await authService.login(email, password);
+        const result = await authService.login(email, password);
 
-        res.cookie('auth', token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
+        // res.cookie('auth', result.token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
+        res.cookie('auth', result.token, { httpOnly: true }); // 2 hours
 
-        res.status(200).json({ message: 'Logged in successfully' });
+        res.status(200).json(result);
     } catch (err) {
         res.status(400).json({ message: err.message }).end()
     }
@@ -38,7 +40,8 @@ authController.post('/login', isGuest, async (req, res) => {
 
 authController.get('/logout', isAuth, (req, res) => {
     try {
-        res.clearCookie('auth', { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax'  });
+        // res.clearCookie('auth', { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax'  });
+        res.clearCookie('auth', { httpOnly: true  });
         res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
         console.log(error.message);
