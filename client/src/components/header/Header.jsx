@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar as CalendarIcon, Menu, X, Plus, LogOut } from "lucide-react";
+import { Calendar as CalendarIcon, Menu, X, Plus } from "lucide-react";
 import { Link } from "react-router";
+import { UserContext } from "../../context/UserContext";
 
 // Concrete motion element to enable the animated underline (and keep ESLint happy)
 const MotionSpan = motion.span;
@@ -13,16 +14,31 @@ const MotionSpan = motion.span;
 export default function Header({ initialActive = "Home" }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(initialActive);
+  const { email, role } = useContext(UserContext)
 
-  const items = [
+  const guestItems = [
     { label: "Home", href: "/" },
     { label: "Register", href: "/register" },
     { label: "Login", href: "/login" },
+    { label: "Create appointment", href: "/create" },
+  ]
+  
+  const adminItems = [
+    { label: "Appointments", href: "/appointments" },
+    { label: "Dashboard", href: "/admin" },
+    { label: "Create appointment", href: "/create" },
     { label: "Logout", href: "/logout" },
+  ]
+  
+  const clientItems = [
+    { label: "Home", href: "/" },
+    { label: "Dashboard", href: "/client" },
     { label: "Appointments", href: "/appointments" },
     { label: "Create appointment", href: "/create" },
-    { label: "More…", href: "#more" },
-  ];
+    { label: "Logout", href: "/logout" },
+  ]
+
+  const items = email && role === "Admin" ? adminItems : email && role === "Client" ? clientItems : guestItems
 
   const NavLink = ({ label, href }) => {
     const isActive = active === label;
