@@ -2,19 +2,19 @@
 // - No state, no validation, no navigation, no handlers
 // - Pure presentational components with Framer Motion + Tailwind
 
-import { useActionState, useContext } from "react";
+import { useActionState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useLogin } from "../../api/authApi";
-import { UserContext } from "../../context/UserContext";
+import { useUserContext } from "../../context/UserContext";
 
 const MotionSection = motion.section;
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useLogin()
-  const { userLoginHandler } = useContext(UserContext)
+  const { userLoginHandler } = useUserContext()
 
   const loginHandler = async(_, formData) => {
     const values = Object.fromEntries(formData)

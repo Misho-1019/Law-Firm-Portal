@@ -10,15 +10,15 @@ import {
   Eye
 } from "lucide-react";
 import { useRegister } from "../../api/authApi";
-import { useContext, useState } from "react";
-import { UserContext } from "../../context/UserContext";
+import { useState } from "react";
+import { useUserContext } from "../../context/UserContext";
 
 const MotionSection = motion.section;
 
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useRegister();
-  const { userLoginHandler } = useContext(UserContext);
+  const { userLoginHandler } = useUserContext()
 
   const registerHandler = async (formData) => {
     const values = Object.fromEntries(formData);
