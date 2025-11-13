@@ -8,19 +8,24 @@ import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Logout from "./components/logout/Logout";
 import { UserProvider } from "./providers/UserProvider";
+import AuthGuard from "./components/guards/AuthGuard";
 
 function App() {
   return (
     <UserProvider>
       <div>
         <Header />
-        {/* <AdminDashboard /> */}
-        {/* <ClientDashboard /> */}
+        
+        
         <Routes>
+          <Route element={<AuthGuard />}>
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/client" element={<ClientDashboard />} />
+          </Route>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/logout" element={<Logout />} />
         </Routes>
       </div>
     </UserProvider>
