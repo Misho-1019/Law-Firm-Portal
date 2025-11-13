@@ -15,17 +15,18 @@ function App() {
     <UserProvider>
       <div>
         <Header />
-        
-        
+
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route element={<AuthGuard />}>
             <Route path="/logout" element={<Logout />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/client" element={<ClientDashboard />} />
           </Route>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
+          <Route>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+          </Route>
         </Routes>
       </div>
     </UserProvider>
