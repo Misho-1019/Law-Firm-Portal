@@ -12,35 +12,57 @@ import {
 import { useRegister } from "../../api/authApi";
 import { useState } from "react";
 import { useUserContext } from "../../context/UserContext";
+import { toast } from "react-toastify";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 
 const MotionSection = motion.section;
 
+const schema = yup.object({
+  username: yup.string().min(2, 'Username must be at least 2 characters').required('Username is required'),
+  email: yup.string().email('Invalid email format').required('Email is required'),
+  password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+  confirmPassword: yup.string()
+    .oneOf([yup.ref('password'), null], 'Passwords must match')
+    .required('Confirm Password is required'),
+})
+
 export default function Register() {
   const navigate = useNavigate();
-  const { register } = useRegister();
+  const { register: registerUser } = useRegister();
   const { userLoginHandler } = useUserContext()
 
-  const registerHandler = async (formData) => {
-    const values = Object.fromEntries(formData);
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = useForm({
+    resolver: yupResolver(schema)
+  })
 
-    const confirmPassword = formData.get("confirmPassword");
+  const registerHandler = async (data) => {
+    try {
+      const authData = await registerUser(data.username, data.email, data.password)
 
-    if (confirmPassword !== values.password) {
-      console.log("Password mismatch!");
+      userLoginHandler(authData)
 
-      return;
+      toast.success('Registration successful', {
+        position: 'top-center',
+        autoClose: 2000,
+        theme: 'light',
+      })
+
+      navigate('/')
+    } catch (error) {
+      toast.error(error.message || 'Registration failed', {
+        position: 'top-center',
+        autoClose: 2000,
+        theme: 'light'
+      })
     }
+  }
 
-    const authData = await register(
-      values.username,
-      values.email,
-      values.password,
-    );
-
-    userLoginHandler(authData);
-
-    navigate(`/`);
-  };
   return (
     // Force dark for preview parity; remove 'dark' to respect system
     <div className="dark">
@@ -67,7 +89,8 @@ export default function Register() {
                 {/* UI-only form: no state, no validation, no handlers */}
                 <form
                   className="mt-6 space-y-5"
-                  action={registerHandler}
+                  onSubmit={handleSubmit(registerHandler)}
+                  noValidate
                 >
                   {/* Username */}
                   <Field
@@ -75,9 +98,13 @@ export default function Register() {
                     id="username"
                     name="username"
                     icon={<User className="h-4 w-4" />}
+                    {...register("username")}
+                    aria-invalid={!!errors.username}
                     placeholder="ivan.petrov"
                     hint="Min 2 characters. Will be visible to staff."
+                    autoComplete="username"
                   />
+                  {errors.username && <p className="text-red-600 text-sm">{errors.username.message}</p>}
 
                   {/* Email */}
                   <Field
@@ -86,26 +113,38 @@ export default function Register() {
                     name="email"
                     type="email"
                     icon={<Mail className="h-4 w-4" />}
+                    {...register("email")}
+                    aria-invalid={!!errors.email}
                     placeholder="ivan.petrov@example.com"
                     hint="Must look like name@domain.tld"
+                    autoComplete="email"
                   />
+                  {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
 
                   {/* Password */}
                   <PasswordField
                     label="Password"
                     id="password"
                     name="password"
+                    {...register("password")}
+                    aria-invalid={!!errors.password}
                     placeholder="••••••••"
                     hint="At least 6 characters. Letters, numbers, underscore only."
+                    autoComplete="new-password"
                   />
+                  {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
 
                   {/* Confirm */}
                   <PasswordField
                     label="Confirm password"
                     id="confirm"
                     name="confirmPassword"
+                    {...register("confirmPassword")}
+                    aria-invalid={!!errors.confirmPassword}
                     placeholder="••••••••"
+                    autoComplete="new-password"
                   />
+                  {errors.confirmPassword && <p className="text-red-600 text-sm">{errors.confirmPassword.message}</p>}
 
                   {/* Phone (optional) */}
                   <Field
@@ -115,11 +154,13 @@ export default function Register() {
                     type="tel"
                     icon={<PhoneIcon className="h-4 w-4" />}
                     placeholder="+359 88 123 4567"
+                    autoComplete="tel"
                   />
 
                   {/* CTA (button type=button to avoid form submit) */}
                   <button
                     type="submit"
+                    disabled={isSubmitting}
                     className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
                   >
                     Create account <ArrowRight className="h-4 w-4" />
@@ -186,6 +227,7 @@ function Field({
   type = "text",
   placeholder = "",
   hint,
+  ...inputProps
 }) {
   return (
     <div className="space-y-1.5">
@@ -203,6 +245,7 @@ function Field({
             type={type}
             placeholder={placeholder}
             className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
+            {...inputProps}
           />
         </div>
       </div>
@@ -213,7 +256,7 @@ function Field({
   );
 }
 
-function PasswordField({ id, name, label, placeholder, hint }) {
+function PasswordField({ id, name, label, placeholder, hint, ...inputProps }) {
   const [show, setShow] = useState(false);
   const ToggleIcon = show ? Eye : EyeOff;
 
@@ -231,6 +274,7 @@ function PasswordField({ id, name, label, placeholder, hint }) {
             type={show ? "text" : "password"}
             placeholder={placeholder}
             className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
+            {...inputProps}
           />
           <button
             type="button"
