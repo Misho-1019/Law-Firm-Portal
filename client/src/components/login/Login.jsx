@@ -2,35 +2,62 @@
 // - No state, no validation, no navigation, no handlers
 // - Pure presentational components with Framer Motion + Tailwind
 
-import { useActionState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useLogin } from "../../api/authApi";
 import { useUserContext } from "../../context/UserContext";
+import { toast } from "react-toastify";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 
 const MotionSection = motion.section;
+
+const schema = yup.object({
+  email: yup.string().email('Invalid email format').required('Email is required'),
+  password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+})
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useLogin()
   const { userLoginHandler } = useUserContext()
 
-  const loginHandler = async(_, formData) => {
-    const values = Object.fromEntries(formData)
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors }
+  } = useForm({
+    resolver: yupResolver(schema)
+  })
 
-    const authData = await login(values.email, values.password)
-  
-    userLoginHandler(authData)
+  const loginHandler = async (data) => {
+    try {
+      const authData = await login(data.email, data.password)
 
-    navigate('/')
+      userLoginHandler(authData)
 
+      toast.success('Login successful', {
+        position: 'top-center',
+        autoClose: 2000,
+        theme: 'light',
+      })
+
+      navigate('/')
+    } catch (error) {
+      toast.error(error.message || 'Login failed', {
+        position: 'top-center',
+        autoClose: 2000,
+        theme: 'light'
+      })
+    }
   }
 
-  const [_, loginAction, isPending] = useActionState(loginHandler, {
-    email: '', password: ''
-  })
-  
+  // const [_, loginAction, isPending] = useActionState(loginHandler, {
+  //   email: '', password: ''
+  // })
+
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
@@ -47,7 +74,7 @@ export default function Login() {
               <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">Use your email and password.</p>
 
               {/* UI-only form (no handlers) */}
-              <form className="mt-6 space-y-5" action={loginAction} noValidate>
+              <form className="mt-6 space-y-5" onSubmit={handleSubmit(loginHandler)} noValidate>
                 {/* Email */}
                 <Field
                   label="Email"
@@ -55,16 +82,22 @@ export default function Login() {
                   type="email"
                   name="email"
                   icon={<Mail className="h-4 w-4" />}
+                  {...register('email')}
+                  aria-invalid={!!errors.email}   
                   placeholder="name@domain.tld"
                 />
+                {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
 
                 {/* Password */}
                 <PasswordField
                   label="Password"
                   id="password"
                   name="password"
+                  {...register('password')}
+                  aria-invalid={!!errors.password}
                   placeholder="••••••••"
                 />
+                {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
 
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#334155] dark:text-[#94A3B8]">
@@ -75,7 +108,7 @@ export default function Login() {
 
                 <button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isSubmitting}
                   className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none bg-[#2F80ED] text-white hover:bg-[#266DDE] focus:ring-4 focus:ring-[#2F80ED]/40"
                 >
                   Sign in <ArrowRight className="h-4 w-4" />
@@ -101,7 +134,7 @@ export default function Login() {
 /* ----------------------------------------------------------
    Fields (presentational only)
 ---------------------------------------------------------- */
-function Field({ id, label, icon, type = "text", name, placeholder = "" }) {
+function Field({ id, label, icon, type = "text", name, placeholder = "", ...inputProps }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
@@ -115,6 +148,7 @@ function Field({ id, label, icon, type = "text", name, placeholder = "" }) {
             placeholder={placeholder}
             className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
             autoComplete={name}
+            {...inputProps}
           />
         </div>
       </div>
@@ -122,7 +156,7 @@ function Field({ id, label, icon, type = "text", name, placeholder = "" }) {
   );
 }
 
-function PasswordField({ id, label, name, placeholder }) {
+function PasswordField({ id, label, name, placeholder, ...inputProps }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
@@ -136,6 +170,7 @@ function PasswordField({ id, label, name, placeholder }) {
             placeholder={placeholder}
             className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
             autoComplete="current-password"
+            {...inputProps}
           />
         </div>
       </div>
