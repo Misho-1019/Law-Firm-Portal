@@ -24,6 +24,12 @@ const request = async (method, url, data, options = {}) => {
 
     if (!responseContentType) return;
 
+    if (!response.ok) {
+        const error = await response.json();
+
+        throw error;
+    }
+
     const result = await response.json();
 
     return result
