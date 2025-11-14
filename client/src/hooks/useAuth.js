@@ -19,6 +19,7 @@ export default function useAuth() {
 
     return {
         ...authData,
+        userId: authData.id,
         isAuthenticated: !!authData.token,
         request: {
             get: requestWrapper.bind(null, 'GET'),

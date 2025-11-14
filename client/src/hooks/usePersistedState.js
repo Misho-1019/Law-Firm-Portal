@@ -16,7 +16,7 @@ export default function usePersistedState(stateKey, initialState) {
     const setPersistedState = (input) => {
         const data = typeof input === 'function' ? input(state) : input
 
-        const persistedData = JSON.parse(data)
+        const persistedData = JSON.stringify(data)
 
         localStorage.setItem(stateKey, persistedData)
 

@@ -1,12 +1,20 @@
 import { Router } from "express";
 import authService from "../services/authService.js";
 import { isAuth, isGuest } from "../middlewares/authMiddleware.js";
+import { loginUserChecks, registerUserChecks } from "../validators/user.js";
+import { validationResult } from "express-validator";
 
 const authController = Router();
 
 const isProd = process.env.NODE_ENV === 'production';
 
-authController.post('/register', isGuest, async (req, res) => {
+authController.post('/register', isGuest, registerUserChecks, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
+
     const authData = req.body;
 
     try {
@@ -21,7 +29,12 @@ authController.post('/register', isGuest, async (req, res) => {
     }
 })
 
-authController.post('/login', isGuest, async (req, res) => {
+authController.post('/login', isGuest, loginUserChecks, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
     const { email, password } = req.body;
 
     try {
