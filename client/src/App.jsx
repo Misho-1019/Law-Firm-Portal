@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
-import AdminDashboard from "./components/adminDash/Dashboard";
-import ClientDashboard from "./components/clientsDash/ClientDashboard";
+import AdminDashboard from "./components/admin/Dashboard";
+import ClientDashboard from "./components/clients/ClientDashboard";
 import Header from "./components/header/Header";
 import Home from "./components/home/Home";
 import Login from "./components/login/Login";
