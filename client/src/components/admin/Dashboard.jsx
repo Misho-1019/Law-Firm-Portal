@@ -1,7 +1,5 @@
-import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Calendar as CalendarIcon,
   Plus,
   UserPlus,
   Share2,
@@ -10,106 +8,29 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
-  XCircle,
-  Monitor,
-  Moon,
-  Sun
+  XCircle
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import appointmentsService from "../../services/appointmentsService";
 
-/* ---- Framer Motion components (fix ESLint unused import) ---- */
+/* ---- Framer Motion elements ---- */
 const MotionDiv = motion.div;
 const MotionSection = motion.section;
 const MotionAside = motion.aside;
 
-// --- Tri-state theme (system / light / dark) ---
-// function useThemeMode() {
-//   const getInitial = () =>
-//     (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-//   const [mode, setMode] = useState(getInitial);
-//   const [systemDark, setSystemDark] = useState(() =>
-//     typeof window !== 'undefined' && window.matchMedia
-//       ? window.matchMedia('(prefers-color-scheme: dark)').matches
-//       : false
-//   );
-
-//   useEffect(() => {
-//     if (!window.matchMedia) return;
-//     const mql = window.matchMedia('(prefers-color-scheme: dark)');
-//     const onChange = (e) => setSystemDark(e.matches);
-//     try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
-//     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
-//   }, []);
-
-//   useEffect(() => {
-//     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
-//     else localStorage.removeItem('theme-mode');
-//   }, [mode]);
-
-//   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
-//   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
-//   return { mode, isDark, cycle };
-// }
-
-/* --- Status pill (UI only) --- */
-function StatusPill({ status }) {
-  const map = {
-    confirmed: { bg: 'bg-[rgba(22,101,52,0.12)]', fg: 'text-[#166534]', label: 'Confirmed', Icon: CheckCircle2 },
-    pending:   { bg: 'bg-[rgba(180,83,9,0.12)]',  fg: 'text-[#B45309]', label: 'Pending',   Icon: AlertCircle },
-    canceled:  { bg: 'bg-[rgba(185,28,28,0.12)]', fg: 'text-[#B91C1C]', label: 'Canceled',  Icon: XCircle },
-    info:      { bg: 'bg-[rgba(3,105,161,0.12)]',  fg: 'text-[#0369A1]', label: 'Info',      Icon: AlertCircle },
-  };
-  const S = map[status] || map.info;
-  const I = S.Icon;
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold ${S.bg} ${S.fg}`}>
-      <I className="h-3.5 w-3.5" /> {S.label}
-    </span>
-  );
-}
-
-// --- Small helpers for dates ---
-const weekdays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-function isSameDay(a, b) {
-  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
-}
-function mondayFirst(d){ return (d.getDay()+6)%7; }
-function getWeeks(year, month){
-  const first = new Date(year, month, 1);
-  const pad = mondayFirst(first);
-  const start = new Date(year, month, 1 - pad);
-  const weeks = [];
-  const cur = new Date(start);
-  for(let w=0; w<6; w++){
-    const row=[]; for(let i=0;i<7;i++){ row.push(new Date(cur)); cur.setDate(cur.getDate()+1); }
-    weeks.push(row);
-  }
-  return weeks;
-}
-
-// --- Sample data (UI only) ---
-const sampleUpcoming = [
-  { id:'a1', when:'09:00 – 09:30', client:'Ivan Petrov',     title:'Initial consultation', status:'confirmed' },
-  { id:'a2', when:'10:00 – 10:45', client:'Maria Georgieva', title:'Contract review',      status:'pending' },
-  { id:'a3', when:'14:00 – 14:30', client:'Nikolay Dimitrov',title:'Litigation prep',      status:'confirmed' },
-];
-
 export default function AdminDashboard(){
-  // const { isDark } = useThemeMode();
-  const now = new Date();
-  const [current, setCurrent] = useState({ y: now.getFullYear(), m: now.getMonth() });
-  const [selected, setSelected] = useState(now);
-  const weeks = useMemo(()=>getWeeks(current.y, current.m), [current]);
+  const [appointments, setAppointments] = useState([]);
+  
+  useEffect(() => {
+    appointmentsService.getAll()
+       .then(setAppointments)
+  }, [])
 
-  const headerLabel = new Intl.DateTimeFormat(undefined, { month:'long', year:'numeric' }).format(new Date(current.y, current.m, 1));
-
-  const prevMonth = () => setCurrent(({y,m}) => m===0?{y:y-1,m:11}:{y,m:m-1});
-  const nextMonth = () => setCurrent(({y,m}) => m===11?{y:y+1,m:0}:{y,m:m+1});
+  console.log(appointments);
 
   return (
-    // <div className={isDark? 'dark':''}>
     <div className='dark'>
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
-        
         {/* Hero / search */}
         <section className="bg-white dark:bg-[#111827] border-b border-[#E5E7EB] dark:border-[#1F2937]">
           <div className="mx-auto max-w-7xl px-5 py-8">
@@ -123,24 +44,23 @@ export default function AdminDashboard(){
                 <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] overflow-hidden">
                   <div className="flex items-center gap-2 px-3 py-2">
                     <Search className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
-                    <input id="globalSearch" className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]" placeholder="Search clients, matters, or events" />
+                    <input id="globalSearch" className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]" placeholder="Search clients, matters, or events" disabled readOnly />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Quick actions */}
+            {/* Quick actions (disabled) */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <button className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
+              <span className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white opacity-60 cursor-not-allowed select-none">
                 <Plus className="h-4 w-4" /> New appointment
-                <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
-              </button>
-              <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
+              </span>
+              <span className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 opacity-60 cursor-not-allowed select-none">
                 <UserPlus className="h-4 w-4" /> Create client
-              </button>
-              <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
+              </span>
+              <span className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 opacity-60 cursor-not-allowed select-none">
                 <Share2 className="h-4 w-4" /> Share availability
-              </button>
+              </span>
             </div>
           </div>
         </section>
@@ -171,47 +91,76 @@ export default function AdminDashboard(){
             </div>
           </MotionDiv>
 
-          {/* Calendar preview (left) */}
+          {/* Calendar preview (static) */}
           <MotionSection initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:.35}} className="lg:col-span-2 rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
             <div className="flex items-center justify-between p-4 pb-3">
               <div>
                 <h2 className="text-lg font-semibold">This month</h2>
-                <p className="text-sm text-[#334155] dark:text-[#94A3B8]">{headerLabel}</p>
+                <p className="text-sm text-[#334155] dark:text-[#94A3B8]">November 2025</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={prevMonth} className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Prev</button>
-                <button onClick={()=>{ const d=new Date(); setCurrent({y:d.getFullYear(),m:d.getMonth()}); setSelected(d); }} className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Today</button>
-                <button onClick={nextMonth} className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Next</button>
+                <span className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 opacity-60 cursor-not-allowed select-none">Prev</span>
+                <span className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 opacity-60 cursor-not-allowed select-none">Today</span>
+                <span className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 opacity-60 cursor-not-allowed select-none">Next</span>
               </div>
             </div>
             <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
 
             {/* Weekday header */}
             <div className="grid grid-cols-7 gap-2 px-4 pt-4 text-xs font-medium text-[#334155] dark:text-[#94A3B8]">
-              {weekdays.map(w => <div key={w} className="text-center">{w}</div>)}
+              <div className="text-center">Mon</div>
+              <div className="text-center">Tue</div>
+              <div className="text-center">Wed</div>
+              <div className="text-center">Thu</div>
+              <div className="text-center">Fri</div>
+              <div className="text-center">Sat</div>
+              <div className="text-center">Sun</div>
             </div>
 
-            {/* Days grid */}
+            {/* Days grid (non-interactive, fixed for Nov 2025; Mon-first) */}
             <div className="grid grid-cols-7 gap-2 p-4">
-              {weeks.flat().map((d, idx) => {
-                const inMonth = d.getMonth()===current.m;
-                const isToday = isSameDay(d, now);
-                const isSel = isSameDay(d, selected);
-                return (
-                  <button key={idx} onClick={()=>setSelected(new Date(d))} className={[
-                      "relative h-20 rounded-xl border text-left p-3 transition-colors",
-                      inMonth ? "bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]" : "bg-white/60 dark:bg-[#0F1117]/60 border-dashed border-[#E5E7EB] dark:border-[#1F2937] opacity-70",
-                      isToday ? "border-transparent [background:linear-gradient(#fff,#fff),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)] [background-origin:border-box] [background-clip:padding-box,border-box] dark:[background:linear-gradient(#0F1117,#0F1117),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)]" : "",
-                      isSel ? "bg-[#2F80ED]/10 border-[#2F80ED]/40" : "",
-                    ].join(' ')}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">{d.getDate()}</span>
-                      {isToday && <span className="rounded-md bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 text-[10px] font-semibold">Today</span>}
-                    </div>
-                    {isSel && <span className="pointer-events-none absolute left-3 right-3 bottom-2 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent"/>}
-                  </button>
-                );
-              })}
+              {/* Oct 27–31 */}
+              {[27,28,29,30,31].map((n)=> (
+                <div key={`oct-${n}`} className="relative h-20 rounded-xl border text-left p-3 bg-white/60 dark:bg-[#0F1117]/60 border-dashed border-[#E5E7EB] dark:border-[#1F2937] opacity-70">
+                  <span className="text-sm font-semibold">{n}</span>
+                </div>
+              ))}
+              {/* Nov 1–2 */}
+              {[1,2].map((n)=> (
+                <div key={`nov-a-${n}`} className="relative h-20 rounded-xl border text-left p-3 bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]">
+                  <span className="text-sm font-semibold">{n}</span>
+                </div>
+              ))}
+              {/* Nov 3–9 */}
+              {[3,4,5,6,7,8,9].map((n)=> (
+                <div key={`nov-b-${n}`} className="relative h-20 rounded-xl border text-left p-3 bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]">
+                  <span className="text-sm font-semibold">{n}</span>
+                </div>
+              ))}
+              {/* Nov 10–16 */}
+              {[10,11,12,13,14,15,16].map((n)=> (
+                <div key={`nov-c-${n}`} className="relative h-20 rounded-xl border text-left p-3 bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]">
+                  <span className="text-sm font-semibold">{n}</span>
+                </div>
+              ))}
+              {/* Nov 17–23 */}
+              {[17,18,19,20,21,22,23].map((n)=> (
+                <div key={`nov-d-${n}`} className="relative h-20 rounded-xl border text-left p-3 bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]">
+                  <span className="text-sm font-semibold">{n}</span>
+                </div>
+              ))}
+              {/* Nov 24–30 */}
+              {[24,25,26,27,28,29,30].map((n)=> (
+                <div key={`nov-e-${n}`} className="relative h-20 rounded-xl border text-left p-3 bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]">
+                  <span className="text-sm font-semibold">{n}</span>
+                </div>
+              ))}
+              {/* Dec 1–7 */}
+              {[1,2,3,4,5,6,7].map((n)=> (
+                <div key={`dec-${n}`} className="relative h-20 rounded-xl border text-left p-3 bg-white/60 dark:bg-[#0F1117]/60 border-dashed border-[#E5E7EB] dark:border-[#1F2937] opacity-70">
+                  <span className="text-sm font-semibold">{n}</span>
+                </div>
+              ))}
             </div>
           </MotionSection>
 
@@ -222,28 +171,52 @@ export default function AdminDashboard(){
                 <h3 className="text-lg font-semibold">Upcoming</h3>
                 <p className="text-sm text-[#334155] dark:text-[#94A3B8]">Next 24 hours</p>
               </div>
-              <button className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5 border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors">
+              <span className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] px-3 py-1.5 border border-[#2F80ED] opacity-60 cursor-not-allowed select-none">
                 View all
-              </button>
+              </span>
             </div>
             <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
 
             <ul className="p-4 space-y-3">
-              {sampleUpcoming.map(a => (
-                <li key={a.id} className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
-                      <span className="font-semibold">{a.when}</span>
-                    </div>
-                    <StatusPill status={a.status} />
+              <li className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
+                    <span className="font-semibold">09:00 – 09:30</span>
                   </div>
-                  <div className="mt-2 text-sm">
-                    <div className="font-medium">{a.client}</div>
-                    <div className="text-[#334155] dark:text-[#94A3B8]">{a.title}</div>
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold bg-[rgba(22,101,52,0.12)] text-[#166534]"><CheckCircle2 className="h-3.5 w-3.5"/> Confirmed</span>
+                </div>
+                <div className="mt-2 text-sm">
+                  <div className="font-medium">Ivan Petrov</div>
+                  <div className="text-[#334155] dark:text-[#94A3B8]">Initial consultation</div>
+                </div>
+              </li>
+              <li className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
+                    <span className="font-semibold">10:00 – 10:45</span>
                   </div>
-                </li>
-              ))}
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold bg-[rgba(180,83,9,0.12)] text-[#B45309]"><AlertCircle className="h-3.5 w-3.5"/> Pending</span>
+                </div>
+                <div className="mt-2 text-sm">
+                  <div className="font-medium">Maria Georgieva</div>
+                  <div className="text-[#334155] dark:text-[#94A3B8]">Contract review</div>
+                </div>
+              </li>
+              <li className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
+                    <span className="font-semibold">14:00 – 14:30</span>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold bg-[rgba(22,101,52,0.12)] text-[#166534]"><CheckCircle2 className="h-3.5 w-3.5"/> Confirmed</span>
+                </div>
+                <div className="mt-2 text-sm">
+                  <div className="font-medium">Nikolay Dimitrov</div>
+                  <div className="text-[#334155] dark:text-[#94A3B8]">Litigation prep</div>
+                </div>
+              </li>
               <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
                 <span>No more items.</span>
                 <ChevronRight className="h-4 w-4"/>
@@ -276,7 +249,7 @@ export default function AdminDashboard(){
 
         {/* Footer */}
         <footer className="py-6 text-center text-sm text-[#334155] dark:text-[#94A3B8]">
-          © {new Date().getFullYear()} LexSchedule. All rights reserved.
+          © LexSchedule. All rights reserved.
         </footer>
       </div>
     </div>

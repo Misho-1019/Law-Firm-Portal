@@ -1,17 +1,16 @@
+import request from "../utils/request";
+
 const baseUrl = 'http://localhost:3000/appointments';
 
 export default {
-    async create(appointmentData) {
-        const response = await fetch(baseUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(appointmentData)
-        })
+    async getAll() {
+        const result = await request.get(baseUrl);
 
-        const result = await response.json()
+        const appointments = Object.values(result)
 
-        return result;
+        return appointments;
+    },
+    create(appointmentData) {
+        return request.post(baseUrl, appointmentData)
     }
 }

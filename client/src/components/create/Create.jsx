@@ -1,37 +1,21 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Clock, FileText, MapPin, MonitorSmartphone, DoorOpen, ArrowRight, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router";
+import appointmentsService from "../../services/appointmentsService";
 
 const MotionSection = motion.section;
 
-/**
- * UI-only Create Appointment page (clients & admins)
- * Router-free so it renders even without <Router> context in previews/tests.
- * - Matches the register page color system
- * - No data fetching or submission logic wired yet
- * - Reads optional prefilled params from the URL (?startsAtLocal=&durationMin=&service=&mode=)
- */
+
 export default function CreateAppointmentPage() {
-  const qp = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const navigate = useNavigate();
 
-  // Prefills from URL if coming from /book
-  const [service, setService] = useState(qp.get("service") || "");
-  const [mode, setMode] = useState(qp.get("mode") || "Online");
-  const [startsAtLocal, setStartsAtLocal] = useState(qp.get("startsAtLocal") || "");
-  const [durationMin, setDurationMin] = useState(qp.get("durationMin") || "60");
-  const [timezone, setTimezone] = useState("Europe/Sofia");
-  const [notes, setNotes] = useState("");
+  const submitAction = async (formData) => {
+    const appointmentData = Object.fromEntries(formData)
 
-  const onDummySubmit = (e) => {
-    e.preventDefault();
-    // UI-only: in a real app you'd submit to /appointments/create and navigate via SPA routing.
-    // Using location.assign keeps this component router-agnostic for previews/tests.
-    if (typeof window !== "undefined") {
-      window.location.assign("/appointments");
-    }
-  };
+    await appointmentsService.create(appointmentData);
 
-  const bookHref = `/book?durationMin=${encodeURIComponent(durationMin)}`;
+    navigate('/')
+  }
 
   return (
     <div className="dark">
@@ -39,7 +23,7 @@ export default function CreateAppointmentPage() {
         {/* Header crumb */}
         <header className="px-4 sm:px-6 lg:px-8 pt-6">
           <nav className="text-sm text-[#334155] dark:text-[#94A3B8] flex items-center gap-2">
-            <a href="/" className="hover:underline">Home</a>
+            <span className="opacity-80">Home</span>
             <ChevronRight className="h-4 w-4 opacity-60" />
             <span className="opacity-80">Appointments</span>
             <ChevronRight className="h-4 w-4 opacity-60" />
@@ -63,7 +47,7 @@ export default function CreateAppointmentPage() {
                   Choose a time that works for you. Times are shown in <span className="font-medium">Europe/Sofia</span>.
                 </p>
 
-                <form className="mt-6 space-y-5" onSubmit={onDummySubmit} noValidate>
+                <form className="mt-6 space-y-5" action={submitAction} noValidate>
                   {/* Service */}
                   <Field
                     label="Service"
@@ -71,24 +55,19 @@ export default function CreateAppointmentPage() {
                     name="service"
                     placeholder="Initial consultation, Contract review, ..."
                     icon={<FileText className="h-4 w-4" />}
-                    value={service}
-                    onChange={(e) => setService(e.target.value)}
                   />
 
-                  {/* Mode */}
+                  {/* Mode (static visual only) */}
                   <div className="space-y-1.5">
                     <label htmlFor="mode" className="text-sm font-medium">Mode</label>
                     <div className="grid grid-cols-2 gap-3">
                       <Choice
-                        selected={mode === "Online"}
-                        onClick={() => setMode("Online")}
+                        selected
                         icon={<MonitorSmartphone className="h-4 w-4" />}
                         title="Online"
                         subtitle="Video call"
                       />
                       <Choice
-                        selected={mode === "In-Person"}
-                        onClick={() => setMode("In-Person")}
                         icon={<MapPin className="h-4 w-4" />}
                         title="In-Person"
                         subtitle="At the office"
@@ -104,8 +83,6 @@ export default function CreateAppointmentPage() {
                       name="startsAtLocal"
                       type="datetime-local"
                       icon={<CalendarIcon className="h-4 w-4" />}
-                      value={startsAtLocal}
-                      onChange={(e) => setStartsAtLocal(e.target.value)}
                       hint="Format: YYYY-MM-DDTHH:mm:ss"
                     />
                     <Field
@@ -114,13 +91,8 @@ export default function CreateAppointmentPage() {
                       name="durationMin"
                       type="number"
                       icon={<Clock className="h-4 w-4" />}
-                      value={durationMin}
-                      onChange={(e) => setDurationMin(e.target.value)}
                       placeholder="60"
                       hint="15–480"
-                      min={15}
-                      max={480}
-                      step={15}
                     />
                   </div>
 
@@ -131,19 +103,17 @@ export default function CreateAppointmentPage() {
                       id="timezone"
                       name="timezone"
                       placeholder="Europe/Sofia"
-                      value={timezone}
-                      onChange={(e) => setTimezone(e.target.value)}
                       icon={<DoorOpen className="h-4 w-4" />}
                     />
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium">Need a slot?</label>
-                      <a
-                        href={bookHref}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
+                      <span
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white opacity-60 cursor-not-allowed select-none"
+                        aria-disabled="true"
                       >
                         Browse availability
                         <ArrowRight className="h-4 w-4" />
-                      </a>
+                      </span>
                       <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
                         Pick a slot on the calendar; we’ll prefill the time here.
                       </p>
@@ -157,23 +127,22 @@ export default function CreateAppointmentPage() {
                     name="notes"
                     placeholder="Anything we should know before the meeting?"
                     icon={<FileText className="h-4 w-4" />}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
                   />
 
-                  {/* CTA */}
+                  {/* CTA (disabled) */}
                   <button
                     type="submit"
-                    className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
+                    className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white opacity-60 cursor-not-allowed select-none"
                     aria-label="Create appointment"
+                    aria-disabled="true"
                   >
                     Create appointment
                     <ArrowRight className="h-4 w-4" />
-                    <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
+                    <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
                   </button>
 
                   <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                    This is a UI preview. Actual booking will validate availability and enforce your 24h policy.
+                    This is a static UI preview. Booking, validation, and policies are not active here.
                   </p>
                 </form>
               </div>
@@ -202,7 +171,7 @@ export default function CreateAppointmentPage() {
         </main>
 
         <footer className="py-6 text-center text-sm text-[#334155] dark:text-[#94A3B8]">
-          © {new Date().getFullYear()} LexSchedule. All rights reserved.
+          © LexSchedule. All rights reserved.
         </footer>
       </div>
     </div>
@@ -210,13 +179,13 @@ export default function CreateAppointmentPage() {
 }
 
 /* ----------------------------------------------------------
-   Presentational Fields & Choices (UI-only)
+   Presentational Fields & Choices (pure UI)
 ---------------------------------------------------------- */
-function Field({ id, name, label, icon, type = "text", placeholder = "", hint, value, onChange, min, max, step }) {
+function Field({ id, name, label, icon, type = "text", placeholder = "", hint }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
-      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2 focus-within:ring-4 focus-within:ring-[rgb(47,128,237)/0.35]">
+      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2">
         <div className="flex items-center gap-2">
           {icon ? <span className="text-[#334155] dark:text-[#94A3B8]">{icon}</span> : null}
           <input
@@ -225,11 +194,9 @@ function Field({ id, name, label, icon, type = "text", placeholder = "", hint, v
             type={type}
             placeholder={placeholder}
             className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
-            value={value}
-            onChange={onChange}
-            min={min}
-            max={max}
-            step={step}
+            disabled
+            aria-disabled="true"
+            readOnly
           />
         </div>
       </div>
@@ -238,20 +205,20 @@ function Field({ id, name, label, icon, type = "text", placeholder = "", hint, v
   );
 }
 
-function Choice({ selected, onClick, icon, title, subtitle }) {
+function Choice({ selected, icon, title, subtitle }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-colors focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.35]
-        ${selected ? "border-[#2F80ED] bg-[rgb(47,128,237,0.08)] dark:border-[#2F80ED]" : "border-[#E5E7EB] dark:border-[#1F2937]"}`}
-      aria-pressed={selected}
+    <div
+      className={`flex items-start gap-3 rounded-2xl border px-3 py-3 text-left select-none ${
+        selected ? "border-[#2F80ED] bg-[rgb(47,128,237,0.08)] dark:border-[#2F80ED]" : "border-[#E5E7EB] dark:border-[#1F2937]"
+      }`}
+      aria-pressed={selected || undefined}
+      aria-disabled="true"
     >
       <span className="mt-0.5 text-[#334155] dark:text-[#94A3B8]">{icon}</span>
       <span>
         <span className="block text-sm font-semibold">{title}</span>
         <span className="block text-xs opacity-80">{subtitle}</span>
       </span>
-    </button>
+    </div>
   );
 }
