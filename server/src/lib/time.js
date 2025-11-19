@@ -18,7 +18,7 @@ export function toSofiaISO(value) {
   const dt = DateTime.fromJSDate(d, { zone: "utc" }).setZone(SOFIA_TZ);
   if (!dt.isValid) return value;
 
-  return dt.toFormat("yyyy-MM-dd//HH:mm:ss") // e.g. "2025-11-05T11:40:00+02:00"
+  return dt.toFormat("yyyy-MM-dd'T'HH:mm:ssZZ"); // e.g. "2025-11-05T11:40:00+02:00"
 }
 
 /**
