@@ -1,12 +1,17 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router";
-import { Clock, ChevronRight, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
+import {
+  Clock,
+  ChevronRight,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+} from "lucide-react";
 
 const MotionAside = motion.aside;
 
 /* --- Status pill (UI only) --- */
 function StatusPill({ status }) {
- 
   const map = {
     CONFIRMED: {
       bg: "bg-[rgba(22,101,52,0.12)]",
@@ -44,9 +49,7 @@ function StatusPill({ status }) {
   );
 }
 
-export default function UpcomingList({
-    upcoming
-}) {
+export default function UpcomingList({ upcoming }) {
   return (
     <MotionAside
       initial={{ opacity: 0, y: 8 }}
@@ -93,10 +96,15 @@ export default function UpcomingList({
             </div>
           </li>
         ))}
-        <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
-          <span>No more items.</span>
-          <ChevronRight className="h-4 w-4" />
-        </li>
+        {upcoming.length > 0 ? (
+          <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
+            <span>No more items.</span>
+          </li>
+        ) : (
+          <h3 className="text-center text-lg font-medium mt-10 text-[#334155] dark:text-[#94A3B8]">
+            You don't have any appointments yet
+          </h3>
+        )}
       </ul>
     </MotionAside>
   );
