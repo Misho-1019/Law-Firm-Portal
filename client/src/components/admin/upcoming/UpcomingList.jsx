@@ -23,7 +23,7 @@ function StatusPill({ status }) {
     CANCELLED: {
       bg: "bg-[rgba(185,28,28,0.12)]",
       fg: "text-[#B91C1C]",
-      label: "Canceled",
+      label: "Cancelled",
       Icon: XCircle,
     },
     INFO: {
@@ -81,12 +81,12 @@ export default function UpcomingList({
                 <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
                 <span className="font-semibold">{`${new Date(
                   a.startsAt
-                ).getHours()}:${new Date(a.startsAt).getMinutes()}`}</span>
+                ).getHours()}:${new Date(a.startsAt).getMinutes()} PM`}</span>
               </div>
               <StatusPill status={a.status} />
             </div>
             <div className="mt-2 text-sm">
-              <div className="font-medium">{a.role}</div>
+              <div className="font-medium">{`${a.firstName} ${a.lastName}`}</div>
               <div className="text-[#334155] dark:text-[#94A3B8]">
                 {a.notes}
               </div>

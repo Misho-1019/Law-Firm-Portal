@@ -58,9 +58,11 @@ export default function Dates({ appointments = [] }) {
   // Count appointments per Sofia day
   const apptCountByDay = useMemo(() => {
     const m = new Map();
-    for (const a of appointments) {
+    const confirmed = appointments.filter(x => x.status === 'CONFIRMED')
+    for (const a of confirmed) {
       const raw = a?.startsAt;
       if (!raw) continue;
+
       // Backend should send with offset (e.g. +02:00 / +03:00)
       const key = keyFromInstantSofia(new Date(raw));
       m.set(key, (m.get(key) || 0) + 1);

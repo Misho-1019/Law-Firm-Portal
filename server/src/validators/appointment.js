@@ -33,6 +33,8 @@ export const createAppointmentChecks = [
     .isIn(MODE_VALUES)
     .withMessage(`Mode must be one of: ${MODE_VALUES.join(", ")}`),
 
+  requiredString('firstName', 'FirstName'),
+  requiredString('lastName', 'LastName'),
   // For now you require startsAt (ISO). If you plan to allow date+time later, we can extend this.
   body("startsAt").custom(isFutureISODate),
 

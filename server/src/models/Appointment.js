@@ -10,7 +10,14 @@ const appointmentSchema = new Schema(
       required: true,
       index: true,
     },
-
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
     // Snapshot of who created the appointment (do not use for auth; use req.user.role)
     role: {
       type: String,
