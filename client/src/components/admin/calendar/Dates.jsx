@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useMemo, useState } from "react";
 
 function isSameDay(a, b) {

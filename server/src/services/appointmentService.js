@@ -158,18 +158,7 @@ async function emailUpdated(prev, next) {
 }
 
 export default {
-  async getAll({
-    status,
-    from,
-    to,
-    fromLocal,
-    toLocal,
-    timezone,
-    clientId,
-    limit = 20,
-    skip = 0,
-    sort = "startsAt:asc",
-  } = {}) {
+  async getAll({ status, from, to, fromLocal, toLocal, timezone, clientId, limit = 20, skip = 0, sort = "startsAt:asc" } = {}) {
     const query = {};
 
     if (status) query.status = status;

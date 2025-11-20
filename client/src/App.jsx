@@ -10,6 +10,7 @@ import Logout from "./components/logout/Logout";
 import { UserProvider } from "./providers/UserProvider";
 import AuthGuard from "./components/guards/AuthGuard";
 import { ToastContainer } from "react-toastify";
+import Catalog from "./components/admin/Catalog";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/logout" element={<Logout />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/client" element={<ClientDashboard />} />
+            <Route path="/appointments" element={<Catalog />} />
           </Route>
           <Route>
             <Route path="/register" element={<Register />} />
