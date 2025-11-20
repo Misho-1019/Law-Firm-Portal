@@ -11,6 +11,7 @@ import { UserProvider } from "./providers/UserProvider";
 import AuthGuard from "./components/guards/AuthGuard";
 import { ToastContainer } from "react-toastify";
 import Catalog from "./components/admin/Catalog";
+import AppointmentDetails from "./components/details/Details";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/client" element={<ClientDashboard />} />
             <Route path="/appointments" element={<Catalog />} />
+            <Route path="/appointments/:appointmentId/details" element={<AppointmentDetails />} />
           </Route>
           <Route>
             <Route path="/register" element={<Register />} />

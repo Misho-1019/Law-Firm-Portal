@@ -10,11 +10,11 @@ import {
   Hash,
   CheckCircle2,
 } from "lucide-react";
-import { Link as RRLink, useInRouterContext } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link as RRLink, useInRouterContext, useParams } from "react-router";
+import appointmentsService from "../../services/appointmentsService";
 
 const MotionSection = motion.section;
-
-
 
 /**
  * SafeLink — avoids crashes when rendered outside a Router.
@@ -34,7 +34,7 @@ function SafeLink({ to, className, children }) {
  * - Borders: #E5E7EB (light) / #1F2937 (dark)
  * - Subtle text: #334155 (light) / #94A3B8 (dark)
  */
-export default function AppointmentDetails({ appointment }) {
+export default function AppointmentDetails({ app }) {
   const demo = {
     id: "appt_123456",
     service: "Contract review",
@@ -48,21 +48,21 @@ export default function AppointmentDetails({ appointment }) {
     notes: "Please bring last year's contract and any amendments.",
   };
 
-  const a = appointment ?? demo;
+  const a = app ?? demo;
+
+  const [appointment, setAppointment] = useState({})
+  const { appointmentId } = useParams()
+
+  useEffect(() => {
+    appointmentsService.getOne(appointmentId)
+      .then(setAppointment)
+  }, [ appointmentId])
+
+  console.log(appointment);
 
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
-        {/* Breadcrumb */}
-        <header className="px-4 sm:px-6 lg:px-8 pt-6">
-          <nav className="text-sm text-[#334155] dark:text-[#94A3B8] flex items-center gap-2">
-            <SafeLink to="/" className="hover:underline">Home</SafeLink>
-            <span className="h-4 w-[1px] bg-[#E5E7EB] dark:bg-[#1F2937] mx-1" />
-            <SafeLink to="/appointments" className="hover:underline">Appointments</SafeLink>
-            <span className="h-4 w-[1px] bg-[#E5E7EB] dark:bg-[#1F2937] mx-1" />
-            <span className="font-medium text-[#0B1220] dark:text-white">Details</span>
-          </nav>
-        </header>
 
         {/* Main card */}
         <main className="flex-1 flex items-center justify-center px-4 py-10">
@@ -78,12 +78,12 @@ export default function AppointmentDetails({ appointment }) {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Hash className="h-5 w-5 text-[#334155] dark:text-[#94A3B8]" />
-                    <h1 className="text-2xl font-semibold">Appointment #{a.id}</h1>
+                    <h1 className="text-2xl font-semibold">Appointment #{appointment.id}</h1>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <SafeLink
-                      to={`/appointments/${a.id}/edit`}
+                      to={`/appointments/${appointment.id}/update`}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-2 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40]"
                       title="Open edit screen"
                     >
@@ -100,27 +100,27 @@ export default function AppointmentDetails({ appointment }) {
 
                 {/* Summary strip */}
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  <SummaryItem icon={<CalendarIcon className="h-4 w-4" />} label="Start (local)" value={fmtDateTime(a.startsAtLocal)} />
+                  <SummaryItem icon={<CalendarIcon className="h-4 w-4" />} label="Start (local)" value={fmtDateTime(appointment.startsAt)} />
                   <SummaryItem icon={<Clock className="h-4 w-4" />} label="Duration" value={`${a.durationMin} min`} />
-                  <SummaryItem icon={<CheckCircle2 className="h-4 w-4" />} label="Status" value={a.status} />
+                  <SummaryItem icon={<CheckCircle2 className="h-4 w-4" />} label="Status" value={appointment.status} />
                 </div>
 
                 {/* Info groups */}
                 <div className="mt-6 space-y-6">
                   <InfoCard title="Service & Mode">
-                    <InfoRow icon={<User className="h-4 w-4" />} label="Client" value={a.clientName} />
-                    <InfoRow icon={<PencilLine className="h-4 w-4" />} label="Service" value={a.service} />
+                    <InfoRow icon={<User className="h-4 w-4" />} label="Client" value={`${appointment.firstName} ${appointment.lastName}`} />
+                    <InfoRow icon={<PencilLine className="h-4 w-4" />} label="Service" value={appointment.service} />
                     <InfoRow
-                      icon={a.mode === "Online" ? <MonitorSmartphone className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
+                      icon={appointment.mode === "Online" ? <MonitorSmartphone className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
                       label="Mode"
-                      value={a.mode}
-                      helper={a.mode === "Online" ? "Video call link will be shown after booking." : a.location}
+                      value={appointment.mode}
+                      helper={appointment.mode === "Online" ? "Video call link will be shown after booking." : a.location}
                     />
-                    <InfoRow icon={<Clock className="h-4 w-4" />} label="Timezone" value={a.timezone} />
+                    <InfoRow icon={<Clock className="h-4 w-4" />} label="Timezone" value='Europe/Sofia' />
                   </InfoCard>
 
                   <InfoCard title="Notes">
-                    <p className="text-sm text-[#0B1220] dark:text-white/90 whitespace-pre-line">{a.notes || "—"}</p>
+                    <p className="text-sm text-[#0B1220] dark:text-white/90 whitespace-pre-line">{appointment.notes || "—"}</p>
                   </InfoCard>
                 </div>
 
@@ -137,8 +137,8 @@ export default function AppointmentDetails({ appointment }) {
                     <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
                       <li>Times are shown in {a.timezone}.</li>
-                      <li>Duration range: 15–480 minutes.</li>
-                      <li>Reminders go at T−24h and T−1h.</li>
+                      <li>Duration range: 15-480 minutes.</li>
+                      <li>Reminders go at T-24h and T-1h.</li>
                     </ul>
                   </div>
                   <div className="space-y-2 text-xs text-white/70">

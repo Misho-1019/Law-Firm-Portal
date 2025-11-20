@@ -12,5 +12,8 @@ export default {
     },
     create(appointmentData) {
         return request.post(baseUrl, appointmentData)
+    },
+    getOne(appointmentId) {
+        return request.get(`${baseUrl}/${appointmentId}`)
     }
 }

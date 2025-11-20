@@ -7,6 +7,7 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
+import { formatSofiaTime } from "../../../utils/dates";
 
 const MotionAside = motion.aside;
 
@@ -82,9 +83,7 @@ export default function UpcomingList({ upcoming }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
-                <span className="font-semibold">{`${new Date(
-                  a.startsAt
-                ).getHours()}:${new Date(a.startsAt).getMinutes()} PM`}</span>
+                <span className="font-semibold">{`${formatSofiaTime(a.startsAt)} PM`}</span>
               </div>
               <StatusPill status={a.status} />
             </div>
