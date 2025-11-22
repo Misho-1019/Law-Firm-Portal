@@ -136,7 +136,7 @@ export default function AppointmentDetails({ app }) {
                     <h2 className="text-lg font-semibold relative pb-2">Overview</h2>
                     <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
-                      <li>Times are shown in {a.timezone}.</li>
+                      <li>Times are shown in Europe/Sofia.</li>
                       <li>Duration range: 15-480 minutes.</li>
                       <li>Reminders go at T-24h and T-1h.</li>
                     </ul>
