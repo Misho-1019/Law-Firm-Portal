@@ -9,9 +9,10 @@ import {
   User,
   Hash,
   CheckCircle2,
+  Trash2
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link as RRLink, useInRouterContext, useParams } from "react-router";
+import { Link as RRLink, useInRouterContext, useNavigate, useParams } from "react-router";
 import appointmentsService from "../../services/appointmentsService";
 
 const MotionSection = motion.section;
@@ -52,13 +53,22 @@ export default function AppointmentDetails({ app }) {
 
   const [appointment, setAppointment] = useState({})
   const { appointmentId } = useParams()
+  const navigate = useNavigate()
 
   useEffect(() => {
     appointmentsService.getOne(appointmentId)
       .then(setAppointment)
   }, [ appointmentId])
 
-  console.log(appointment);
+  const appointmentDeleteClickHandler = async () => {
+    const hasConfirm = confirm(`Are you sure you want to delete appointment(${appointmentId}) created by ${appointment.firstName} ${appointment.lastName}`)
+
+    if (!hasConfirm) return;
+
+    await appointmentsService.delete(appointmentId)
+
+    navigate('/appointments')
+  }
 
   return (
     <div className="dark">
@@ -90,7 +100,7 @@ export default function AppointmentDetails({ app }) {
                       <PencilLine className="h-4 w-4" /> Edit
                     </SafeLink>
                     <SafeLink
-                      to="/appointments"
+                      to={-1}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-3 py-2 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       <ArrowLeft className="h-4 w-4" /> Back
@@ -114,7 +124,7 @@ export default function AppointmentDetails({ app }) {
                       icon={appointment.mode === "Online" ? <MonitorSmartphone className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
                       label="Mode"
                       value={appointment.mode}
-                      helper={appointment.mode === "Online" ? "Video call link will be shown after booking." : a.location}
+                      helper={appointment.mode === "Online" ? "Video call link will be shown after booking." : 'Sofia, bul. Vitosha 25, Floor 3'}
                     />
                     <InfoRow icon={<Clock className="h-4 w-4" />} label="Timezone" value='Europe/Sofia' />
                   </InfoCard>
@@ -122,6 +132,14 @@ export default function AppointmentDetails({ app }) {
                   <InfoCard title="Notes">
                     <p className="text-sm text-[#0B1220] dark:text-white/90 whitespace-pre-line">{appointment.notes || "—"}</p>
                   </InfoCard>
+
+                  <button
+                    onClick={appointmentDeleteClickHandler}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#ed2f2f] px-20 py-2 font-semibold text-white hover:bg-[#ffffff] hover:text-red-500 focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40]"
+                    title="Open edit screen"
+                  >
+                    <Trash2 className="h-4 w-4" /> Delete
+                  </button>
                 </div>
 
                 <p className="mt-6 text-xs text-[#334155] dark:text-[#94A3B8]">

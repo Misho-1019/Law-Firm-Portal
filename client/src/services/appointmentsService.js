@@ -15,5 +15,8 @@ export default {
     },
     getOne(appointmentId) {
         return request.get(`${baseUrl}/${appointmentId}`)
+    },
+    delete(appointmentId) {
+        return request.delete(`${baseUrl}/${appointmentId}`)
     }
 }
