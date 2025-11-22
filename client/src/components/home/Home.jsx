@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -8,130 +7,22 @@ import {
   Bell,
   ArrowRight,
   ChevronRight,
-  Monitor,
-  Moon,
-  Sun,
   X
 } from "lucide-react";
 import { Link } from "react-router";
+import useAuth from "../../hooks/useAuth";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
 const MotionSection = motion.section;
 
 /* ----------------------------------------------------------
-   Tri-state theme hook (system / light / dark)
----------------------------------------------------------- */
-// function useThemeMode() {
-//   const getInitial = () => (typeof window === 'undefined' ? 'system' : localStorage.getItem('theme-mode') || 'system');
-//   const [mode, setMode] = useState(getInitial);
-//   const [systemDark, setSystemDark] = useState(() =>
-//     typeof window !== 'undefined' && window.matchMedia
-//       ? window.matchMedia('(prefers-color-scheme: dark)').matches
-//       : false
-//   );
-
-//   useEffect(() => {
-//     if (!window.matchMedia) return;
-//     const mql = window.matchMedia('(prefers-color-scheme: dark)');
-//     const onChange = (e) => setSystemDark(e.matches);
-//     try { mql.addEventListener('change', onChange); } catch { mql.addListener(onChange); }
-//     return () => { try { mql.removeEventListener('change', onChange); } catch { mql.removeListener(onChange); } };
-//   }, []);
-
-//   useEffect(() => {
-//     if (mode !== 'system') localStorage.setItem('theme-mode', mode);
-//     else localStorage.removeItem('theme-mode');
-//   }, [mode]);
-
-//   const isDark = mode === 'dark' || (mode === 'system' && systemDark);
-//   const cycle = () => setMode((m) => (m === 'system' ? 'dark' : m === 'dark' ? 'light' : 'system'));
-//   return { mode, isDark, cycle };
-// }
-
-/* ----------------------------------------------------------
-   Quick Book Modal (UI only)
----------------------------------------------------------- */
-function QuickBookModal({ open, onClose }) {
-  const stop = (e) => e.stopPropagation();
-  return (
-    <AnimatePresence>
-      {open && (
-        <MotionDiv
-          className="fixed inset-0 z-50"
-          onClick={onClose}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <div className="absolute inset-0 bg-black/40" />
-          <MotionSection
-            role="dialog"
-            aria-modal
-            onClick={stop}
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-            className="relative mx-auto mt-20 w-[92%] max-w-lg rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-xl"
-          >
-            <div className="flex items-center justify-between p-4 pb-3">
-              <h3 className="text-lg font-semibold">Book an appointment</h3>
-              <button onClick={onClose} className="rounded-full p-1 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
-
-            <form className="p-4 space-y-4" onSubmit={(e)=>e.preventDefault()}>
-              <Field id="name" label="Full name" placeholder="Your name" />
-              <Field id="email" type="email" label="Email" placeholder="you@example.com" />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field id="date" type="date" label="Date" />
-                <Field id="time" type="time" label="Time" />
-              </div>
-              <Field id="note" as="textarea" label="Note (optional)" placeholder="Short context" />
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button className="relative inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
-                  Continue as guest <ArrowRight className="h-4 w-4" />
-                  <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
-                </button>
-                <Link to="/register" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">Register</Link>
-                <Link to="/login" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">Sign in</Link>
-              </div>
-            </form>
-          </MotionSection>
-        </MotionDiv>
-      )}
-    </AnimatePresence>
-  );
-}
-
-function Field({ id, label, placeholder = "", type = "text", as }) {
-  const InputTag = as === 'textarea' ? 'textarea' : 'input';
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="text-sm font-medium">{label}</label>
-      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] focus-within:ring-4 focus-within:ring-[#2F80ED]/35">
-        <div className="flex items-center gap-2 px-3 py-2">
-          <InputTag id={id} placeholder={placeholder} type={as==='textarea'?undefined:type} className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8] min-h-[42px]" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ----------------------------------------------------------
    Public Home Page (unauthenticated)
 ---------------------------------------------------------- */
 export default function Home() {
-  // const { isDark } = useThemeMode();
-  const [open, setOpen] = useState(false);
-
+  const { email } = useAuth()
+  
   return (
-    // <div className={isDark ? "dark" : ""}>
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
 
@@ -147,14 +38,26 @@ export default function Home() {
               <p className="mt-3 text-[#334155] dark:text-[#94A3B8] max-w-prose">
                 Keep your clients on track with clear availability, accessible states, and trustworthy Azure CTAs.
               </p>
-              <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <button onClick={()=>setOpen(true)} className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-5 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
+              {email && (
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                  <Link to='/create' className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-5 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
+                    Create appointment <ArrowRight className="h-4 w-4" />
+                    <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
+                  </Link>
+                  <Link to="/client" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-5 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">My Dashboard</Link>
+                  <Link to="/mine" className="inline-flex items-center justify-center rounded-2xl border border-transparent px-5 py-2.5 font-semibold text-white bg-[#0B1220]/20 hover:bg-white/10">My Appointments</Link>
+                </div>
+              )}
+              {!email && (
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <Link to='/create' className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-5 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
                   Create appointment <ArrowRight className="h-4 w-4" />
                   <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
-                </button>
+                </Link>
                 <Link to="/login" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-5 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">Sign in</Link>
                 <Link to="/register" className="inline-flex items-center justify-center rounded-2xl border border-transparent px-5 py-2.5 font-semibold text-white bg-[#0B1220]/20 hover:bg-white/10">Register</Link>
               </div>
+              )}
               <div className="mt-6 flex items-center gap-5 text-xs text-[#334155] dark:text-[#94A3B8]">
                 <div className="flex items-center gap-2"><Shield className="h-4 w-4"/>Secure</div>
                 <div className="flex items-center gap-2"><Bell className="h-4 w-4"/>Reminders</div>
@@ -179,9 +82,9 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <button onClick={()=>setOpen(true)} className="mt-4 inline-flex items-center gap-2 rounded-2xl w-full border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">
+              <Link to='/create' className="mt-4 inline-flex items-center gap-2 rounded-2xl w-full border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">
                 Book this slot <ChevronRight className="h-4 w-4"/>
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -231,12 +134,16 @@ export default function Home() {
               <p className="text-sm text-[#334155] dark:text-[#94A3B8]">Create an appointment as a guest, or sign in for faster checkout.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={()=>setOpen(true)} className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
+              <Link to='/create' className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
                 Create appointment <ArrowRight className="h-4 w-4" />
                 <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
-              </button>
-              <Link to="/login" className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Sign in</Link>
-              <Link to="/register" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Register</Link>
+              </Link>
+              {!email && (
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to="/login" className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Sign in</Link>
+                  <Link to="/register" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Register</Link>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -246,9 +153,6 @@ export default function Home() {
           © {new Date().getFullYear()} LexSchedule. All rights reserved.
         </footer>
       </div>
-
-      {/* Modal */}
-      <QuickBookModal open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }
