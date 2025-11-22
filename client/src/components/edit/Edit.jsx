@@ -1,17 +1,16 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, CalendarClock, PencilLine, Save, Undo2 } from "lucide-react";
-import { Link as RRLink, useInRouterContext } from "react-router-dom";
+import {
+  ArrowLeft,
+  CalendarClock,
+  PencilLine,
+  Save,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link as RRLink, useInRouterContext, useParams } from "react-router";
+import appointmentsService from "../../services/appointmentsService";
+import { getDateAndTimeDefaults } from "../../utils/dates";
 
 const MotionSection = motion.section;
-
-/**
- * Edit Appointment (UI-only) — matched to create.jsx palette
- * - Neutral surfaces/light/dark
- * - Primary blue: #2F80ED (hover #266DDE)
- * - Borders: #E5E7EB (light), #1F2937 (dark)
- * - Subtle text: #334155 (light), #94A3B8 (dark)
- * - Works with or without Router via SafeLink
- */
 
 function SafeLink({ to, className, children }) {
   const hasRouter = useInRouterContext?.() ?? false;
@@ -20,20 +19,19 @@ function SafeLink({ to, className, children }) {
 }
 
 export default function EditAppointment() {
+  const { appointmentId } = useParams()
+  const [appointment, setAppointment] = useState({})
+
+  useEffect(() => {
+    appointmentsService.getOne(appointmentId)
+      .then(setAppointment)
+  }, [appointmentId])
+
+  const { date: defaultDate, time: defaultTime } = appointment.startsAt ? getDateAndTimeDefaults(appointment.startsAt) : { date: '', time: '' }
+
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
-        {/* Header crumb */}
-        <header className="px-4 sm:px-6 lg:px-8 pt-6">
-          <nav className="text-sm text-[#334155] dark:text-[#94A3B8] flex items-center gap-2">
-            <SafeLink to="/" className="hover:underline">Home</SafeLink>
-            <span className="h-4 w-[1px] bg-[#E5E7EB] dark:bg-[#1F2937] mx-1" />
-            <span className="opacity-80">Appointments</span>
-            <span className="h-4 w-[1px] bg-[#E5E7EB] dark:bg-[#1F2937] mx-1" />
-            <span className="font-medium text-[#0B1220] dark:text-white">Edit</span>
-          </nav>
-        </header>
-
         {/* Main card */}
         <main className="flex-1 flex items-center justify-center px-4 py-10">
           <MotionSection
@@ -50,26 +48,37 @@ export default function EditAppointment() {
                   <h1 className="text-2xl font-semibold">Edit appointment</h1>
                 </div>
                 <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Adjust service, timing, and notes. This screen is a static mock — actions are disabled.
+                  Adjust service, timing, and notes. Times are shown in <span className="font-medium">Europe/Sofia</span>.
                 </p>
 
-                <form className="mt-6 space-y-5" onSubmit={(e) => e.preventDefault()} noValidate>
+                <form key={appointment.id || 'loading'} className="mt-6 space-y-5" noValidate>
                   {/* Service */}
                   <Field
                     label="Service"
                     id="service"
                     name="service"
                     placeholder="Contract review, Initial consultation, ..."
-                    value="Contract review"
-                    readOnly
+                    defaultValue={appointment.service}
                   />
 
-                  {/* Mode */}
+                  {/* Mode (now active radio like Create) */}
                   <div className="space-y-1.5">
-                    <label htmlFor="mode" className="text-sm font-medium">Mode</label>
+                    <label className="text-sm font-medium">Mode</label>
                     <div className="grid grid-cols-2 gap-3">
-                      <Choice selected title="In-Person" subtitle="At the office" />
-                      <Choice selected={false} title="Online" subtitle="Video call" />
+                      <Choice
+                        name="mode"
+                        value="In-Person"
+                        title="In-Person"
+                        subtitle="At the office"
+                        defaultChecked={appointment.mode === 'In-Person'}
+                        />
+                      <Choice
+                        name="mode"
+                        value="Online"
+                        title="Online"
+                        subtitle="Video call"
+                        defaultChecked={appointment.mode === 'Online'}
+                      />
                     </div>
                   </div>
 
@@ -80,16 +89,14 @@ export default function EditAppointment() {
                       id="date"
                       name="date"
                       type="date"
-                      value="2025-11-18"
-                      readOnly
+                      defaultValue={defaultDate}
                     />
                     <Field
                       label="Start time"
                       id="time"
                       name="time"
                       type="time"
-                      value="10:30"
-                      readOnly
+                      defaultValue={defaultTime}
                     />
                   </div>
 
@@ -100,20 +107,22 @@ export default function EditAppointment() {
                       id="duration"
                       name="duration"
                       type="number"
-                      value={60}
-                      readOnly
+                      min={15}
+                      max={480}
+                      defaultValue={60}
                     />
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium">Status</label>
                       <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2">
                         <select
-                          defaultValue="Scheduled"
-                          disabled
+                          name="status"
+                          defaultValue={appointment.status}
                           className="w-full bg-transparent outline-none"
                         >
-                          <option>Scheduled</option>
-                          <option>Completed</option>
-                          <option>Cancelled</option>
+                          <option value='PENDING'>Pending</option>
+                          <option value='CONFIRMED'>Confirmed</option>
+                          <option value='CANCELLED'>Cancelled</option>
+                          <option value='COMPLETED'>Completed</option>
                         </select>
                       </div>
                     </div>
@@ -125,31 +134,29 @@ export default function EditAppointment() {
                     id="notes"
                     name="notes"
                     placeholder="Enter context or preparation notes"
-                    value={"Please bring last year's contract and any amendments."}
-                    readOnly
                     textarea
+                    defaultValue={appointment.notes}
                   />
 
                   {/* Actions */}
-                  <div className="flex items-center justify-end gap-2 pt-2">
+                  <div className="flex items-center justify-between gap-2 pt-2">
                     <SafeLink
                       to="/appointments"
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
                     >
-                      <ArrowLeft className="h-4 w-4" /> Cancel
+                      <ArrowLeft className="h-4 w-4" /> Back
                     </SafeLink>
+
                     <button
-                      type="button"
-                      aria-disabled
-                      title="Disabled in UI-only mode"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40] pointer-events-none opacity-60"
+                      type="submit"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white disabled:opacity-70"
                     >
-                      <Save className="h-4 w-4" /> Save changes
+                      <Save className="h-4 w-4" />
                     </button>
                   </div>
 
                   <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                    This is a UI preview. Actual editing will validate availability and enforce your 24h policy.
+                    Saving will validate availability and apply your 24h policy server-side.
                   </p>
                 </form>
               </div>
@@ -163,7 +170,7 @@ export default function EditAppointment() {
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
                       <li>Times are in Europe/Sofia (EET/EEST).</li>
                       <li>Keep duration within 15–480 minutes.</li>
-                      <li>Switch between Online and In‑Person as needed.</li>
+                      <li>Switch between Online and In-Person as needed.</li>
                     </ul>
                   </div>
                   <div className="space-y-2 text-xs text-white/70">
@@ -185,18 +192,45 @@ export default function EditAppointment() {
 }
 
 /* ----------------------------------------------------------
-   Presentational Fields & Choices (UI-only)
+   Presentational Fields & Choices (active)
 ---------------------------------------------------------- */
-function Field({ id, name, label, type = "text", placeholder = "", hint, value, readOnly, textarea }) {
+function Field({
+  id,
+  name,
+  label,
+  type = "text",
+  placeholder = "",
+  hint,
+  defaultValue,
+  textarea,
+  min,
+  max,
+}) {
   const common = "w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]";
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
       <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2 focus-within:ring-4 focus-within:ring-[rgb(47,128,237)/0.35]">
         {textarea ? (
-          <textarea id={id} name={name} placeholder={placeholder} className={common} rows={5} defaultValue={value} readOnly={readOnly} />
+          <textarea
+            id={id}
+            name={name}
+            placeholder={placeholder}
+            className={common}
+            rows={5}
+            defaultValue={defaultValue}
+          />
         ) : (
-          <input id={id} name={name} type={type} placeholder={placeholder} className={common} defaultValue={value} readOnly={readOnly} />
+          <input
+            id={id}
+            name={name}
+            type={type}
+            placeholder={placeholder}
+            className={common}
+            defaultValue={defaultValue}
+            min={min}
+            max={max}
+          />
         )}
       </div>
       {hint ? <p className="text-xs text-[#334155] dark:text-[#94A3B8]">{hint}</p> : null}
@@ -204,22 +238,25 @@ function Field({ id, name, label, type = "text", placeholder = "", hint, value, 
   );
 }
 
-function Choice({ selected, title, subtitle }) {
+function Choice({ name, value, defaultChecked, title, subtitle }) {
   return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      className={`flex items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-colors focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.35]
-        ${selected ? "border-[#2F80ED] bg-[rgb(47,128,237,0.08)] dark:border-[#2F80ED]" : "border-[#E5E7EB] dark:border-[#1F2937]"}`}
-      disabled
-      title="Disabled in UI-only mode"
+    <label
+      className="flex items-start gap-3 rounded-2xl border px-3 py-3 cursor-pointer
+                 border-[#E5E7EB] dark:border-[#1F2937]
+                 has-[:checked]:border-[#2F80ED] has-[:checked]:bg-[rgb(47,128,237,0.08)]"
     >
+      <input
+        type="radio"
+        name={name}
+        value={value}
+        defaultChecked={defaultChecked}
+        className="mt-1"
+      />
       <span className="mt-0.5 text-[#334155] dark:text-[#94A3B8]" />
       <span>
         <span className="block text-sm font-semibold">{title}</span>
         <span className="block text-xs opacity-80">{subtitle}</span>
       </span>
-    </button>
+    </label>
   );
 }
-

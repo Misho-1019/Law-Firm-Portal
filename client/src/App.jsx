@@ -13,6 +13,7 @@ import { ToastContainer } from "react-toastify";
 import Catalog from "./components/admin/Catalog";
 import AppointmentDetails from "./components/details/Details";
 import CreateAppointmentPage from "./components/create/Create";
+import EditAppointment from "./components/edit/Edit";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/appointments" element={<Catalog />} />
             <Route path="/create" element={<CreateAppointmentPage />} />
             <Route path="/appointments/:appointmentId/details" element={<AppointmentDetails />} />
+            <Route path="/appointments/:appointmentId/update" element={<EditAppointment />} />
           </Route>
           <Route>
             <Route path="/register" element={<Register />} />
