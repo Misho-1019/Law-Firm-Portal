@@ -90,20 +90,18 @@ export default function Catalog() {
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Loading appointments…
           </div>
-
-          {/* Empty state (example) */}
-          <h3 className="text-center text-lg font-medium mt-2 text-[#334155] dark:text-[#94A3B8]">
+         
+          {allAppointments.length > 0 ? (
+            <ItemCatalog appointments={allAppointments}/>
+          ) : (
+            <h3 className="text-center text-lg font-medium mt-2 text-[#334155] dark:text-[#94A3B8]">
             No appointments yet
           </h3>
-
-          {/* List (static sample rows) */}
-          <ItemCatalog appointments={allAppointments}/>
-          
+          )}
 
           {/* Pagination (static/disabled) */}
           <div className="mt-4 flex items-center justify-center gap-2">
             <button
-              disabled
               className="rounded-xl border border-slate-200/40 px-3 py-2 text-sm text-[#334155] opacity-50 dark:border-slate-800/60 dark:text-[#94A3B8]"
             >
               Prev
@@ -112,7 +110,6 @@ export default function Catalog() {
               Page 1 / 5
             </span>
             <button
-              disabled
               className="rounded-xl border border-slate-200/40 px-3 py-2 text-sm text-[#334155] opacity-50 dark:border-slate-800/60 dark:text-[#94A3B8]"
             >
               Next
