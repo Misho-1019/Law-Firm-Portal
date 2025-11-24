@@ -5,7 +5,7 @@ import TimeOff from "../models/TimeOff.js";
 
 const TZ  = 'Europe/Sofia';
 const SLOT_STEP_MIN = 30;
-const DEFAULT_DURATION_MIN = 60;
+const DEFAULT_DURATION_MIN = 120;
 const MIN_START_SPACING_MIN = 120;
 
 function hhmmIntervalOn(dateISO, fromHHMM, toHHMM) {

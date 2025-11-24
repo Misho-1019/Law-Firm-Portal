@@ -116,34 +116,33 @@ appointmentController.get("/:appointmentId", isAuth, idParamCheck, async (req, r
  */
 appointmentController.post("/create", isAuth, createAppointmentChecks, async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const appointmentData = { ...req.body };
+  const creatorId = req.user?.id;
+
+  // ✅ pull the fields you reference
+  const { startsAt, durationMin } = appointmentData;
+  const effectiveDurationMin = Number(durationMin) > 0 ? Number(durationMin) : 120;
+
+  try {
+    // normalize for availability check (you’re using startsAt)
+    const startsAtUtcISO = new Date(startsAt).toISOString();
+    const dateISO = startsAtUtcISO.slice(0, 10);
+
+    const allowed = await availabilityService.getBookableSlotsForDate({ dateISO, durationMin: effectiveDurationMin });
+    if (!allowed.includes(startsAtUtcISO)) {
+      return res.status(409).json({ message: "Selected start time is no longer available." });
     }
 
-    const appointmentData = { ...req.body };
-    const creatorId = req.user?.id;
-
-    try {
-      const dateISO = new Date(startsAt).toISOString().slice(0,10)
-      const allowed = await availabilityService.getSlotsForDate({ dateISO, durationMin })
-
-      const chosenISO = new Date(startsAt).toISOString();
-
-      if (!allowed.includes(chosenISO)) {
-        return res.status(409).json({ message: 'Selected start time is no longer available.'})
-      }
-
-      const newAppointment = await appointmentService.create(
-        appointmentData,
-        creatorId
-      );
-      return res.status(201).json({ newAppointment });
-    } catch (error) {
-      const status = error.status || 400;
-      return res.status(status).json({ message: error.message });
-    }
+    const newAppointment = await appointmentService.create(appointmentData, creatorId);
+    return res.status(201).json({ newAppointment });
+  } catch (error) {
+    const status = error.status || 400;
+    return res.status(status).json({ message: error.message });
   }
-);
+});
+
 
 /**
  * Update appointment (owner or admin)

@@ -44,6 +44,14 @@ const appointmentSchema = new Schema(
       index: true,
     },
 
+    durationMin: { 
+      type: Number, 
+      min: 15, 
+      max: 480, 
+      required: true, 
+      default: 120 
+    },
+
     status: {
       type: String,
       enum: ["PENDING", "CONFIRMED", "DECLINED", "CANCELLED"],
