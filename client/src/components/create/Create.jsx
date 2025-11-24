@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -5,24 +7,46 @@ import {
   FileText,
   MapPin,
   MonitorSmartphone,
-  DoorOpen,
-  ArrowRight,
   ChevronRight,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
+import { toUTCISO } from "../../utils/time";
 import appointmentsService from "../../services/appointmentsService";
+import useAuth from "../../hooks/useAuth";
 
 const MotionSection = motion.section;
 
 export default function CreateAppointmentPage() {
+  const [selectedTime, setSelectedTime] = useState("");
+  const [mode, setMode] = useState("In-Person");
+  const { id } = useAuth()
   const navigate = useNavigate();
 
-  const submitAction = async (formData) => {
-    const appointmentData = Object.fromEntries(formData);
+  const formAction = async (formData) => {
+    const date = formData.get("date");
+    const time = formData.get("time");
+    const rawDuration = formData.get("durationMin")
 
-    await appointmentsService.create(appointmentData);
+    const startsAt = toUTCISO(date, time, "Europe/Sofia");
 
-    navigate("/");
+    let durationMin = Number(rawDuration)
+
+    if (!Number.isFinite(durationMin)) durationMin = 120;
+
+    durationMin = Math.max(15, Math.min(480, durationMin))
+
+    const appointmentData = {
+      ...Object.fromEntries(formData),
+      startsAt,
+      durationMin,
+    };
+
+    delete appointmentData.date;
+    delete appointmentData.time;
+
+    await appointmentsService.create(appointmentData, id)
+    
+    navigate('/appointments')
   };
 
   return (
@@ -47,7 +71,7 @@ export default function CreateAppointmentPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-5xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-hidden"
+            className="w-full max-w-5xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-visible"
           >
             <div className="grid lg:grid-cols-5">
               {/* Form side */}
@@ -60,11 +84,26 @@ export default function CreateAppointmentPage() {
                   <span className="font-medium">Europe/Sofia</span>.
                 </p>
 
-                <form
-                  className="mt-6 space-y-5"
-                  action={submitAction}
-                  noValidate
-                >
+                {/* ✅ Properly closed <form> */}
+                <form className="mt-6 space-y-5" action={formAction} noValidate>
+                  {/* First / Last name */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Field
+                      label="First name"
+                      id="firstName"
+                      name="firstName"
+                      placeholder="Mila"
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                    <Field
+                      label="Last name"
+                      id="lastName"
+                      name="lastName"
+                      placeholder="Georgieva"
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                  </div>
+
                   {/* Service */}
                   <Field
                     label="Service"
@@ -74,64 +113,80 @@ export default function CreateAppointmentPage() {
                     icon={<FileText className="h-4 w-4" />}
                   />
 
-                  {/* Mode (static visual only) */}
+                  {/* Mode (visual only) */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium">
-                      Mode
-                    </label>
+                    <label className="text-sm font-medium">Mode</label>
                     <div className="grid grid-cols-2 gap-3">
                       <Choice
-                        name='mode'
-                        value='In-Person'
-                        defaultChecked
+                        name="mode"
+                        value="In-Person"
+                        defaultChecked={mode === "In-Person"}
                         icon={<MapPin className="h-4 w-4" />}
-                        title='In-Person'
-                        subtitle='At the office'
+                        title="In-Person"
+                        subtitle="At the office"
                       />
                       <Choice
-                        name='mode'
-                        value='Online'
+                        name="mode"
+                        value="Online"
+                        defaultChecked={mode === "Online"}
                         icon={<MonitorSmartphone className="h-4 w-4" />}
-                        title='Online'
-                        subtitle='Video Call'
+                        title="Online"
+                        subtitle="Video Call"
                       />
                     </div>
                   </div>
 
-                  {/* Date & time */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <Field
-                      label="Start (local)"
-                      id="startsAtLocal"
-                      name="startsAtLocal"
-                      type="datetime-local"
-                      icon={<CalendarIcon className="h-4 w-4" />}
-                      hint="Format: YYYY-MM-DDTHH:mm"
+                  <Field
+                    label="Date"
+                    id="date"
+                    name="date"
+                    type="date"
+                    icon={<CalendarIcon className="h-4 w-4" />}
+                    hint="Format: YYYY-MM-DD"
+                  />
+
+                  {/* Time grid (09:00–17:00) */}
+                  <div className="space-y-1.5">
+                    <label
+                      className="text-sm font-medium flex items-center gap-2"
+                      htmlFor="time"
+                    >
+                      <Clock className="h-4 w-4" /> Time (09:00–17:00)
+                    </label>
+                    <TimeGrid
+                      id="time"
+                      name="time"
+                      value={selectedTime}
+                      onChange={setSelectedTime}
+                      start="09:00"
+                      end="17:00"
+                      stepMinutes={30}
                     />
+                    {/* keep a hidden input so forms still have a value if you later wire this up */}
+                    <input
+                      type="hidden"
+                      name="time"
+                      value={selectedTime || ""}
+                    />
+                    <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                      Business hours only. Actual availability may vary by
+                      bookings/spacing.
+                    </p>
                   </div>
 
-                  {/* Timezone & helper */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <div className="space-x-7">
-                        <label className="text-sm font-medium">
-                          Need a slot?
-                        </label>
-                        <Link
-                          to=""
-                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white"
-                          aria-disabled="true"
-                        >
-                          Browse availability
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                      <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                        Pick a slot on the calendar; we’ll prefill the time
-                        here.
-                      </p>
-                    </div>
-                  </div>
+                  {/* Duration */}
+                  <Field
+                    label="Duration (minutes)"
+                    id="durationMin"
+                    name="durationMin"
+                    type="number"
+                    icon={<Clock className="h-4 w-4" />}
+                    min={15}
+                    max={480}
+                    step={15}
+                    placeholder="120"
+                    hint="Allowed range: 15–480. Default is 120."
+                  />
 
                   {/* Notes */}
                   <Field
@@ -149,10 +204,9 @@ export default function CreateAppointmentPage() {
                     aria-label="Create appointment"
                   >
                     Create appointment
-                    <ArrowRight className="h-4 w-4" />
-                    <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
                   </button>
                 </form>
+                {/* ← closes form correctly */}
               </div>
 
               {/* Side panel */}
@@ -167,7 +221,7 @@ export default function CreateAppointmentPage() {
                       <li>Times are in Europe/Sofia (EET/EEST).</li>
                       <li>Use the calendar to avoid taken slots.</li>
                       <li>Duration can be 15–480 minutes.</li>
-                      <li>Online or In-Person—your choice.</li>
+                      <li>Online or In-Person — your choice.</li>
                     </ul>
                   </div>
                   <div className="space-y-2 text-xs text-white/70">
@@ -201,6 +255,7 @@ function Field({
   type = "text",
   placeholder = "",
   hint,
+  ...rest
 }) {
   return (
     <div className="space-y-1.5">
@@ -218,6 +273,7 @@ function Field({
             type={type}
             placeholder={placeholder}
             className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
+            {...rest}
           />
         </div>
       </div>
@@ -237,17 +293,13 @@ function Choice({
   subtitle,
 }) {
   return (
-    <label
-      className="flex items-start gap-3 rounded-2xl border px-3 py-3 cursor-pointer
-                 border-[#E5E7EB] dark:border-[#1F2937]
-                 has-[:checked]:border-[#2F80ED] has-[:checked]:bg-[rgb(47,128,237,0.08)]"
-    >
-      <input 
+    <label className="flex items-start gap-3 rounded-2xl border px-3 py-3 cursor-pointer border-[#E5E7EB] dark:border-[#1F2937] has-[:checked]:border-[#2F80ED] has-[:checked]:bg-[rgb(47,128,237,0.08)]">
+      <input
         type="radio"
         name={name}
         value={value}
         defaultChecked={defaultChecked}
-        className="mt-1" 
+        className="mt-1"
       />
       <span className="mt-0.5 text-[#334155] dark:text-[#94A3B8]">{icon}</span>
       <span>
@@ -255,5 +307,45 @@ function Choice({
         <span className="block text-xs opacity-80">{subtitle}</span>
       </span>
     </label>
+  );
+}
+
+/* Time grid picker — UI-only */
+function TimeGrid({
+  value,
+  onChange,
+  start = "09:00",
+  end = "17:00",
+  stepMinutes = 30,
+}) {
+  const slots = [];
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  const startMin = sh * 60 + sm;
+  const endMin = eh * 60 + em;
+  for (let m = startMin; m <= endMin; m += stepMinutes) {
+    const h = String(Math.floor(m / 60)).padStart(2, "0");
+    const mi = String(m % 60).padStart(2, "0");
+    slots.push(`${h}:${mi}`);
+  }
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+      {slots.map((t) => (
+        <button
+          key={t}
+          type="button"
+          onClick={() => onChange && onChange(t)}
+          className={[
+            "px-3 py-2 rounded-xl border text-sm transition",
+            value === t
+              ? "border-[#2F80ED] bg-[#2F80ED] text-white shadow"
+              : "border-[#E5E7EB] dark:border-[#1F2937] text-[#0B1220] dark:text-white hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]",
+          ].join(" ")}
+          aria-pressed={value === t}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
   );
 }

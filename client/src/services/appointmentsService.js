@@ -10,8 +10,8 @@ export default {
 
         return appointments;
     },
-    create(appointmentData) {
-        return request.post(baseUrl, appointmentData)
+    create(appointmentData, creatorId) {
+        return request.post(`${baseUrl}/create`, appointmentData, creatorId)
     },
     getOne(appointmentId) {
         return request.get(`${baseUrl}/${appointmentId}`)
