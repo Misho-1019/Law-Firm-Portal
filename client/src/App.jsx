@@ -14,6 +14,7 @@ import Catalog from "./components/admin/Catalog";
 import AppointmentDetails from "./components/details/Details";
 import CreateAppointmentPage from "./components/create/Create";
 import EditAppointment from "./components/edit/Edit";
+import GuestGuard from "./components/guards/GuestGuard";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
             <Route path="/appointments/:appointmentId/details" element={<AppointmentDetails />} />
             <Route path="/appointments/:appointmentId/update" element={<EditAppointment />} />
           </Route>
-          <Route>
+          <Route element={<GuestGuard />}>
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
           </Route>

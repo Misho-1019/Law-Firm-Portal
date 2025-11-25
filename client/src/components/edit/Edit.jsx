@@ -16,6 +16,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTimeDefaults } from "../../utils/dates";
 import { toUTCISO } from "../../utils/time";
+import useAuth from "../../hooks/useAuth";
 
 const MotionSection = motion.section;
 
@@ -24,6 +25,7 @@ export default function EditAppointmentPage() {
   const [appointment, setAppointment] = useState({})
   const { appointmentId } = useParams()
   const navigate = useNavigate()
+  const { role } = useAuth()
 
   useEffect(() => {
     appointmentsService.getOne(appointmentId)
@@ -200,6 +202,24 @@ export default function EditAppointmentPage() {
                     hint="Allowed range: 15–480. Default is 120."
                     defaultValue={appointment?.durationMin || 120}
                   />
+
+                  {role === 'Admin' && (
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">Status</label>
+                      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2">
+                        <select
+                          name="status"
+                          defaultValue={appointment?.status}
+                          className="w-full bg-transparent outline-none"
+                        >
+                          <option value="PENDING">Pending</option>
+                          <option value="CONFIRMED">Confirmed</option>
+                          <option value="DECLINED">Declined</option>
+                          <option value="CANCELLED">Cancelled</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Notes */}
                   <Field
