@@ -8,6 +8,7 @@ import {
   buildSofiaReminders,
 } from "../lib/time.js";
 import { sendEmail } from "../lib/mailer.js";
+import { getDateAndTimeDefaults } from "../lib/dates.js";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || null;
 const EMAILS_DISABLED = process.env.EMAILS_DISABLED === "1"; // optional toggle
@@ -92,14 +93,15 @@ async function emailCreated(apptDoc) {
   const clientEmail = appt.creator?.email || null;
   const clientName = appt.creator?.username || "there";
   const when = toSofiaISO(appt.startsAt);
+  const { date, time } = getDateAndTimeDefaults(String(when))
 
-  const subjectClient = `✅ Appointment created — ${when}`;
+  const subjectClient = `✅ Appointment created — Date: ${date} — Time: ${time}`;
   const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was created successfully.</p>${buildApptSummary(
     appt
   )}`;
 
-  const subjectAdmin = `📥 New appointment — ${clientName} @ ${when}`;
-  const textAdmin = `New appointment for ${clientName}\nWhen: ${when}\nMode: ${appt.mode}\nService: ${appt.service}\nStatus: ${appt.status}`;
+  const subjectAdmin = `📥 New appointment — ${clientName} @ ${date}`;
+  const textAdmin = `New appointment for ${clientName}\nWhen: ${date}\nStart: ${time}\nMode: ${appt.mode}\nService: ${appt.service}\nStatus: ${appt.status}`;
 
   const tasks = [];
   if (clientEmail)
@@ -127,23 +129,24 @@ async function emailUpdated(prev, next) {
     new Date(prev.startsAt).getTime() !== new Date(appt.startsAt).getTime();
   const statusChanged = prev?.status !== appt.status;
   const when = toSofiaISO(appt.startsAt);
+  const { date, time } = getDateAndTimeDefaults(String(when))
 
-  let subjectClient = `Appointment updated — ${when}`;
+  let subjectClient = `Appointment updated — ${date}`;
   if (statusChanged)
-    subjectClient = `Status: ${prev?.status ?? "?"} → ${appt.status} — ${when}`;
+    subjectClient = `Status: ${prev?.status ?? "?"} → ${appt.status} — ${date} -> ${time}`;
   if (statusChanged && appt.status === "CONFIRMED")
-    subjectClient = `✅ Appointment confirmed — ${when}`;
+    subjectClient = `✅ Appointment confirmed — ${date} -> ${time}`;
   if (statusChanged && appt.status === "CANCELLED")
-    subjectClient = `❌ Appointment cancelled — ${when}`;
+    subjectClient = `❌ Appointment cancelled — ${date} -> ${time}`;
   if (timeChanged && !statusChanged)
-    subjectClient = `🗓️ Time changed — ${when}`;
+    subjectClient = `🗓️ Time changed — ${date} -> ${time}`;
 
   const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was updated.</p>${buildApptSummary(
     appt
   )}`;
 
-  const subjectAdmin = `✏️ Appointment updated — ${clientName} @ ${when}`;
-  const textAdmin = `Updated appointment for ${clientName}\nWhen: ${when}\nMode: ${appt.mode}\nStatus: ${appt.status}`;
+  const subjectAdmin = `✏️ Appointment updated — ${clientName} @ ${date}`;
+  const textAdmin = `Updated appointment for ${clientName}\nWhen: ${date}\nStart: ${time}\nMode: ${appt.mode}\nStatus: ${appt.status}`;
 
   const tasks = [];
   if (clientEmail)
