@@ -27,30 +27,7 @@ function SafeLink({ to, className, children }) {
   return <a href={typeof to === "string" ? to : "#"} className={className}>{children}</a>;
 }
 
-/**
- * Appointment Details (UI-only, router-agnostic)
- * Palette matches create.jsx
- * - Light bg: #F5F7FA; Dark bg: #0E1726
- * - Primary: #2F80ED (hover #266DDE)
- * - Borders: #E5E7EB (light) / #1F2937 (dark)
- * - Subtle text: #334155 (light) / #94A3B8 (dark)
- */
-export default function AppointmentDetails({ app }) {
-  const demo = {
-    id: "appt_123456",
-    service: "Contract review",
-    mode: "In-Person", // or "Online"
-    startsAtLocal: "2025-11-18T10:30",
-    durationMin: 60,
-    timezone: "Europe/Sofia",
-    status: "Scheduled",
-    clientName: "John Doe",
-    location: "Sofia, bul. Vitosha 25, Floor 3",
-    notes: "Please bring last year's contract and any amendments.",
-  };
-
-  const a = app ?? demo;
-
+export default function AppointmentDetails() {
   const [appointment, setAppointment] = useState({})
   const { appointmentId } = useParams()
   const navigate = useNavigate()
@@ -111,7 +88,7 @@ export default function AppointmentDetails({ app }) {
                 {/* Summary strip */}
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   <SummaryItem icon={<CalendarIcon className="h-4 w-4" />} label="Start (local)" value={fmtDateTime(appointment.startsAt)} />
-                  <SummaryItem icon={<Clock className="h-4 w-4" />} label="Duration" value={`${a.durationMin} min`} />
+                  <SummaryItem icon={<Clock className="h-4 w-4" />} label="Duration" value={`${appointment.durationMin} min`} />
                   <SummaryItem icon={<CheckCircle2 className="h-4 w-4" />} label="Status" value={appointment.status} />
                 </div>
 

@@ -16,6 +16,9 @@ export default {
     getOne(appointmentId) {
         return request.get(`${baseUrl}/${appointmentId}`)
     },
+    patch(appointmentData, appointmentId) {
+        return request.patch(`${baseUrl}/${appointmentId}`, {...appointmentData, _id: appointmentId})
+    },
     delete(appointmentId) {
         return request.delete(`${baseUrl}/${appointmentId}`)
     }

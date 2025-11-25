@@ -12,9 +12,10 @@ import {
   Save,
   Loader2
 } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTimeDefaults } from "../../utils/dates";
+import { toUTCISO } from "../../utils/time";
 
 const MotionSection = motion.section;
 
@@ -22,6 +23,7 @@ export default function EditAppointmentPage() {
   const [selectedTime, setSelectedTime] = useState("");
   const [appointment, setAppointment] = useState({})
   const { appointmentId } = useParams()
+  const navigate = useNavigate()
 
   useEffect(() => {
     appointmentsService.getOne(appointmentId)
@@ -37,7 +39,32 @@ export default function EditAppointmentPage() {
     }
   }, [appointment?.startsAt])
 
-  console.log(selectedTime);
+  const formAction = async (formData) => {
+    const date = formData.get('date')
+    const time = formData.get('time')
+    const rawDuration = formData.get('durationMin')
+
+    const startsAt = toUTCISO(date, time, 'Europe/Sofia')
+
+    let durationMin = Number(rawDuration)
+
+    if (!Number.isFinite(durationMin)) durationMin = 120;
+
+    durationMin = Math.max(15, Math.min(480, durationMin))
+
+    const appointmentData = {
+      ...Object.fromEntries(formData),
+      startsAt,
+      durationMin,
+    }
+
+    delete appointmentData.date
+    delete appointmentData.time
+
+    await appointmentsService.patch(appointmentData, appointmentId)
+    
+    navigate(`/appointments/${appointmentId}/details`)
+  }
   
   return (
     <div className="dark">
@@ -66,6 +93,7 @@ export default function EditAppointmentPage() {
                 <form
                   className="mt-6 space-y-5"
                   key={appointment?.id || <div><Loader2 className="h-4 w-4" />Loading...</div>}
+                  action={formAction}
                   noValidate
                 >
                   {/* First / Last name */}
@@ -195,9 +223,8 @@ export default function EditAppointmentPage() {
 
                     <button
                       type="submit"
-                      disabled
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white disabled:opacity-70"
-                      title="UI-only, not wired yet"
+                      title="Submit changes"
                     >
                       <Save className="h-4 w-4" />
                       Save changes
