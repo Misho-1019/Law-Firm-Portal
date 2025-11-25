@@ -295,35 +295,62 @@ export default {
 
   async update(appointmentData, appointmentId) {
     const update = {};
-
+  
+    // Basic text fields
+    if (typeof appointmentData.firstName === "string" && appointmentData.firstName.trim()) {
+      update.firstName = appointmentData.firstName.trim();
+    }
+  
+    if (typeof appointmentData.lastName === "string" && appointmentData.lastName.trim()) {
+      update.lastName = appointmentData.lastName.trim();
+    }
+  
+    if (typeof appointmentData.service === "string" && appointmentData.service.trim()) {
+      update.service = appointmentData.service.trim();
+    }
+  
+    if (typeof appointmentData.mode === "string") {
+      update.mode = appointmentData.mode;
+    }
+  
+    // Duration
+    if (Object.prototype.hasOwnProperty.call(appointmentData, "durationMin")) {
+      const d = Number(appointmentData.durationMin);
+      if (!Number.isNaN(d)) {
+        update.durationMin = d;
+      }
+    }
+  
+    // Notes
     if (typeof appointmentData.notes === "string") {
       update.notes = appointmentData.notes.trim();
     }
-
+  
+    // Status (controller already enforces admin-only)
     if (Object.prototype.hasOwnProperty.call(appointmentData, "status")) {
-      // Controller must ensure only admins can change status
       update.status = appointmentData.status;
     }
-
-    // Allow either startsAtLocal(+timezone) or startsAt
+  
+    // Time (allow startsAtLocal + timezone OR startsAt)
     const whenUtc = normalizeStartsAt(appointmentData);
     if (whenUtc) {
       update.startsAt = whenUtc;
       update.reminders = buildSofiaReminders(whenUtc); // recompute on reschedule
     }
-
+  
     try {
+      // IMPORTANT: fetch prev BEFORE update if you want a real diff
+      const prev = await Appointment.findById(appointmentId).lean();
+  
       const doc = await Appointment.findByIdAndUpdate(appointmentId, update, {
         new: true,
         runValidators: true,
       });
-
-      const prev = await Appointment.findById(appointmentId).lean(); // for email diff
-
+  
       emailUpdated(prev, doc).catch((e) =>
         console.error("[email] update failed:", e?.message || e)
       );
-
+  
       return doc;
     } catch (error) {
       if (error && error.code === 11000) {
