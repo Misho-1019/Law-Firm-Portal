@@ -207,7 +207,7 @@ appointmentController.patch("/:appointmentId", isAuth, idParamCheck, updateAppoi
  * Your service currently sets status to CANCELLED for non-admins (and enforces 24h rule).
  * No reminder recomputation here; cancel does not need reminders.
  */
-appointmentController.patch("/:appointmentId/status", isAuth, idParamCheck, async (req, res) => {
+appointmentController.patch("/:appointmentId/status", isAuth, isAdmin, idParamCheck, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -215,11 +215,13 @@ appointmentController.patch("/:appointmentId/status", isAuth, idParamCheck, asyn
 
     const appointmentId = req.params.appointmentId;
     const user = req.user;
+    const { status } = req.body;
 
     try {
       const updatedAppointment = await appointmentService.updateStatus(
         appointmentId,
-        user
+        user,
+        status
       );
 
       if (!updatedAppointment) {

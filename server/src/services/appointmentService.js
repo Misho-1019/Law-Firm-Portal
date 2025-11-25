@@ -365,7 +365,7 @@ export default {
     }
   },
 
-  async updateStatus(appointmentId, user) {
+  async updateStatus(appointmentId, user, status) {
     const appointment = await Appointment.findById(appointmentId);
 
     if (!appointment) {
@@ -374,38 +374,32 @@ export default {
       throw err;
     }
 
-    const isOwner =
-      appointment.creator?.toString() === user.id ||
-      appointment.creator === user.id;
     const isAdmin = user.role === "Admin";
 
-    if (!isOwner) {
+    if (!isAdmin) {
       const err = new Error(
-        "You are not authorized to update this appointment!"
+        "Only admin can change the appointment status"
       );
       err.status = 403;
       throw err;
     }
+    
+    const validStatuses = ['CANCELLED', 'CONFIRMED', 'PENDING', 'DECLINED'];
 
-    if (!isAdmin) {
-      const msUntilAppointment = appointment.startsAt.getTime() - Date.now();
-      if (msUntilAppointment < day_ms) {
-        const err = new Error(
-          "Too late to cancel: less than 24 hours before the appointment."
-        );
-        err.status = 422;
-        throw err;
-      }
+    if (!validStatuses.includes(status)) {
+      const err = new Error('Invalid status value')
+      err.status = 400;
+      throw err;
     }
 
     try {
+      const prev = appointment.toObject();
       const updatedAppointment = await Appointment.findByIdAndUpdate(
         appointmentId,
-        { status: "CANCELLED" },
+        { status },
         { new: true, runValidators: true }
       );
 
-      const prev = appointment.toObject();
       emailUpdated(prev, updatedAppointment).catch((e) =>
         console.error("[email] status update failed:", e?.message || e)
       );
