@@ -1,34 +1,44 @@
+/* eslint-disable no-unused-vars */
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  CalendarClock,
-  PencilLine,
+  Calendar as CalendarIcon,
+  Clock,
+  FileText,
+  MapPin,
+  MonitorSmartphone,
+  ChevronRight,
   Save,
+  Loader2
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link as RRLink, useInRouterContext, useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTimeDefaults } from "../../utils/dates";
 
 const MotionSection = motion.section;
 
-function SafeLink({ to, className, children }) {
-  const hasRouter = useInRouterContext?.() ?? false;
-  if (hasRouter) return <RRLink to={to} className={className}>{children}</RRLink>;
-  return <a href={typeof to === "string" ? to : "#"} className={className}>{children}</a>;
-}
-
-export default function EditAppointment() {
-  const { appointmentId } = useParams()
+export default function EditAppointmentPage() {
+  const [selectedTime, setSelectedTime] = useState("");
   const [appointment, setAppointment] = useState({})
+  const { appointmentId } = useParams()
 
   useEffect(() => {
     appointmentsService.getOne(appointmentId)
       .then(setAppointment)
   }, [appointmentId])
 
-  const { date: defaultDate, time: defaultTime } = appointment.startsAt ? getDateAndTimeDefaults(appointment.startsAt) : { date: '', time: '' }
+  const dateAndTime = getDateAndTimeDefaults(String(appointment?.startsAt));
+  
+  useEffect(() => {
+    if (appointment.startsAt) {
+      const { date, time } = getDateAndTimeDefaults(String(appointment?.startsAt));
+      setSelectedTime(time);
+    }
+  }, [appointment?.startsAt])
 
+  console.log(selectedTime);
+  
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
@@ -38,30 +48,57 @@ export default function EditAppointment() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-5xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-hidden"
+            className="w-full max-w-5xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-visible"
           >
             <div className="grid lg:grid-cols-5">
               {/* Form side */}
               <div className="lg:col-span-3 p-6 md:p-8">
                 <div className="flex items-center gap-2">
-                  <PencilLine className="h-5 w-5 text-[#334155] dark:text-[#94A3B8]" />
+                  <CalendarIcon className="h-5 w-5 text-[#334155] dark:text-[#94A3B8]" />
                   <h1 className="text-2xl font-semibold">Edit appointment</h1>
                 </div>
                 <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Adjust service, timing, and notes. Times are shown in <span className="font-medium">Europe/Sofia</span>.
+                  Adjust service, timing, and notes. Times are shown in{" "}
+                  <span className="font-medium">Europe/Sofia</span>.
                 </p>
 
-                <form key={appointment.id || 'loading'} className="mt-6 space-y-5" noValidate>
+                {/* UI-only form (no real submit) */}
+                <form
+                  className="mt-6 space-y-5"
+                  key={appointment?.id || <div><Loader2 className="h-4 w-4" />Loading...</div>}
+                  noValidate
+                >
+                  {/* First / Last name */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Field
+                      label="First name"
+                      id="firstName"
+                      name="firstName"
+                      placeholder="Mila"
+                      icon={<FileText className="h-4 w-4" />}
+                      defaultValue={appointment?.firstName || ''}
+                      />
+                    <Field
+                      label="Last name"
+                      id="lastName"
+                      name="lastName"
+                      placeholder="Georgieva"
+                      icon={<FileText className="h-4 w-4" />}
+                      defaultValue={appointment?.lastName || ''}
+                    />
+                  </div>
+
                   {/* Service */}
                   <Field
                     label="Service"
                     id="service"
                     name="service"
                     placeholder="Contract review, Initial consultation, ..."
-                    defaultValue={appointment.service}
+                    icon={<FileText className="h-4 w-4" />}
+                    defaultValue={appointment?.service || ''}
                   />
 
-                  {/* Mode (now active radio like Create) */}
+                  {/* Mode (visual only) */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Mode</label>
                     <div className="grid grid-cols-2 gap-3">
@@ -70,94 +107,102 @@ export default function EditAppointment() {
                         value="In-Person"
                         title="In-Person"
                         subtitle="At the office"
-                        defaultChecked={appointment.mode === 'In-Person'}
-                        />
+                        defaultChecked={appointment?.mode === "In-Person"}
+                      />
                       <Choice
                         name="mode"
                         value="Online"
                         title="Online"
                         subtitle="Video call"
-                        defaultChecked={appointment.mode === 'Online'}
+                        defaultChecked={appointment?.mode === "Online"}
                       />
                     </div>
                   </div>
 
-                  {/* Date & time */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <Field
-                      label="Date"
-                      id="date"
-                      name="date"
-                      type="date"
-                      defaultValue={defaultDate}
-                    />
-                    <Field
-                      label="Start time"
+                  {/* Date */}
+                  <Field
+                    label="Date"
+                    id="date"
+                    name="date"
+                    type="date"
+                    icon={<CalendarIcon className="h-4 w-4" />}
+                    hint="Format: YYYY-MM-DD"
+                    defaultValue={dateAndTime.date}
+                  />
+
+                  {/* Time grid (09:00–17:00) */}
+                  <div className="space-y-1.5">
+                    <label
+                      className="text-sm font-medium flex items-center gap-2"
+                      htmlFor="time"
+                    >
+                      <Clock className="h-4 w-4" /> Time (09:00–17:00)
+                    </label>
+                    <TimeGrid
                       id="time"
                       name="time"
-                      type="time"
-                      defaultValue={defaultTime}
+                      value={selectedTime}
+                      onChange={setSelectedTime}
+                      start="09:00"
+                      end="17:00"
+                      stepMinutes={30}
                     />
+                    {/* hidden input for future wiring */}
+                    <input
+                      type="hidden"
+                      name="time"
+                      value={selectedTime || ""}
+                    />
+                    <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                      Business hours only. Actual availability may vary by
+                      bookings/spacing.
+                    </p>
                   </div>
 
-                  {/* Duration & Status */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <Field
-                      label="Duration (minutes)"
-                      id="duration"
-                      name="duration"
-                      type="number"
-                      min={15}
-                      max={480}
-                      defaultValue={60}
-                    />
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium">Status</label>
-                      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2">
-                        <select
-                          name="status"
-                          defaultValue={appointment.status}
-                          className="w-full bg-transparent outline-none"
-                        >
-                          <option value='PENDING'>Pending</option>
-                          <option value='CONFIRMED'>Confirmed</option>
-                          <option value='CANCELLED'>Cancelled</option>
-                          <option value='COMPLETED'>Completed</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Duration */}
+                  <Field
+                    label="Duration (minutes)"
+                    id="durationMin"
+                    name="durationMin"
+                    type="number"
+                    min={15}
+                    max={480}
+                    placeholder="120"
+                    icon={<Clock className="h-4 w-4" />}
+                    hint="Allowed range: 15–480. Default is 120."
+                    defaultValue={appointment?.durationMin || 120}
+                  />
 
                   {/* Notes */}
                   <Field
-                    label="Client notes"
+                    label="Notes (optional)"
                     id="notes"
                     name="notes"
-                    placeholder="Enter context or preparation notes"
+                    placeholder="Anything we should know before the meeting?"
                     textarea
-                    defaultValue={appointment.notes}
+                    defaultValue={appointment?.notes || ''}
                   />
 
                   {/* Actions */}
                   <div className="flex items-center justify-between gap-2 pt-2">
-                    <SafeLink
-                      to="/appointments"
+                    <Link
+                      to={-1}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
                     >
-                      <ArrowLeft className="h-4 w-4" /> Back
-                    </SafeLink>
+                      <ArrowLeft className="h-4 w-4" />
+                      Back
+                    </Link>
 
                     <button
                       type="submit"
+                      disabled
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white disabled:opacity-70"
+                      title="UI-only, not wired yet"
                     >
                       <Save className="h-4 w-4" />
+                      Save changes
                     </button>
                   </div>
-
-                  <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                    Saving will validate availability and apply your 24h policy server-side.
-                  </p>
                 </form>
               </div>
 
@@ -165,7 +210,9 @@ export default function EditAppointment() {
               <aside className="lg:col-span-2 hidden lg:block bg-[#0E1726] text-white">
                 <div className="h-full p-6 flex flex-col justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold relative pb-2">Editing tips</h2>
+                    <h2 className="text-lg font-semibold relative pb-2">
+                      Editing tips
+                    </h2>
                     <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
                       <li>Times are in Europe/Sofia (EET/EEST).</li>
@@ -174,7 +221,10 @@ export default function EditAppointment() {
                     </ul>
                   </div>
                   <div className="space-y-2 text-xs text-white/70">
-                    <p>We’ll send reminders (24h/1h) based on your chosen time.</p>
+                    <p>
+                      Reminders (24h/1h) are based on the final start time once
+                      wired to the backend.
+                    </p>
                     <p>Cancelling may be restricted in the last 24h.</p>
                   </div>
                 </div>
@@ -192,7 +242,7 @@ export default function EditAppointment() {
 }
 
 /* ----------------------------------------------------------
-   Presentational Fields & Choices (active)
+   Presentational Fields & Choices
 ---------------------------------------------------------- */
 function Field({
   id,
@@ -201,15 +251,18 @@ function Field({
   type = "text",
   placeholder = "",
   hint,
-  defaultValue,
   textarea,
   min,
   max,
+  defaultValue
 }) {
-  const common = "w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]";
+  const common =
+    "w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]";
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="text-sm font-medium">{label}</label>
+      <label htmlFor={id} className="text-sm font-medium">
+        {label}
+      </label>
       <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2 focus-within:ring-4 focus-within:ring-[rgb(47,128,237)/0.35]">
         {textarea ? (
           <textarea
@@ -227,13 +280,15 @@ function Field({
             type={type}
             placeholder={placeholder}
             className={common}
-            defaultValue={defaultValue}
             min={min}
             max={max}
+            defaultValue={defaultValue}
           />
         )}
       </div>
-      {hint ? <p className="text-xs text-[#334155] dark:text-[#94A3B8]">{hint}</p> : null}
+      {hint ? (
+        <p className="text-xs text-[#334155] dark:text-[#94A3B8]">{hint}</p>
+      ) : null}
     </div>
   );
 }
@@ -258,5 +313,41 @@ function Choice({ name, value, defaultChecked, title, subtitle }) {
         <span className="block text-xs opacity-80">{subtitle}</span>
       </span>
     </label>
+  );
+}
+
+/* Time grid picker — UI-only */
+function TimeGrid({ value, onChange, start = "09:00", end = "17:00", stepMinutes = 30 }) {
+  const slots = [];
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  const startMin = sh * 60 + sm;
+  const endMin = eh * 60 + em;
+
+  for (let m = startMin; m <= endMin; m += stepMinutes) {
+    const h = String(Math.floor(m / 60)).padStart(2, "0");
+    const mi = String(m % 60).padStart(2, "0");
+    slots.push(`${h}:${mi}`);
+  }
+
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+      {slots.map((t) => (
+        <button
+          key={t}
+          type="button"
+          onClick={() => onChange && onChange(t)}
+          className={[
+            "px-3 py-2 rounded-xl border text-sm transition",
+            value === t
+              ? "border-[#2F80ED] bg-[#2F80ED] text-white shadow"
+              : "border-[#E5E7EB] dark:border-[#1F2937] text-[#0B1220] dark:text-white hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]",
+          ].join(" ")}
+          aria-pressed={value === t}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
   );
 }
