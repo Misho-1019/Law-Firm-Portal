@@ -10,6 +10,13 @@ export default {
 
         return appointments;
     },
+    async getMine() {
+        const result = await request.get(`${baseUrl}/mine`)
+
+        const appointments = Object.values(result)
+
+        return appointments;
+    },
     create(appointmentData, creatorId) {
         return request.post(`${baseUrl}/create`, appointmentData, creatorId)
     },
