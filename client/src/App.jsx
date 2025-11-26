@@ -15,6 +15,8 @@ import AppointmentDetails from "./components/details/Details";
 import CreateAppointmentPage from "./components/create/Create";
 import EditAppointment from "./components/edit/Edit";
 import GuestGuard from "./components/guards/GuestGuard";
+import AdminGuard from "./components/guards/AdminGuard";
+import ClientGuard from "./components/guards/ClientGuard";
 
 function App() {
   return (
@@ -26,12 +28,16 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route element={<AuthGuard />}>
             <Route path="/logout" element={<Logout />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/client" element={<ClientDashboard />} />
             <Route path="/appointments" element={<Catalog />} />
             <Route path="/create" element={<CreateAppointmentPage />} />
             <Route path="/appointments/:appointmentId/details" element={<AppointmentDetails />} />
             <Route path="/appointments/:appointmentId/update" element={<EditAppointment />} />
+          </Route>
+          <Route element={<AdminGuard />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+          <Route element={<ClientGuard />}>
+            <Route path="/client" element={<ClientDashboard />} />
           </Route>
           <Route element={<GuestGuard />}>
             <Route path="/register" element={<Register />} />
