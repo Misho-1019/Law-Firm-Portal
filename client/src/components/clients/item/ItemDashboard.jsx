@@ -7,7 +7,6 @@ export default function ItemDashboard({
     status,
     service,
     mode,
-    open
 }) {
   const {day, date, time } = getDateAndTime(String(new Date(startsAt)));
 
@@ -34,12 +33,12 @@ export default function ItemDashboard({
             </div>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={open}
+            <Link
+              to={`/appointments/${_id}/update`}
               className="rounded-xl border border-[#2F80ED] text-[#2F80ED] px-3 py-1.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
             >
               Reschedule
-            </button>
+            </Link>
             <Link to={`/appointments/${_id}/details`} className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#F5F7FA] hover:text-black">
               Details
             </Link>

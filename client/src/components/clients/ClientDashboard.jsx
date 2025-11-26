@@ -8,7 +8,6 @@ import {
   MessageSquare,
   FileText,
   Upload,
-  ArrowRight,
   ChevronRight,
   CheckCircle2,
   AlertCircle,
@@ -20,7 +19,6 @@ import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTime } from "../../utils/dates";
 import ItemDashboard from "./item/ItemDashboard";
 
-const MotionDiv = motion.div;
 const MotionSection = motion.section;
 const MotionAside = motion.aside;
 
@@ -29,8 +27,6 @@ const MotionAside = motion.aside;
 ---------------------------------------------------------- */
 export default function ClientDashboard(){
   const timestamp = new Date()
-  const [openBook, setOpenBook] = useState(false);
-  const [openResched, setOpenResched] = useState(false);
   const [appointments, setAppointments] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -94,8 +90,8 @@ export default function ClientDashboard(){
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button onClick={()=>setOpenResched(true)} className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Reschedule</button>
-                <button className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Cancel</button>
+                <Link to={`/appointments/${nextAppt1._id}/update`} className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Reschedule</Link>
+                <Link className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Cancel</Link>
               </div>
             </div>
             <div className="mx-5 mb-5 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
@@ -108,12 +104,12 @@ export default function ClientDashboard(){
                 <h2 className="text-lg font-semibold">My appointments</h2>
                 <p className="text-sm text-[#334155] dark:text-[#94A3B8]">Upcoming</p>
               </div>
-              <button onClick={()=>setOpenBook(true)} className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5 border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors">Book new</button>
+              <Link to='/create' className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5 border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors">Book new</Link>
             </div>
             <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
 
             <ul className="p-4 space-y-3">
-              {upcomingAppt.map(appointment => <ItemDashboard key={appointment._id} {...appointment} open={() => setOpenResched(true)}/>)}
+              {upcomingAppt.map(appointment => <ItemDashboard key={appointment._id} {...appointment}/> )}
               <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
                 <span>No more items.</span>
                 <ChevronRight className="h-4 w-4"/>
@@ -164,10 +160,6 @@ export default function ClientDashboard(){
           © {new Date().getFullYear()} LexSchedule. All rights reserved.
         </footer>
       </div>
-
-      {/* Modals */}
-      <QuickBookModal open={openBook} onClose={()=>setOpenBook(false)} />
-        <RescheduleModal open={openResched} onClose={() => setOpenResched(false)} appt={{ title: nextAppt1.service }}/>
     </div>
   );
 }
@@ -188,104 +180,5 @@ function StatusPill({ status }) {
     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold ${S.bg} ${S.fg}`}>
       <I className="h-3.5 w-3.5" /> {S.label}
     </span>
-  );
-}
-
-/* ----------------------------------------------------------
-   Quick book & reschedule modals (UI only)
----------------------------------------------------------- */
-function Field({ id, label, placeholder = "", type = "text", as }) {
-  const InputTag = as === 'textarea' ? 'textarea' : 'input';
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="text-sm font-medium">{label}</label>
-      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] focus-within:ring-4 focus-within:ring-[#2F80ED]/35">
-        <div className="flex items-center gap-2 px-3 py-2">
-          <InputTag id={id} placeholder={placeholder} type={as==='textarea'?undefined:type} className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8] min-h-[42px]" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ModalShell({ title, children, onClose }) {
-  const stop = (e) => e.stopPropagation();
-  return (
-    <MotionDiv className="fixed inset-0 z-50" onClick={onClose} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-      <div className="absolute inset-0 bg-black/40" />
-      <MotionSection
-        role="dialog"
-        aria-modal
-        onClick={stop}
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 8, scale: 0.98 }}
-        transition={{ duration: 0.2 }}
-        className="relative mx-auto mt-20 w-[92%] max-w-lg rounded-2xl bg-[#111827] text-white border border-[#1F2937] shadow-xl"
-      >
-        <div className="flex items-center justify-between p-4 pb-3">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1 hover:bg-[#0E1726]"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
-        <div className="p-4">{children}</div>
-      </MotionSection>
-    </MotionDiv>
-  );
-}
-
-function QuickBookModal({ open, onClose }) {
-  return (
-    <AnimatePresence>
-      {open && (
-        <ModalShell title="Book a new appointment" onClose={onClose}>
-          <form className="space-y-4" onSubmit={(e)=>e.preventDefault()}>
-            <Field id="topic" label="Topic" placeholder="e.g., Contract review" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field id="date" type="date" label="Date" />
-              <Field id="time" type="time" label="Time" />
-            </div>
-            <Field id="note" as="textarea" label="Notes (optional)" placeholder="Anything we should know?" />
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button className="relative inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
-                Request booking <ArrowRight className="h-4 w-4"/>
-                <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
-              </button>
-              <Link to="/app/schedule" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">Go to schedule</Link>
-            </div>
-          </form>
-        </ModalShell>
-      )}
-    </AnimatePresence>
-  );
-}
-
-function RescheduleModal({ open, onClose, appt }){
-  return (
-    <AnimatePresence>
-      {open && (
-        <ModalShell title={`Reschedule: ${appt?.title || 'Appointment'}`} onClose={onClose}>
-          <form className="space-y-4" onSubmit={(e)=>e.preventDefault()}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field id="newDate" type="date" label="New date" />
-              <Field id="newTime" type="time" label="New time" />
-            </div>
-            <Field id="reason" as="textarea" label="Reason (optional)" placeholder="Short note" />
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button className="relative inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
-                Send request <ArrowRight className="h-4 w-4"/>
-                <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
-              </button>
-              <button type="button" onClick={onClose} className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">Cancel</button>
-            </div>
-          </form>
-        </ModalShell>
-      )}
-    </AnimatePresence>
   );
 }
