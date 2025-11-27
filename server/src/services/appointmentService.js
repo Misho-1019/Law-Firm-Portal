@@ -8,7 +8,7 @@ import {
   buildSofiaReminders,
 } from "../lib/time.js";
 import { sendEmail } from "../lib/mailer.js";
-import { getDateAndTimeDefaults } from "../lib/dates.js";
+import { getDateAndTime, getDateAndTimeDefaults } from "../lib/dates.js";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || null;
 const EMAILS_DISABLED = process.env.EMAILS_DISABLED === "1"; // optional toggle
@@ -93,9 +93,9 @@ async function emailCreated(apptDoc) {
   const clientEmail = appt.creator?.email || null;
   const clientName = appt.creator?.username || "there";
   const when = toSofiaISO(appt.startsAt);
-  const { date, time } = getDateAndTimeDefaults(String(when))
+  const { day, date, time } = getDateAndTime(String(new Date(when)))
 
-  const subjectClient = `✅ Appointment created — Date: ${date} — Time: ${time}`;
+  const subjectClient = `✅ Appointment created — Day: ${day} — Date: ${date} — Time: ${time}`;
   const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was created successfully.</p>${buildApptSummary(
     appt
   )}`;

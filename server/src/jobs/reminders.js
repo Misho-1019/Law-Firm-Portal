@@ -6,6 +6,7 @@ import cron from "node-cron";
 import Appointment from "../models/Appointment.js";
 import { sendEmail } from "../lib/mailer.js";
 import { toSofiaISO, SOFIA_TZ } from "../lib/time.js"; // 👈 use Sofia formatter + zone
+import { getDateAndTime } from "../lib/dates.js";
 
 const BATCH_LIMIT = Number(process.env.REMINDER_BATCH_LIMIT || 100);
 
@@ -32,6 +33,7 @@ async function processWindow(kind) {
     try {
       const startsAtUtc = new Date(appt.startsAt);
       const localWhen = toSofiaISO(startsAtUtc); // e.g. "2025-11-05T11:40:00"
+      const { day, date, time} = getDateAndTime(String(new Date(localWhen)))
 
       const clientEmail = appt.creator?.email || null;
       const adminEmail = process.env.ADMIN_EMAIL || null;
@@ -39,13 +41,13 @@ async function processWindow(kind) {
       if (clientEmail) {
         const subjectClient =
           kind === "24h"
-            ? `Reminder: your appointment is in 24 hours (${localWhen})`
-            : `Reminder: your appointment is in 1 hour (${localWhen})`;
+            ? `Reminder: your appointment is in 24 hours (Tomorrow, ${date} - ${time})`
+            : `Reminder: your appointment is in 1 hour (Today at ${time})`;
 
         const html = `
           <p>Hi ${appt.creator?.username || "there"},</p>
           <p>This is a ${kind} reminder for your appointment.</p>
-          <p><strong>When:</strong> ${localWhen}</p>
+          <p><strong>When:</strong> ${`${day}, ${date} - ${time}`}</p>
           <p><strong>Mode:</strong> ${appt.mode}</p>
           <p><strong>Service:</strong> ${appt.service}</p>
         `;
@@ -56,13 +58,13 @@ async function processWindow(kind) {
       if (adminEmail) {
         const subjectAdmin =
           kind === "24h"
-            ? `Reminder sent (24h) → ${appt.creator?.username || "Client"} @ ${localWhen}`
-            : `Reminder sent (1h) → ${appt.creator?.username || "Client"} @ ${localWhen}`;
+            ? `Reminder sent (24h) → ${appt.creator?.username || "Client"} @ ${date} ${time}`
+            : `Reminder sent (1h) → ${appt.creator?.username || "Client"} @ ${date} ${time}`;
 
         await sendEmail({
           to: adminEmail,
           subject: subjectAdmin,
-          text: `Appointment ${kind} reminder sent to ${clientEmail || "unknown"} at ${localWhen}`,
+          text: `Appointment ${kind} reminder sent to ${clientEmail || "unknown"} at ${day}, ${date} - ${time}`,
         });
       }
 

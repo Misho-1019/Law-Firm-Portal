@@ -7,3 +7,15 @@ export function getDateAndTimeDefaults(startsAtIso) {
         time,
     }
 }
+
+export function getDateAndTime(startsAtIso) {
+  const day = startsAtIso.slice(0, 3)
+  const date = startsAtIso.slice(4, 10)
+  const time = startsAtIso.slice(16, 21)
+
+  return {
+    day,
+    date,
+    time,
+  }
+}
