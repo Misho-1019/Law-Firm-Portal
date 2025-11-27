@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-import { Link } from "react-router";
 import {
   Clock,
   ChevronRight,
@@ -7,9 +5,8 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
-import { formatSofiaTime } from "../../../utils/dates";
-
-const MotionAside = motion.aside;
+import { getDateAndTime } from "../../../utils/dates";
+import { Link } from "react-router";
 
 /* --- Status pill (UI only) --- */
 function StatusPill({ status }) {
@@ -50,61 +47,48 @@ function StatusPill({ status }) {
   );
 }
 
-export default function UpcomingList({ upcoming }) {
-  return (
-    <MotionAside
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: 0.05 }}
-      className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
-    >
-      <div className="p-4 pb-3 flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Upcoming</h3>
-          <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
-            Next appointments
-          </p>
-        </div>
-        <Link
-          to="/appointments"
-          className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5 border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors"
-        >
-          View all
-        </Link>
-      </div>
-      <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
+export default function UpcomingList({
+  _id,
+  startsAt,
+  status,
+  firstName,
+  lastName,
+  notes,
+}) {
+  const { day, date, time } = getDateAndTime(String(new Date(startsAt)));
 
-      <ul className="p-4 space-y-3">
-        {upcoming.map((a) => (
-          <li
-            key={a._id}
-            className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3"
+  return (
+    <li
+      key={_id}
+      className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3"
+    >
+      <div className="flex items-center justify-between gap-20">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
+          <span className="font-semibold">{`${day}, ${date} - ${time}`}</span>
+        </div>
+        <StatusPill status={status} />
+      </div>
+      <div className="flex items-center justify-between gap-20">
+        <div className="mt-2 text-sm gap-2">
+          <div className="font-medium">{`${firstName} ${lastName}`}</div>
+          <div className="text-[#334155] dark:text-[#94A3B8]">{notes}</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/appointments/${_id}/details`}
+            className="rounded-xl border border-slate-200/40 px-3 py-2 text-xs font-medium text-[#334155] hover:bg-slate-200/30 dark:border-slate-800/60 dark:text-[#94A3B8] dark:hover:bg-slate-800/50"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
-                <span className="font-semibold">{`${formatSofiaTime(a.startsAt)} PM`}</span>
-              </div>
-              <StatusPill status={a.status} />
-            </div>
-            <div className="mt-2 text-sm">
-              <div className="font-medium">{`${a.firstName} ${a.lastName}`}</div>
-              <div className="text-[#334155] dark:text-[#94A3B8]">
-                {a.notes}
-              </div>
-            </div>
-          </li>
-        ))}
-        {upcoming.length > 0 ? (
-          <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
-            <span>No more items.</span>
-          </li>
-        ) : (
-          <h3 className="text-center text-lg font-medium mt-10 text-[#334155] dark:text-[#94A3B8]">
-            You don't have any appointments yet
-          </h3>
-        )}
-      </ul>
-    </MotionAside>
+            View
+          </Link>
+          <Link
+            to={`/appointments/${_id}/update`}
+            className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
+          >
+            Edit
+          </Link>
+        </div>
+      </div>
+    </li>
   );
 }

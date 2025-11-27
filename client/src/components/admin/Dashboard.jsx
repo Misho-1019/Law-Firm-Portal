@@ -20,6 +20,7 @@ import UpcomingList from "./upcoming/UpcomingList";
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
 const MotionSection = motion.section;
+const MotionAside = motion.aside;
 
 export default function AdminDashboard() {
   const timestamp = new Date();
@@ -42,7 +43,7 @@ export default function AdminDashboard() {
   const upcoming = allAppointments.filter((a) => {
     const appt = new Date(a?.startsAt);
     return appt > timestamp;
-  }); 
+  });
 
   if (isLoading) {
     return (
@@ -174,7 +175,41 @@ export default function AdminDashboard() {
           </MotionSection>
 
           {/* Upcoming list (right) */}
-          <UpcomingList upcoming={upcoming}/>
+          <MotionAside
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.05 }}
+            className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+          >
+            <div className="p-4 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Upcoming</h3>
+                <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                  Next appointments
+                </p>
+              </div>
+              <Link
+                to="/appointments"
+                className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5 border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
+
+            <ul className="p-4 space-y-3">
+              {upcoming.map(appointment => <UpcomingList key={appointment._id} {...appointment}/>)}
+              {upcoming.length > 0 ? (
+                <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
+                  <span>No more items.</span>
+                </li>
+              ) : (
+                <h3 className="text-center text-lg font-medium mt-10 text-[#334155] dark:text-[#94A3B8]">
+                  You don't have any appointments yet
+                </h3>
+              )}
+            </ul>
+          </MotionAside>
 
           {/* Activity feed / notices full width */}
           <MotionSection
