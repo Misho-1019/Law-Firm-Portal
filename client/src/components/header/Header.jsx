@@ -27,6 +27,7 @@ export default function Header({ initialActive = "Home" }) {
     { label: "Appointments", href: "/appointments" },
     { label: "Dashboard", href: "/admin" },
     { label: "Create appointment", href: "/create" },
+    { label: "Time Off", href: "/timeoff" },
     { label: "Logout", href: "/logout" },
   ]
   
