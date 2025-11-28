@@ -16,6 +16,7 @@ import {
 import appointmentsService from "../../services/appointmentsService";
 import Dates from "./calendar/Dates";
 import UpcomingList from "./upcoming/UpcomingList";
+import timeOffService from "../../services/timeOffService";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -25,14 +26,22 @@ const MotionAside = motion.aside;
 export default function AdminDashboard() {
   const timestamp = new Date();
   const [appointments, setAppointments] = useState([]);
+  const [timeOffItems, setTimeOffItems] = useState([])
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    appointmentsService
-      .getAll()
-      .then(setAppointments)
-      .finally(() => setIsLoading(false));
-  }, []);
+    setIsLoading(true)
+
+    Promise.all([
+      appointmentsService.getAll(),
+      timeOffService.getAll(),
+    ])
+    .then(([appts, timeOff]) => {
+      setAppointments(appts);
+      setTimeOffItems(timeOff);
+    })
+    .finally(() => setIsLoading(false))
+  }, [])
 
   const allAppointments = appointments[0] || [];
 
@@ -170,7 +179,7 @@ export default function AdminDashboard() {
             className="lg:col-span-2 rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
             {/* {allAppointments.map(appointment => <Dates key={appointment._id} {...appointment} />)} */}
-            <Dates appointments={allAppointments} />
+            <Dates appointments={allAppointments} timeOff={timeOffItems} />
             {/* Days grid */}
           </MotionSection>
 

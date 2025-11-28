@@ -37,7 +37,7 @@ const keyFromInstantSofia = (date) =>
 const keyFromPartsSofia = (y, m, d) =>
   new Date(Date.UTC(y, m, d, 12, 0, 0)).toLocaleDateString("en-CA", { timeZone: SOFIA_TZ });
 
-export default function Dates({ appointments = [] }) {
+export default function Dates({ appointments = [], timeOff = [] }) {
   const now = useMemo(() => new Date(), []);
   const [current, setCurrent] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [selected, setSelected] = useState(now);
@@ -122,6 +122,16 @@ export default function Dates({ appointments = [] }) {
           const count = apptCountByDay.get(cellKey) || 0;
           const hasAppt = count > 0;
 
+          const matchingTimeOff = timeOff.filter(
+            (t) => t.dateFrom <= cellKey && t.dateTo >= cellKey
+          );
+
+          const isTimeOff = matchingTimeOff.length > 0;
+
+          const isFullDayOff = matchingTimeOff.some((t) => !t.from && !t.to)
+
+          const isPartialOff = isTimeOff && !isFullDayOff
+
           return (
             <button
               key={idx}
@@ -135,30 +145,48 @@ export default function Dates({ appointments = [] }) {
                   ? "border-transparent [background:linear-gradient(#fff,#fff),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)] [background-origin:border-box] [background-clip:padding-box,border-box] dark:[background:linear-gradient(#0F1117,#0F1117),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)]"
                   : "",
                 isSel ? "bg-[#2F80ED]/10 border-[#2F80ED]/40" : "",
+                isFullDayOff
+                  ? "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-500/60 text-red-700 dark:text-red-200"
+                  : "",
               ].join(" ")}
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold">{d.getDate()}</span>
 
-                {/* Dot or count badge */}
-                {hasAppt && (
-                  <span
-                    title={`${count} appointment${count > 1 ? "s" : ""}`}
-                    className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 text-[10px] font-semibold"
-                  >
-                    ● {count}
-                  </span>
-                )}
+                <div className="flex flex-col items-end gap-1">
+                  {/* Full-day time off pill */}
+                  {isFullDayOff && (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-100 px-2 py-0.5 text-[10px] font-semibold">
+                      Time off
+                    </span>
+                  )}
 
-                {isToday && (
-                  <span className="rounded-md bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 text-[10px] font-semibold">
-                    Today
-                  </span>
-                )}
+                  {/* Appointment count badge (only if not full-day off) */}
+                  {!isFullDayOff && hasAppt && (
+                    <span
+                      title={`${count} appointment${count > 1 ? "s" : ""}`}
+                      className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 text-[10px] font-semibold"
+                    >
+                      ● {count}
+                    </span>
+                  )}
+
+                  {/* Today badge stays always visible if today */}
+                  {isToday && (
+                    <span className="rounded-md bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 text-[10px] font-semibold">
+                      Today
+                    </span>
+                  )}
+                </div>
               </div>
 
               {hasAppt && (
                 <span className="pointer-events-none absolute left-3 right-3 bottom-2 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
+              )}
+
+              {/* Red line for any time off (full-day or partial) */}
+              {isTimeOff && (
+                <span className="pointer-events-none absolute left-3 right-3 bottom-1 h-[2px] rounded-full bg-red-500/80" />
               )}
             </button>
           );

@@ -17,6 +17,7 @@ import EditAppointment from "./components/edit/Edit";
 import GuestGuard from "./components/guards/GuestGuard";
 import AdminGuard from "./components/guards/AdminGuard";
 import ClientGuard from "./components/guards/ClientGuard";
+import TimeOffPage from "./components/admin/TimeOff";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           </Route>
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/timeoff" element={<TimeOffPage />} />
           </Route>
           <Route element={<ClientGuard />}>
             <Route path="/client" element={<ClientDashboard />} />
