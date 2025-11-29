@@ -18,6 +18,7 @@ import GuestGuard from "./components/guards/GuestGuard";
 import AdminGuard from "./components/guards/AdminGuard";
 import ClientGuard from "./components/guards/ClientGuard";
 import TimeOffPage from "./components/admin/TimeOff";
+import TimeOffDetailsPage from "./components/admin/TimeOffDetails";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/timeoff" element={<TimeOffPage />} />
+            <Route path="/timeoff/:date" element={<TimeOffDetailsPage />} />
           </Route>
           <Route element={<ClientGuard />}>
             <Route path="/client" element={<ClientDashboard />} />

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 
 function isSameDay(a, b) {
   return (
@@ -8,7 +9,9 @@ function isSameDay(a, b) {
   );
 }
 
-function mondayFirst(d) { return (d.getDay() + 6) % 7; }
+function mondayFirst(d) {
+  return (d.getDay() + 6) % 7;
+}
 
 function getWeeks(year, month) {
   const first = new Date(year, month, 1);
@@ -18,7 +21,10 @@ function getWeeks(year, month) {
   const cur = new Date(start);
   for (let w = 0; w < 6; w++) {
     const row = [];
-    for (let i = 0; i < 7; i++) { row.push(new Date(cur)); cur.setDate(cur.getDate() + 1); }
+    for (let i = 0; i < 7; i++) {
+      row.push(new Date(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
     weeks.push(row);
   }
   return weeks;
@@ -35,11 +41,16 @@ const keyFromInstantSofia = (date) =>
 
 // Build a cell key from Y/M/D at UTC noon, then format in Sofia
 const keyFromPartsSofia = (y, m, d) =>
-  new Date(Date.UTC(y, m, d, 12, 0, 0)).toLocaleDateString("en-CA", { timeZone: SOFIA_TZ });
+  new Date(Date.UTC(y, m, d, 12, 0, 0)).toLocaleDateString("en-CA", {
+    timeZone: SOFIA_TZ,
+  });
 
 export default function Dates({ appointments = [], timeOff = [] }) {
   const now = useMemo(() => new Date(), []);
-  const [current, setCurrent] = useState({ y: now.getFullYear(), m: now.getMonth() });
+  const [current, setCurrent] = useState({
+    y: now.getFullYear(),
+    m: now.getMonth(),
+  });
   const [selected, setSelected] = useState(now);
 
   const weeks = useMemo(() => getWeeks(current.y, current.m), [current]);
@@ -57,7 +68,7 @@ export default function Dates({ appointments = [], timeOff = [] }) {
   // Count appointments per Sofia day
   const apptCountByDay = useMemo(() => {
     const m = new Map();
-    const confirmed = appointments.filter(x => x.status === 'CONFIRMED')
+    const confirmed = appointments.filter((x) => x.status === "CONFIRMED");
     for (const a of confirmed) {
       const raw = a?.startsAt;
       if (!raw) continue;
@@ -74,7 +85,9 @@ export default function Dates({ appointments = [], timeOff = [] }) {
       <div className="flex items-center justify-between p-4 pb-3">
         <div>
           <h2 className="text-lg font-semibold">This month</h2>
-          <p className="text-sm text-[#334155] dark:text-[#94A3B8]">{headerLabel}</p>
+          <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
+            {headerLabel}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -107,7 +120,9 @@ export default function Dates({ appointments = [], timeOff = [] }) {
       {/* Weekday header */}
       <div className="grid grid-cols-7 gap-2 px-4 pt-4 text-xs font-medium text-[#334155] dark:text-[#94A3B8]">
         {weekdays.map((w) => (
-          <div key={w} className="text-center">{w}</div>
+          <div key={w} className="text-center">
+            {w}
+          </div>
         ))}
       </div>
 
@@ -118,38 +133,37 @@ export default function Dates({ appointments = [], timeOff = [] }) {
           const isToday = isSameDay(d, now);
           const isSel = isSameDay(d, selected);
 
-          const cellKey = keyFromPartsSofia(d.getFullYear(), d.getMonth(), d.getDate());
+          const cellKey = keyFromPartsSofia(
+            d.getFullYear(),
+            d.getMonth(),
+            d.getDate()
+          );
           const count = apptCountByDay.get(cellKey) || 0;
           const hasAppt = count > 0;
 
+          // Time off for this cell
           const matchingTimeOff = timeOff.filter(
             (t) => t.dateFrom <= cellKey && t.dateTo >= cellKey
           );
-
           const isTimeOff = matchingTimeOff.length > 0;
+          const isFullDayOff = matchingTimeOff.some((t) => !t.from && !t.to);
 
-          const isFullDayOff = matchingTimeOff.some((t) => !t.from && !t.to)
+          const baseClasses = [
+            "relative h-20 rounded-xl border text-left p-3 transition-colors",
+            inMonth
+              ? "bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]"
+              : "bg-white/60 dark:bg-[#0F1117]/60 border-dashed border-[#E5E7EB] dark:border-[#1F2937] opacity-70",
+            isToday
+              ? "border-transparent [background:linear-gradient(#fff,#fff),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)] [background-origin:border-box] [background-clip:padding-box,border-box] dark:[background:linear-gradient(#0F1117,#0F1117),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)]"
+              : "",
+            isSel ? "bg-[#2F80ED]/10 border-[#2F80ED]/40" : "",
+            isFullDayOff
+              ? "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-500/60 text-red-700 dark:text-red-200"
+              : "",
+          ].join(" ");
 
-          const isPartialOff = isTimeOff && !isFullDayOff
-
-          return (
-            <button
-              key={idx}
-              onClick={() => setSelected(new Date(d))}
-              className={[
-                "relative h-20 rounded-xl border text-left p-3 transition-colors",
-                inMonth
-                  ? "bg-white dark:bg-[#0F1117] border-[#E5E7EB] dark:border-[#1F2937]"
-                  : "bg-white/60 dark:bg-[#0F1117]/60 border-dashed border-[#E5E7EB] dark:border-[#1F2937] opacity-70",
-                isToday
-                  ? "border-transparent [background:linear-gradient(#fff,#fff),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)] [background-origin:border-box] [background-clip:padding-box,border-box] dark:[background:linear-gradient(#0F1117,#0F1117),conic-gradient(from_180deg,#2F80ED33,#06B6D433,#7C3AED33,#2F80ED33)]"
-                  : "",
-                isSel ? "bg-[#2F80ED]/10 border-[#2F80ED]/40" : "",
-                isFullDayOff
-                  ? "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-500/60 text-red-700 dark:text-red-200"
-                  : "",
-              ].join(" ")}
-            >
+          const Inner = (
+            <>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold">{d.getDate()}</span>
 
@@ -164,14 +178,15 @@ export default function Dates({ appointments = [], timeOff = [] }) {
                   {/* Appointment count badge (only if not full-day off) */}
                   {!isFullDayOff && hasAppt && (
                     <span
-                      title={`${count} appointment${count > 1 ? "s" : ""}`}
+                      title={`${count} appointment${
+                        count > 1 ? "s" : ""
+                      }`}
                       className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 text-[10px] font-semibold"
                     >
                       ● {count}
                     </span>
                   )}
 
-                  {/* Today badge stays always visible if today */}
                   {isToday && (
                     <span className="rounded-md bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5 text-[10px] font-semibold">
                       Today
@@ -180,14 +195,40 @@ export default function Dates({ appointments = [], timeOff = [] }) {
                 </div>
               </div>
 
-              {hasAppt && (
+              {/* Bottom lines */}
+              {hasAppt && !isFullDayOff && (
                 <span className="pointer-events-none absolute left-3 right-3 bottom-2 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
               )}
 
-              {/* Red line for any time off (full-day or partial) */}
               {isTimeOff && (
                 <span className="pointer-events-none absolute left-3 right-3 bottom-1 h-[2px] rounded-full bg-red-500/80" />
               )}
+            </>
+          );
+
+          // If this day has any time off, use Link to navigate to details
+          if (isTimeOff) {
+            return (
+              <Link
+                key={idx}
+                to={`/timeoff/${cellKey}`}
+                className={baseClasses}
+                onClick={() => setSelected(new Date(d))}
+              >
+                {Inner}
+              </Link>
+            );
+          }
+
+          // Otherwise, plain button (no navigation)
+          return (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setSelected(new Date(d))}
+              className={baseClasses}
+            >
+              {Inner}
             </button>
           );
         })}
