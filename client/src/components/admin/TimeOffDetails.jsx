@@ -1,12 +1,13 @@
-/* eslint-disable no-unused-vars */
 // src/components/admin/TimeOffDetailsPage.jsx
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import {
   ArrowLeft,
   Calendar as CalendarIcon,
   Clock,
   Briefcase,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import timeOffService from "../../services/timeOffService";
 
@@ -14,6 +15,7 @@ export default function TimeOffDetailsPage() {
   const { date } = useParams(); // expected "YYYY-MM-DD"
   const [isLoading, setIsLoading] = useState(true)
   const [timeOffItems, setTimeOffItems] = useState([])
+  const navigate = useNavigate();
 
   const prettyDate = useMemo(() => {
       if (!date) return "";
@@ -32,6 +34,23 @@ export default function TimeOffDetailsPage() {
       .then(setTimeOffItems)
       .finally(() => setIsLoading(false))
   }, [])
+
+  const timeOffDeleteHandler = async (id, dateFrom, dateTo, from, to) => {
+    let hasConfirm;
+
+    if (from === undefined || to === undefined) {
+        hasConfirm = confirm(`Victor, are you sure you want to delete time off from ${dateFrom} to ${dateTo}?`)
+    }
+    else {
+        hasConfirm = confirm(`Victor, are you sure you want to delete time off for ${dateFrom} from ${from} until ${to}`)
+    }
+
+    if (!hasConfirm) return;
+
+    await timeOffService.delete(id)
+    
+    navigate('/admin')
+  }
 
   const partialOffs = timeOffItems.filter(x => (x.dateFrom === date && x.dateTo === date) || (x.dateFrom <= date && x.dateTo >= date)) 
 
@@ -116,8 +135,25 @@ export default function TimeOffDetailsPage() {
                     </div>
 
                     {/* Placeholder right side – later: delete/edit buttons */}
-                    <div className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] italic">
-                      Actions (edit / delete) will go here later.
+                    <div className="flex flex-col gap-2 text-xs">
+                      {/* Edit button – later you can turn this into a Link to your edit page */}
+                      <Link
+                        type="button"
+                        className="inline-flex items-center justify-center gap-1 rounded-xl border border-[#2F80ED] text-[#2F80ED] px-3 py-1.5 font-semibold hover:bg-[#2F80ED] hover:text-white transition-colors"
+                        // onClick={() => {/* navigate to edit page later */}}
+                      >
+                        <Pencil className="h-3 w-3" />
+                        Edit
+                      </Link>
+                    
+                      {/* Delete button – later you’ll wire timeOffService.delete(item._id) */}
+                      <button
+                        className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-500/70 text-red-600 dark:text-red-300 px-3 py-1.5 font-semibold hover:bg-red-50 dark:hover:bg-red-900/40 transition-colors"
+                        onClick={() => timeOffDeleteHandler(item._id, item.dateFrom, item.dateTo, item.from, item.to)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Delete
+                      </button>
                     </div>
                   </div>
                 );
