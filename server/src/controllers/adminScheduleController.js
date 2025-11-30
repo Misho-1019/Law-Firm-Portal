@@ -4,6 +4,7 @@ import { body, validationResult } from "express-validator";
 import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
 import { isAdmin, isAuth } from "../middlewares/authMiddleware.js";
+import { update } from "../services/availabilityService.js";
 
 const adminScheduleController = Router();
 adminScheduleController.use(isAuth)
@@ -92,6 +93,36 @@ adminScheduleController.post("/timeOff",
     res.status(201).json(item);
   }
 );
+
+adminScheduleController.put("/timeOff/:id",[
+    body("dateFrom").optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+    body("dateTo").optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+    body("from").optional({ checkFalsy: true }).matches(/^\d{2}:\d{2}$/),
+    body("to").optional({ checkFalsy: true }).matches(/^\d{2}:\d{2}$/),
+    body("reason").optional().isString(),
+], async (req, res) => {
+  const errors = validationResult(req)
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
+
+  const { id } = req.params;
+  const data = req.body;
+
+  try {
+    const updatedTimeOff = await update(data, id)
+
+    if (!updatedTimeOff) {
+      return res.status(404).json({ message: 'Time off entry not found!' })
+    }
+
+    res.status(200).json({ updatedTimeOff })
+  } catch (error) {
+    const status = error.status || 500;
+    return res.status(status).json({ message: error.message })
+  }
+})
 
 /**
  * DELETE /admin/timeOff/:id

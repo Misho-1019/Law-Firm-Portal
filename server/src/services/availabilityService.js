@@ -267,7 +267,39 @@ export async function getCalendarForMonth({
   return { days };
 }
 
+export async function update(data, id) {
+  const updateData = {}
+
+  if (data.dateFrom !== undefined) {
+    updateData.dateFrom = data.dateFrom
+  }
+
+  if (data.dateTo !== undefined) {
+    updateData.dateTo = data.dateTo
+  }
+
+  if (data.from !== undefined) {
+    updateData.from = data.from
+  }
+
+  if (data.to !== undefined) {
+    updateData.to = data.to
+  }
+
+  if (data.reason !== undefined) {
+    updateData.reason = data.reason
+  }
+
+  const item = await TimeOff.findByIdAndUpdateData(id, updateData, {
+    new: true,
+    runValidators: true
+  })
+
+  return item
+}
+
 export default {
   getBookableSlotsForDate,
   getCalendarForMonth,
+  updateData
 };

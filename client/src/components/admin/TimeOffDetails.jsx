@@ -36,19 +36,16 @@ export default function TimeOffDetailsPage() {
   }, [])
 
   const timeOffDeleteHandler = async (id, dateFrom, dateTo, from, to) => {
-    let hasConfirm;
+    const isFullDay = !from && !to;
 
-    if (from === undefined || to === undefined) {
-        hasConfirm = confirm(`Victor, are you sure you want to delete time off from ${dateFrom} to ${dateTo}?`)
-    }
-    else {
-        hasConfirm = confirm(`Victor, are you sure you want to delete time off for ${dateFrom} from ${from} until ${to}`)
-    }
+    const hasConfirm = isFullDay
+      ? confirm(`Victor, are you sure you want to delete time off from ${dateFrom} to ${dateTo}?`)
+      : confirm(`Victor, are you sure you want to delete time off for ${dateFrom} from ${from} until ${to}?`);
 
-    if (!hasConfirm) return;
+    if (!hasConfirm) return
 
     await timeOffService.delete(id)
-    
+
     navigate('/admin')
   }
 
