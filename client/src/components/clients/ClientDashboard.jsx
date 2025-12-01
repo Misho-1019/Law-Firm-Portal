@@ -30,15 +30,32 @@ export default function ClientDashboard(){
   const [appointments, setAppointments] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const pageSize = 5;
+  const [currentPage, setCurrentPage] = useState(1)
+
   useEffect(() => {
     appointmentsService.getMine()
       .then(setAppointments)
       .finally(setIsLoading(false))
   }, [])
 
-  console.log(appointments);
-
   const allAppointments = appointments[0] || []
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(allAppointments.length / pageSize)
+  )
+
+  useEffect(() => {
+    setCurrentPage(prev => Math.min(prev || 1, totalPages))
+  }, [totalPages])
+
+  const offset = (currentPage - 1) * pageSize;
+
+  const paginatedAppointments = allAppointments.slice(
+    offset,
+    offset + pageSize
+  )
 
   const upcomingAppt = allAppointments.filter((x) => {
     const appt = new Date(x?.startsAt)
@@ -109,12 +126,33 @@ export default function ClientDashboard(){
             <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
 
             <ul className="p-4 space-y-3">
-              {upcomingAppt.map(appointment => <ItemDashboard key={appointment._id} {...appointment}/> )}
+              {paginatedAppointments.map(appointment => <ItemDashboard key={appointment._id} {...appointment}/> )}
               <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
                 <span>No more items.</span>
                 <ChevronRight className="h-4 w-4"/>
               </li>
             </ul>
+
+            {/* Pagination (static/disabled) */}
+            <div className="mt-4 flex items-center justify-center gap-2 ">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="rounded-xl border border-slate-200/40 px-3 py-2 text-sm text-[#334155] opacity-50 dark:border-slate-800/60 dark:text-[#94A3B8]"
+              >
+                Prev
+              </button>
+              <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                Page {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="rounded-xl border border-slate-200/40 px-3 py-2 text-sm text-[#334155] opacity-50 dark:border-slate-800/60 dark:text-[#94A3B8]"
+              >
+                Next
+              </button>
+            </div>
           </MotionSection>
 
           {/* Sidebar: Updates & Documents */}

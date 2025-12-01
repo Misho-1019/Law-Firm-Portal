@@ -47,3 +47,19 @@ export function getDateAndTime(startsAtIso) {
     time,
   }
 }
+
+export function prettyDate(iso) {
+    if (!iso) return '_';
+
+    const dateIso = iso.slice(0, 10)
+
+    const [year, month, date] = dateIso.split('-')
+    const jsDate = new Date(Number(year), Number(month) - 1, Number(date));
+
+    return jsDate.toLocaleDateString(undefined, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    })
+}
