@@ -290,7 +290,7 @@ export async function update(data, id) {
     updateData.reason = data.reason
   }
 
-  const item = await TimeOff.findByIdAndUpdateData(id, updateData, {
+  const item = await TimeOff.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true
   })
@@ -301,5 +301,5 @@ export async function update(data, id) {
 export default {
   getBookableSlotsForDate,
   getCalendarForMonth,
-  updateData
+  update
 };

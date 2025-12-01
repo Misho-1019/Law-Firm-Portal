@@ -51,6 +51,9 @@ export default {
     create(timeoffData) {
         return request.post(`${baseUrl}/timeOff`, timeoffData)
     },
+    update(timeoffData, timeOffId) {
+        return request.put(`${baseUrl}/timeOff/${timeOffId}`, timeoffData)
+    },
     delete(timeOffId) {
         return request.delete(`${baseUrl}/timeOff/${timeOffId}`)
     }
