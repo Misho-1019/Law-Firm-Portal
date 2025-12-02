@@ -28,6 +28,8 @@ export default function Header({ initialActive = "Home" }) {
     { label: "Dashboard", href: "/admin" },
     { label: "Create appointment", href: "/create" },
     { label: "Time Off", href: "/timeoff" },
+    { label: "Schedule", href: "/schedule" },
+    { label: "Change Your Schedule", href: "/scheduleditor" },
     { label: "Logout", href: "/logout" },
   ]
   
@@ -36,6 +38,7 @@ export default function Header({ initialActive = "Home" }) {
     { label: "Dashboard", href: "/client" },
     { label: "Appointments", href: "/appointments" },
     { label: "Create appointment", href: "/create" },
+    { label: "Schedule", href: "/schedule" },
     { label: "Logout", href: "/logout" },
   ]
 
