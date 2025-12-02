@@ -10,10 +10,12 @@ import {
   Trash2,
 } from "lucide-react";
 import timeOffService from "../../services/timeOffService";
+import useAuth from "../../hooks/useAuth";
 
 export default function TimeOffDetailsPage() {
   const { date } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
+  const { role } = useAuth()
 
   const [isLoading, setIsLoading] = useState(true)
   const [timeOffItems, setTimeOffItems] = useState([])
@@ -177,7 +179,7 @@ export default function TimeOffDetailsPage() {
               })
             )}
           </section>
-          {editingItem && (
+          {role === 'Admin' && editingItem && (
             <QuickEditForm 
               item={editingItem}
               values={editValues}

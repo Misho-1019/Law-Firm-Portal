@@ -24,7 +24,7 @@ adminScheduleController.get("/schedule", async (req, res) => {
  * days[].weekday: 0–6  (0 = Sunday)
  * days[].intervals[]: { from: "HH:MM", to: "HH:MM" }
  */
-adminScheduleController.put("/schedule",
+adminScheduleController.put("/schedule",  isAdmin,
   [
     body("tz").optional().isString(),
     body("days").isArray(),
@@ -73,7 +73,6 @@ adminScheduleController.get("/timeOff", async (req, res) => {
  *   { dateFrom: "2025-12-05", dateTo: "2025-12-05", from: "13:00", to: "15:00", reason: "Court" }
  */
 adminScheduleController.post("/timeOff",
-  isAuth,
   isAdmin,
   [
     body("dateFrom").matches(/^\d{4}-\d{2}-\d{2}$/),
@@ -94,7 +93,7 @@ adminScheduleController.post("/timeOff",
   }
 );
 
-adminScheduleController.put("/timeOff/:id",[
+adminScheduleController.put("/timeOff/:id",  isAdmin, [
     body("dateFrom").optional().matches(/^\d{4}-\d{2}-\d{2}$/),
     body("dateTo").optional().matches(/^\d{4}-\d{2}-\d{2}$/),
     body("from").optional({ checkFalsy: true }).matches(/^\d{2}:\d{2}$/),
@@ -128,7 +127,7 @@ adminScheduleController.put("/timeOff/:id",[
  * DELETE /admin/timeOff/:id
  * Remove a time-off block by ID.
  */
-adminScheduleController.delete("/timeOff/:id", async (req, res) => {
+adminScheduleController.delete("/timeOff/:id",  isAdmin, async (req, res) => {
   await TimeOff.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });

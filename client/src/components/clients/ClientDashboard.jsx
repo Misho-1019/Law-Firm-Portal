@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import appointmentsService from "../../services/appointmentsService";
-import { getDateAndTime } from "../../utils/dates";
+import { getDateAndTime, prettyDate } from "../../utils/dates";
 import ItemDashboard from "./item/ItemDashboard";
 
 const MotionSection = motion.section;
@@ -63,8 +63,10 @@ export default function ClientDashboard(){
   })
     
   const nextAppt1 = upcomingAppt[0] || [];
+
+  const pDate = prettyDate(String(nextAppt1.startsAt))
   
-  const {day, date, time} = getDateAndTime(String(new Date(nextAppt1.startsAt)));
+  const {_day, _date, time} = getDateAndTime(String(new Date(nextAppt1.startsAt)));
 
   const updates = [
     { id:'u1', kind:'info', text:'Please bring your contract draft (PDF).' },
@@ -97,7 +99,7 @@ export default function ClientDashboard(){
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED]"><Clock className="h-5 w-5"/></div>
                 <div>
                   <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Next appointment</div>
-                  <div className="text-xl font-semibold">{day}, {date} - {time}</div>
+                  <div className="text-xl font-semibold">{pDate} - {time}</div>
                   <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{nextAppt1.service} · with Victor Todorov</div>
                   <div className="mt-2 flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><MapPin className="h-4 w-4"/>Law Office · 12 Vitosha Blvd</div>
