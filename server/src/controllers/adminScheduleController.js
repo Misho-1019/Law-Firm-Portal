@@ -4,7 +4,7 @@ import { body, validationResult } from "express-validator";
 import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
 import { isAdmin, isAuth } from "../middlewares/authMiddleware.js";
-import { update } from "../services/availabilityService.js";
+import { getCalendarWeek, update } from "../services/availabilityService.js";
 
 const adminScheduleController = Router();
 adminScheduleController.use(isAuth)
@@ -51,6 +51,27 @@ adminScheduleController.put("/schedule",  isAdmin,
     res.json(doc);
   }
 );
+
+adminScheduleController.get('/calendar/week', async (req, res) => {
+  const fromStr = req.body.from;
+  const toStr = req.body.to;
+
+  if (!fromStr || !toStr) {
+    return res
+      .status(400)
+      .json({ message: "Query params 'from' and 'to' are required (YYYY-MM-DD)." })
+  }
+
+  try {
+    const payload = await getCalendarWeek(fromStr, toStr)
+
+    return res.status(200).json(payload)
+  } catch (err) {
+    console.error('Error in GET /admin/calendar/week:', err);
+    const status = err.status || 500;
+    return res.status(status).json({ message: err.message || "Failed to build calendar week." })
+  }
+})
 
 /**
  * GET /admin/timeOff

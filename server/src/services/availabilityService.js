@@ -3,11 +3,14 @@ import { DateTime, Interval } from "luxon";
 import Appointment from "../models/Appointment.js";
 import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
+import { toSofiaISO, SOFIA_TZ } from "../lib/time.js";
 
 const TZ = "Europe/Sofia";
 const SLOT_STEP_MIN = 30;
 const DEFAULT_DURATION_MIN = 120;
 const MIN_START_SPACING_MIN = 120;
+const WORK_START = '09:00';
+const WORK_END = '17:00';
 
 /**
  * Build an Interval [fromHHMM, toHHMM] for a given ISO date (local TZ).
@@ -77,6 +80,21 @@ function respectsStartSpacing(slotStartUTC, existingStartUTC, spacingMin) {
   return existingStartUTC.every(
     (s) => Math.abs(slotStartUTC.diff(s, "minutes").minutes) >= spacingMin
   );
+}
+
+function clampToWorkingWindow(fromStr, toStr) {
+  let from = fromStr || WORK_START;
+  let to = toStr || WORK_END;
+
+  if (from < WORK_START) from = WORK_START;
+  if (to > WORK_END) to = WORK_END;
+
+  if (from >= to) return null;
+  return { from, to }
+}
+
+function isoDateFromJS(d) {
+  return d.toISOString().slice(0, 10);
 }
 
 /**
@@ -298,8 +316,136 @@ export async function update(data, id) {
   return item
 }
 
+export async function getCalendarWeek(fromStr, toStr) {
+  if (!fromStr || !toStr) {
+    const err = new Error(`from and to are required (YYYY-MM-DD)`);
+    err.status = 400;
+    throw err;
+  }
+
+  // 1) Load working schedule
+  const scheduleDoc = await WorkingSchedule.findOne().lean();
+  const tz = scheduleDoc?.tz || scheduleDoc?.tzone || SOFIA_TZ || "Europe/Sofia";
+  const dayConfigs = Array.isArray(scheduleDoc?.days) ? scheduleDoc.days : [];
+
+  // 2) Load time off blocks overlapping the range
+  const timeOffList = await TimeOff.find({
+    dateFrom: { $lte: toStr },
+    dateTo: { $gte: fromStr },
+  }).lean();
+
+  // 3) Load appointments in that range (in UTC, then later filter per local date)
+  const rangeStartLocal = DateTime.fromISO(fromStr, { zone: TZ }).startOf("day");
+  const rangeEndLocal = DateTime.fromISO(toStr, { zone: TZ }).endOf("day");
+
+  const rangeStartUtc = rangeStartLocal.toUTC().toJSDate();
+  const rangeEndUtc = rangeEndLocal.toUTC().toJSDate();
+
+  const appointments = await Appointment.find({
+    status: { $nin: ["CANCELLED"] },
+    startsAt: {
+      $gte: rangeStartUtc,
+      $lte: rangeEndUtc,
+    },
+  })
+    .select("startsAt durationMin service firstName lastName")
+    .lean();
+
+  const days = [];
+  const cursor = new Date(fromStr + "T00:00:00.000Z");
+  const end = new Date(toStr + "T00:00:00.000Z");
+
+  while (cursor <= end) {
+    const dateIso = isoDateFromJS(cursor); // "YYYY-MM-DD"
+    // weekday in your WorkingSchedule: 0=Sunday,1=Monday,... (you used getUTCDay())
+    const weekday = cursor.getUTCDay();
+
+    const items = [];
+
+    // 4a) Working intervals from schedule
+    const cfg = dayConfigs.find((x) => x.weekday === weekday);
+    const intervals = cfg?.intervals || [];
+
+    intervals.forEach((intv, idx) => {
+      const clamped = clampToWorkingWindow(intv.from, intv.to);
+      if (!clamped) return;
+
+      items.push({
+        id: `working_${dateIso}_${idx}`,
+        type: "working",
+        title: "Working hours",
+        startTime: clamped.from, // "HH:MM"
+        endTime: clamped.to,     // "HH:MM"
+        note: null,
+      });
+    });
+
+    // 4b) Time off blocks affecting this date
+    timeOffList.forEach((off) => {
+      if (dateIso < off.dateFrom || dateIso > off.dateTo) return;
+
+      const isFullDay = !off.from && !off.to;
+      const rawFrom = isFullDay ? WORK_START : off.from;
+      const rawTo = isFullDay ? WORK_END : off.to;
+
+      const clamped = clampToWorkingWindow(rawFrom, rawTo);
+      if (!clamped) return;
+
+      items.push({
+        id: off._id.toString(),
+        type: "timeoff",
+        title: off.reason || "Time off",
+        startTime: clamped.from,
+        endTime: clamped.to,
+        note: null,
+      });
+    });
+
+    // 4c) Appointments on this date (Sofia local time)
+    appointments.forEach((appt) => {
+      // Convert startsAt (UTC in DB) to Sofia local
+      const startLocal = DateTime.fromJSDate(appt.startsAt).setZone(TZ);
+
+      const localDate = startLocal.toISODate(); // "YYYY-MM-DD"
+      if (localDate !== dateIso) return;
+
+      const dur =
+        Number(appt.durationMin) > 0
+          ? Number(appt.durationMin)
+          : DEFAULT_DURATION_MIN;
+
+      const endLocal = startLocal.plus({ minutes: dur });
+
+      const timeFrom = startLocal.toFormat("HH:mm");
+      const timeTo = endLocal.toFormat("HH:mm");
+
+      const clamped = clampToWorkingWindow(timeFrom, timeTo);
+      if (!clamped) return;
+
+      const noteParts = [appt.firstName || "", appt.lastName || ""].filter(Boolean);
+      const note = noteParts.join(" ") || null;
+
+      items.push({
+        id: appt._id.toString(),
+        type: "appointment",
+        title: appt.service || "Appointment",
+        startTime: clamped.from,
+        endTime: clamped.to,
+        note,
+      });
+    });
+
+    days.push({ date: dateIso, items });
+
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return { tz, days };
+}
+
 export default {
   getBookableSlotsForDate,
   getCalendarForMonth,
-  update
+  update,
+  getCalendarWeek,
 };

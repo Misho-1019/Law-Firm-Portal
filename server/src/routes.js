@@ -10,6 +10,6 @@ const router = Router();
 router.use('/auth', authController);
 router.use('/appointments', appointmentController)
 router.use('/availability', availabilityController)
-router.use('/admin', isAuth, isAdmin, adminScheduleController)
+router.use('/admin', isAuth, adminScheduleController)
 
 export default router;

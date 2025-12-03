@@ -14,7 +14,7 @@ const daySchema = new Schema({
 }, { _id: false })
 
 const scheduleSchema = new Schema({
-    tzone: {
+    tz: {
         type: String,
         default: 'Europe/Sofia',
     },
