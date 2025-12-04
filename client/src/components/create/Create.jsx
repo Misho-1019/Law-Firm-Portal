@@ -13,27 +13,74 @@ import { useNavigate } from "react-router";
 import { toUTCISO } from "../../utils/time";
 import appointmentsService from "../../services/appointmentsService";
 import useAuth from "../../hooks/useAuth";
+import { availabilityService } from "../../services/availabilityService";
+import { getDateAndTime } from "../../utils/dates";
 
 const MotionSection = motion.section;
+
+function normalizeDuration(raw) {
+  let d = Number(raw)
+
+  if (!Number.isFinite(d)) d = 120;
+
+  d = Math.max(15, Math.min(480, d))
+
+  return d;
+}
 
 export default function CreateAppointmentPage() {
   const [selectedTime, setSelectedTime] = useState("");
   const [mode, setMode] = useState("In-Person");
+  const [date, setDate] = useState('')
+  const [duration, setDuration] = useState('120')
+  const [availableTimes, setAvailableTimes] = useState([])
+  const [slotsLoading, setSlotsLoading] = useState(false)
+
   const { id } = useAuth()
   const navigate = useNavigate();
+
+  const loadSlotsForDate = async (nextDate, currentDuration) => {
+    if (!nextDate) {
+      setAvailableTimes([])
+
+      return;
+    }
+
+    const effDuration = normalizeDuration(currentDuration);
+    
+    setSlotsLoading(true)
+    setAvailableTimes([])
+    setSelectedTime('')
+
+    try {
+      const res = await availabilityService.getSlots(nextDate, effDuration);
+      const slots = res.slots || [];
+
+      const times = slots.map((iso) => {
+        const d = new Date(iso);
+
+        const { day, date, time } = getDateAndTime(String(d))
+
+        return time;
+      })
+
+      setAvailableTimes(times)
+    } catch (err) {
+      console.error('Failed to load slots:', err);
+      setAvailableTimes([]);
+    } finally {
+      setSlotsLoading(false)
+    }
+  }
 
   const formAction = async (formData) => {
     const date = formData.get("date");
     const time = formData.get("time");
+
     const rawDuration = formData.get("durationMin")
+    let durationMin = normalizeDuration(rawDuration)
 
     const startsAt = toUTCISO(date, time, "Europe/Sofia");
-
-    let durationMin = Number(rawDuration)
-
-    if (!Number.isFinite(durationMin)) durationMin = 120;
-
-    durationMin = Math.max(15, Math.min(480, durationMin))
 
     const appointmentData = {
       ...Object.fromEntries(formData),
@@ -49,22 +96,25 @@ export default function CreateAppointmentPage() {
     navigate('/appointments')
   };
 
+  const handleDateChange = async (value) => {
+    setDate(value)
+
+    await loadSlotsForDate(value, duration)
+  }
+
+  const handleDurationChange = async (e) => {
+    const value = e.target.value;
+
+    setDuration(value)
+
+    if (date) {
+      await loadSlotsForDate(date, value)
+    }
+  }
+
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
-        {/* Header crumb */}
-        <header className="px-4 sm:px-6 lg:px-8 pt-6">
-          <nav className="text-sm text-[#334155] dark:text-[#94A3B8] flex items-center gap-2">
-            <span className="opacity-80">Home</span>
-            <ChevronRight className="h-4 w-4 opacity-60" />
-            <span className="opacity-80">Appointments</span>
-            <ChevronRight className="h-4 w-4 opacity-60" />
-            <span className="font-medium text-[#0B1220] dark:text-white">
-              Create
-            </span>
-          </nav>
-        </header>
-
         {/* Main card */}
         <main className="flex-1 flex items-center justify-center px-4 py-10">
           <MotionSection
@@ -143,6 +193,8 @@ export default function CreateAppointmentPage() {
                     type="date"
                     icon={<CalendarIcon className="h-4 w-4" />}
                     hint="Format: YYYY-MM-DD"
+                    value={date}
+                    onChange={(e) => handleDateChange(e.target.value)}
                   />
 
                   {/* Time grid (09:00–17:00) */}
@@ -158,9 +210,7 @@ export default function CreateAppointmentPage() {
                       name="time"
                       value={selectedTime}
                       onChange={setSelectedTime}
-                      start="09:00"
-                      end="17:00"
-                      stepMinutes={30}
+                      slots={date ? availableTimes : [] }
                     />
                     {/* keep a hidden input so forms still have a value if you later wire this up */}
                     <input
@@ -168,10 +218,25 @@ export default function CreateAppointmentPage() {
                       name="time"
                       value={selectedTime || ""}
                     />
-                    <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                      Business hours only. Actual availability may vary by
-                      bookings/spacing.
-                    </p>
+
+                    {slotsLoading && (
+                      <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                        Loading availability…
+                      </p>
+                    )}
+
+                    {!slotsLoading && date && availableTimes.length === 0 && (
+                      <p className="text-xs text-[#DC2626]">
+                        No available slots for this date. Please pick another
+                        day or change the duration.
+                      </p>
+                    )}
+
+                    {!date && (
+                      <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                        Select a date to see available times.
+                      </p>
+                    )}
                   </div>
 
                   {/* Duration */}
@@ -186,6 +251,8 @@ export default function CreateAppointmentPage() {
                     step={15}
                     placeholder="120"
                     hint="Allowed range: 15–480. Default is 120."
+                    value={duration}
+                    onChange={handleDurationChange}
                   />
 
                   {/* Notes */}
@@ -202,6 +269,7 @@ export default function CreateAppointmentPage() {
                     type="submit"
                     className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white"
                     aria-label="Create appointment"
+                    disabled={!date || !selectedTime}
                   >
                     Create appointment
                   </button>
@@ -317,20 +385,29 @@ function TimeGrid({
   start = "09:00",
   end = "17:00",
   stepMinutes = 30,
+  slots,
 }) {
-  const slots = [];
-  const [sh, sm] = start.split(":").map(Number);
-  const [eh, em] = end.split(":").map(Number);
-  const startMin = sh * 60 + sm;
-  const endMin = eh * 60 + em;
-  for (let m = startMin; m <= endMin; m += stepMinutes) {
-    const h = String(Math.floor(m / 60)).padStart(2, "0");
-    const mi = String(m % 60).padStart(2, "0");
-    slots.push(`${h}:${mi}`);
+  let finalSlots;
+
+  if (slots !== undefined) {
+    finalSlots = slots;
+  } else {
+    const generated = [];
+    const [sh, sm] = start.split(":").map(Number);
+    const [eh, em] = end.split(":").map(Number);
+    const startMin = sh * 60 + sm;
+    const endMin = eh * 60 + em;
+    for (let m = startMin; m <= endMin; m += stepMinutes) {
+      const h = String(Math.floor(m / 60)).padStart(2, "0");
+      const mi = String(m % 60).padStart(2, "0");
+      generated.push(`${h}:${mi}`);
+    }
+
+    finalSlots = generated;
   }
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-      {slots.map((t) => (
+      {finalSlots.map((t) => (
         <button
           key={t}
           type="button"
