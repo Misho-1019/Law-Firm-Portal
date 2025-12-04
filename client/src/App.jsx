@@ -19,8 +19,8 @@ import AdminGuard from "./components/guards/AdminGuard";
 import ClientGuard from "./components/guards/ClientGuard";
 import TimeOffPage from "./components/admin/TimeOff";
 import TimeOffDetailsPage from "./components/admin/TimeOffDetails";
-import ScheduleOverview from "./components/schedule/ScheduleOverview";
 import ScheduleEditor from "./components/admin/ScheduleEditor";
+import SchedulePage from "./components/schedule/Schedule";
 
 function App() {
   return (
@@ -37,7 +37,7 @@ function App() {
             <Route path="/appointments/:appointmentId/details" element={<AppointmentDetails />} />
             <Route path="/appointments/:appointmentId/update" element={<EditAppointment />} />
             <Route path="/timeoff/:date" element={<TimeOffDetailsPage />} />
-            <Route path="/schedule" element={<ScheduleOverview />} />
+            <Route path="/schedule" element={<SchedulePage />} />
           </Route>
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<AdminDashboard />} />

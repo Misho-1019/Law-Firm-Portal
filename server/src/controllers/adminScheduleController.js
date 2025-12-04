@@ -53,8 +53,8 @@ adminScheduleController.put("/schedule",  isAdmin,
 );
 
 adminScheduleController.get('/calendar/week', async (req, res) => {
-  const fromStr = req.body.from;
-  const toStr = req.body.to;
+  const fromStr = req.query.from;
+  const toStr = req.query.to;
 
   if (!fromStr || !toStr) {
     return res
