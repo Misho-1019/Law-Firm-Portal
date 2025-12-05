@@ -211,7 +211,7 @@ export default function Dates({ appointments = [], timeOff = [] }) {
             return (
               <Link
                 key={idx}
-                to={`/timeoff/${cellKey}`}
+                to={`/day/${cellKey}`}
                 className={baseClasses}
                 onClick={() => setSelected(new Date(d))}
               >
@@ -222,14 +222,14 @@ export default function Dates({ appointments = [], timeOff = [] }) {
 
           // Otherwise, plain button (no navigation)
           return (
-            <button
+            <Link
               key={idx}
-              type="button"
+              to={`/day/${cellKey}`}
               onClick={() => setSelected(new Date(d))}
               className={baseClasses}
             >
               {Inner}
-            </button>
+            </Link>
           );
         })}
       </div>

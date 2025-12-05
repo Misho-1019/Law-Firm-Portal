@@ -9,9 +9,10 @@ import {
   Plus,
   Link as LinkIcon,
 } from "lucide-react";
-import { Link as RRLink, useInRouterContext } from "react-router";
+import { Link, Link as RRLink, useInRouterContext, useNavigate } from "react-router";
 import scheduleService from "../../services/scheduleService";
 import useAuth from "../../hooks/useAuth";
+import { formatSofiaDate } from "../../utils/dates";
 
 const MotionSection = motion.section;
 
@@ -210,10 +211,19 @@ function LegendSwatch({ className = "", label }) {
 }
 
 function DayColumn({ date, items }) {
+  const navigate = useNavigate()
   const weekday = new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date);
   const day = date.getDate();
+  const [ month, d, year ] = String(formatSofiaDate(date)).split('/');
+  const validDate = `${year}-${month}-${d}`;
+
+  const handleDayClick = () => {
+    navigate(`/day/${validDate}`)
+  }
+  
+  
   return (
-    <div className="bg-white dark:bg-[#111827]">
+    <div onClick={handleDayClick} role="button" tabIndex={0} className="bg-white dark:bg-[#111827]">
       <div className="flex items-center justify-between px-3.5 py-3 border-b border-[#E5E7EB] dark:border-[#1F2937]">
         <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{weekday}</div>
         <div className="text-base font-semibold">
@@ -261,13 +271,15 @@ function EventChip({ item }) {
           ) : null}
         </div>
         {isBooked && role === 'Admin' ? (
-          <SafeLink
-            to={`/appointments/${item.id}/details`}
-            className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-[#2F80ED] px-3 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-2 focus:ring-[rgb(47,128,237)/0.40]"
-            title="Open details"
-          >
-            <LinkIcon className="h-3.5 w-3.5" /> Details
-          </SafeLink>
+          <div className="shrink-0" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+            <SafeLink
+              to={`/appointments/${item.id}/details`}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-[#2F80ED] px-3 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-2 focus:ring-[rgb(47,128,237)/0.40]"
+              title="Open details"
+              >
+              <LinkIcon className="h-3.5 w-3.5" />
+            </SafeLink>
+          </div>
         ) : null}
       </div>
     </div>

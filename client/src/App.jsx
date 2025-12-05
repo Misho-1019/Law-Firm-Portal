@@ -21,6 +21,7 @@ import TimeOffPage from "./components/admin/TimeOff";
 import TimeOffDetailsPage from "./components/admin/TimeOffDetails";
 import ScheduleEditor from "./components/admin/ScheduleEditor";
 import SchedulePage from "./components/schedule/Schedule";
+import DayDetailsPage from "./components/day/DayDetails";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="/appointments/:appointmentId/update" element={<EditAppointment />} />
             <Route path="/timeoff/:date" element={<TimeOffDetailsPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/day/:date" element={<DayDetailsPage />} />
           </Route>
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<AdminDashboard />} />
