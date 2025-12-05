@@ -13,12 +13,25 @@ import {
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router";
 import { prettyDate } from "../../utils/dates";
+import { useEffect, useState } from "react";
+import appointmentsService from "../../services/appointmentsService";
+import { availabilityService } from "../../services/availabilityService";
+import timeOffService from "../../services/timeOffService";
 
 const MotionSection = motion.section;
 
 export default function DayDetailsPage() {
   const { date: dateParam } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
+
+  const [appointments, setAppointments] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const [freeSlots, setFreeSlots] = useState([])
+  const [durationMin, setDurationMin] = useState('120')
+  const [_slotsLoading, setSlotsLoading] = useState(false)
+
+  const [timeOff, setTimeOff] = useState([])
 
   const titleDate = prettyDate(String(dateParam));
 
@@ -27,12 +40,28 @@ export default function DayDetailsPage() {
     dateParam &&
     new Date().toISOString().slice(0, 10) === dateParam;
 
-  // Later these will come from real data
-  const summary = {
-    totalAppointments: 3,
-    freeSlots: 4,
-    hasTimeOff: true,
-  };
+  useEffect(() => {
+    appointmentsService.getAll()
+      .then(setAppointments)
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  const allAppointments = appointments[0] || [];
+
+  useEffect(() => {
+    if(!dateParam) return
+    
+    setSlotsLoading(true)
+
+    availabilityService.getSlots(dateParam, Number(durationMin))
+      .then(setFreeSlots)
+      .finally(() => setSlotsLoading(false))
+  }, [dateParam, durationMin])
+
+  useEffect(() => {
+    timeOffService.getAll()
+      .then(setTimeOff)
+  }, [])
 
   const dummyAppointments = [
     {
@@ -98,6 +127,30 @@ export default function DayDetailsPage() {
     navigate(`/day/${next}`);
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
+        Loading appointments…
+      </div>
+    );
+  }
+
+  const todayAppts = allAppointments.filter(x => {
+    const d = new Date(x?.startsAt)
+    const isoDay = d.toISOString().slice(0, 10)
+    return isoDay === dateParam;
+  })
+
+  const hasTimeOff = timeOff.filter((x) => {
+    if (!x?.dateFrom || !x?.dateTo) return false;
+    
+    return (
+      x?.dateFrom === dateParam || 
+      (dateParam >= x?.dateFrom && dateParam <= x?.dateTo)
+    )
+  })
+  
+
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
@@ -152,7 +205,7 @@ export default function DayDetailsPage() {
                 <Clock className="h-4 w-4 text-[#94A3B8]" />
               </div>
               <div className="mt-2 text-2xl font-semibold">
-                {summary.totalAppointments}
+                {todayAppts.length}
               </div>
               <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
                 Total booked for this day
@@ -164,13 +217,32 @@ export default function DayDetailsPage() {
                 <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
                   Free start times
                 </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                    Duration:
+                  </span>
+                  <select 
+                    value={durationMin} 
+                    onChange={(e) => setDurationMin(e.target.value)}
+                    className="text-xs rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-2 py-1"
+                  >
+                    <option value="15">15 min</option>
+                    <option value="30">30 min</option>
+                    <option value="45">45 min</option>
+                    <option value="60">60 min</option>
+                    <option value="90">90 min</option>
+                    <option value="100">100 min</option>
+                    <option value="120">120 min</option>
+                    <option value="135">135 min</option>
+                  </select>
+                </div>
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
               </div>
               <div className="mt-2 text-2xl font-semibold">
-                {summary.freeSlots}
+                {freeSlots.slots?.length}
               </div>
               <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
-                Potential new appointment starts
+                Potential new appointment starts ({durationMin} min)
               </p>
             </div>
 
@@ -182,10 +254,10 @@ export default function DayDetailsPage() {
                 <AlertCircle className="h-4 w-4 text-amber-400" />
               </div>
               <div className="mt-2 text-2xl font-semibold">
-                {summary.hasTimeOff ? "Yes" : "No"}
+                {hasTimeOff.length ? "Yes" : "No"}
               </div>
               <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
-                Restricted intervals for this date
+                Check if time off is for the whole day!
               </p>
             </div>
           </MotionSection>
