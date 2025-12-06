@@ -64,33 +64,6 @@ export default function DayDetailsPage() {
       .then(setTimeOff)
   }, [])
 
-  const dummyAppointments = [
-    {
-      id: "1",
-      time: "09:30 – 10:30",
-      service: "Initial consultation",
-      mode: "In-Person",
-      client: "Elena Ivanova",
-      status: "CONFIRMED",
-    },
-    {
-      id: "2",
-      time: "13:00 – 14:00",
-      service: "Contract review",
-      mode: "Online",
-      client: "Petar Dimitrov",
-      status: "PENDING",
-    },
-    {
-      id: "3",
-      time: "16:00 – 17:00",
-      service: "Follow-up meeting",
-      mode: "In-Person",
-      client: "Maria Georgieva",
-      status: "CONFIRMED",
-    },
-  ];
-
   const dummyFreeSlots = [
     "08:30",
     "10:30",
@@ -371,37 +344,43 @@ export default function DayDetailsPage() {
                 <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
 
                 <ul className="p-4 space-y-3 text-sm">
-                  {dummyAppointments.map((appt) => (
-                    <li
-                      key={appt.id}
-                      className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-3 flex flex-col gap-1"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-[#94A3B8]" />
-                          <span className="font-medium">
-                            {appt.time}
+                  {todayAppts.map((appt) => {
+                    const { _day, _date, time } = getDateAndTime(String(new Date(appt.startsAt)))
+
+                    const end = endTime(time, Number(appt.durationMin))
+
+                    return (
+                      <li
+                        key={appt._id}
+                        className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-3 flex flex-col gap-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-[#94A3B8]" />
+                            <span className="font-medium">
+                              {time} – {end}
+                            </span>
+                          </div>
+                          <StatusPill status={appt.status} />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <span className="text-xs rounded-full bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5">
+                            {appt.service}
+                          </span>
+                          <span className="text-xs rounded-full bg-[#111827]/5 dark:bg-[#F9FAFB]/5 px-2 py-0.5 flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {appt.mode}
+                          </span>
+                          <span className="text-xs rounded-full bg-[#F97316]/10 text-[#F97316] px-2 py-0.5 flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {appt.firstName} {appt.lastName}
                           </span>
                         </div>
-                        <StatusPill status={appt.status} />
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
-                        <span className="text-xs rounded-full bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5">
-                          {appt.service}
-                        </span>
-                        <span className="text-xs rounded-full bg-[#111827]/5 dark:bg-[#F9FAFB]/5 px-2 py-0.5 flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {appt.mode}
-                        </span>
-                        <span className="text-xs rounded-full bg-[#F97316]/10 text-[#F97316] px-2 py-0.5 flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {appt.client}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    )
+                  })}
 
-                  {dummyAppointments.length === 0 && (
+                  {todayAppts.length === 0 && (
                     <li className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-6 text-center text-xs text-[#9CA3AF]">
                       No appointments scheduled for this date yet.
                     </li>
