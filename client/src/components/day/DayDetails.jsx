@@ -59,17 +59,12 @@ export default function DayDetailsPage() {
       .finally(() => setSlotsLoading(false))
   }, [dateParam, durationMin])
 
+  const allFreeSlots = freeSlots.slots || [];
+
   useEffect(() => {
     timeOffService.getAll()
       .then(setTimeOff)
   }, [])
-
-  const dummyFreeSlots = [
-    "08:30",
-    "10:30",
-    "14:00",
-    "15:30",
-  ];
 
   const goPrevDay = () => {
     if (!dateParam) return;
@@ -109,7 +104,7 @@ export default function DayDetailsPage() {
       (dateParam >= x?.dateFrom && dateParam <= x?.dateTo)
     )
   })  
-  
+ 
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
@@ -412,20 +407,23 @@ export default function DayDetailsPage() {
                 <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
 
                 <div className="p-4 flex flex-wrap gap-2">
-                  {dummyFreeSlots.length === 0 ? (
+                  {allFreeSlots.length === 0 ? (
                     <p className="text-xs text-[#9CA3AF]">
                       No free start times for this day.
                     </p>
                   ) : (
-                    dummyFreeSlots.map((t) => (
-                      <button
-                        key={t}
-                        type="button"
+                    allFreeSlots.map((t, i) => {
+                      const { _day, _date, time } = getDateAndTime(String(new Date(t)))
+                      
+                      return (
+                      <Link
+                        key={i}
+                        to={`/create`}
                         className="text-xs rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
                       >
-                        {t}
-                      </button>
-                    ))
+                        {time}
+                      </Link>
+                    )})
                   )}
                 </div>
               </MotionSection>
