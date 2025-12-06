@@ -7,3 +7,13 @@ export function toUTCISO(date, time, tz = 'Europe/Sofia') {
       .toUTC()
       .toISO({ suppressMilliseconds: true })
 }
+
+export function endTime(time, duration) {
+  const [sh, sm] = time.split(':')
+
+  const fullMin = sh * 60 + Number(sm) + duration;
+  const hh = Math.trunc(fullMin / 60);
+  const mm = fullMin % 60;
+
+  return `${hh}:${mm}`
+}

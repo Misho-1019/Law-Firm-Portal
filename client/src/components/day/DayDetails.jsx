@@ -12,11 +12,12 @@ import {
   Info,
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router";
-import { prettyDate } from "../../utils/dates";
+import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { useEffect, useState } from "react";
 import appointmentsService from "../../services/appointmentsService";
 import { availabilityService } from "../../services/availabilityService";
 import timeOffService from "../../services/timeOffService";
+import { endTime } from "../../utils/time";
 
 const MotionSection = motion.section;
 
@@ -90,20 +91,6 @@ export default function DayDetailsPage() {
     },
   ];
 
-  const dummyWorkingHours = [
-    { from: "09:00", to: "12:00" },
-    { from: "13:00", to: "17:00" },
-  ];
-
-  const dummyTimeOff = [
-    {
-      id: "to1",
-      from: "11:30",
-      to: "12:30",
-      reason: "Court hearing",
-    },
-  ];
-
   const dummyFreeSlots = [
     "08:30",
     "10:30",
@@ -141,16 +128,15 @@ export default function DayDetailsPage() {
     return isoDay === dateParam;
   })
 
-  const hasTimeOff = timeOff.filter((x) => {
+  let hasTimeOff = timeOff.filter((x) => {
     if (!x?.dateFrom || !x?.dateTo) return false;
     
     return (
       x?.dateFrom === dateParam || 
       (dateParam >= x?.dateFrom && dateParam <= x?.dateTo)
     )
-  })
+  })  
   
-
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
@@ -256,9 +242,9 @@ export default function DayDetailsPage() {
               <div className="mt-2 text-2xl font-semibold">
                 {hasTimeOff.length ? "Yes" : "No"}
               </div>
-              <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
+              <Link to={`/timeoff/${dateParam}`} className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8] underline">
                 Check if time off is for the whole day!
-              </p>
+              </Link>
             </div>
           </MotionSection>
 
@@ -297,19 +283,29 @@ export default function DayDetailsPage() {
                       Working hours
                     </h3>
                     <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
-                      {dummyWorkingHours.map((w, i) => (
+                      {todayAppts.length === 0 ? (
+                        <p className="text-xs text-[#9CA3AF]">
+                          No appointments scheduled for this date yet. Once bookings are added,
+                          their start and end times will appear here.
+                        </p>
+                      ) : (todayAppts.map((appointment) => {
+                      const {_day, _date, time} = getDateAndTime(String(new Date(appointment.startsAt)));
+
+                      const end = endTime(String(time), Number(appointment.durationMin))                      
+
+                      return (
                         <li
-                          key={i}
+                          key={appointment._id}
                           className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5"
                         >
                           <span>
-                            {w.from} – {w.to}
+                            {time} – {end}
                           </span>
                           <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
                             Working
                           </span>
                         </li>
-                      ))}
+                      )}))}
                     </ul>
                   </div>
 
@@ -319,20 +315,26 @@ export default function DayDetailsPage() {
                       <AlertCircle className="h-4 w-4 text-amber-400" />
                       Time off
                     </h3>
-                    {dummyTimeOff.length === 0 ? (
+                    {hasTimeOff.length === 0 ? (
                       <p className="text-xs text-[#9CA3AF]">
                         No time off recorded for this date.
                       </p>
                     ) : (
                       <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
-                        {dummyTimeOff.map((t) => (
+                        {hasTimeOff.map((t) => (
                           <li
-                            key={t.id}
+                            key={t._id}
                             className="flex items-center justify-between rounded-xl border border-[#F87171]/60 dark:border-[#B91C1C]/80 bg-red-50/60 dark:bg-red-900/30 px-3 py-1.5"
                           >
                             <div>
                               <div className="font-medium text-red-700 dark:text-red-200 text-xs">
-                                {t.from} – {t.to}
+                                {t.from ? (
+                                  <span>
+                                    {t.from} – {t.to}
+                                  </span>
+                                ) : (
+                                  <span>Whole day off</span>
+                                )}
                               </div>
                               <div className="text-[11px] text-red-700/80 dark:text-red-200/80">
                                 {t.reason}
