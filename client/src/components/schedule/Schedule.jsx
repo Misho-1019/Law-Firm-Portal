@@ -94,8 +94,6 @@ export default function SchedulePage() {
       .then(setSchedule)
   }, [])
 
-  console.log(data);
-
   return (
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">

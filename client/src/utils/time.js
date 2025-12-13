@@ -15,5 +15,9 @@ export function endTime(time, duration) {
   const hh = Math.trunc(fullMin / 60);
   const mm = fullMin % 60;
 
-  return `${hh}:${mm}`
+  if (mm === 0) {
+    return `${hh}:${mm}0`;
+  } else {
+    return `${hh}:${mm}`
+  }
 }

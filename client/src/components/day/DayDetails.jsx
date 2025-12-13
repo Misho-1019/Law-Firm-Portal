@@ -18,12 +18,14 @@ import appointmentsService from "../../services/appointmentsService";
 import { availabilityService } from "../../services/availabilityService";
 import timeOffService from "../../services/timeOffService";
 import { endTime } from "../../utils/time";
+import useAuth from "../../hooks/useAuth";
 
 const MotionSection = motion.section;
 
 export default function DayDetailsPage() {
   const { date: dateParam } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
+  const { role } = useAuth()
 
   const [appointments, setAppointments] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -253,27 +255,46 @@ export default function DayDetailsPage() {
                     <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
                       {todayAppts.length === 0 ? (
                         <p className="text-xs text-[#9CA3AF]">
-                          No appointments scheduled for this date yet. Once bookings are added,
-                          their start and end times will appear here.
+                          No appointments scheduled for this date yet or appointments which you don't have permission to see. Look at the 'Free start times' 
+                          section to see available slots.
                         </p>
                       ) : (todayAppts.map((appointment) => {
                       const {_day, _date, time} = getDateAndTime(String(new Date(appointment.startsAt)));
 
-                      const end = endTime(String(time), Number(appointment.durationMin))                      
+                      const end = endTime(String(time), Number(appointment.durationMin))                    
 
-                      return (
-                        <li
-                          key={appointment._id}
-                          className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5"
-                        >
-                          <span>
-                            {time} – {end}
-                          </span>
-                          <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
-                            Working
-                          </span>
-                        </li>
-                      )}))}
+                      if (role === 'Admin') {
+                        return (
+                          <Link
+                            key={appointment._id}
+                            to={`/appointments/${appointment._id}/details`}
+                            className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5"
+                          >
+                            <span>
+                              {time} – {end}
+                            </span>
+                            <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
+                              Working
+                            </span>
+                          </Link>
+                        )
+                      } else {
+                        return (
+                          <li
+                            key={appointment._id}
+                            className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5"
+                          >
+                            <span>
+                              {time} – {end}
+                            </span>
+                            <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
+                              Working
+                            </span>
+                          </li>
+                        )
+                      }
+                      
+                      }))}
                     </ul>
                   </div>
 
