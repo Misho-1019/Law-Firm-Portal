@@ -443,9 +443,42 @@ export async function getCalendarWeek(fromStr, toStr) {
   return { tz, days };
 }
 
+export async function getNextFreeSlotsRange(days = 7, durationMin = DEFAULT_DURATION_MIN) {
+  const nowLocal = DateTime.now().setZone(TZ);
+  const nowUtc = nowLocal.toUTC();
+
+  let cursor = nowLocal.startOf('day')
+
+  for (let offset = 0; offset < days; offset++) {
+    const dateISO = cursor.toISODate();
+
+    let slots = await getBookableSlotsForDate({
+      dateISO,
+      durationMin,
+    })
+
+    if (offset === 0) {
+      slots = slots.filter((iso) => {
+        const slotUtc = DateTime.fromISO(iso).toUTC();
+
+        return slotUtc > nowUtc;
+      })
+    }
+
+    if (slots.length > 0) {
+      return { date: dateISO, slots }
+    }
+
+    cursor = cursor.plus({ days: 1 })
+  }
+
+  return { date: null, slots: [] }
+}
+
 export default {
   getBookableSlotsForDate,
   getCalendarForMonth,
   update,
   getCalendarWeek,
+  getNextFreeSlotsRange,
 };
