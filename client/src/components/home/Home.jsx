@@ -11,6 +11,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import useAuth from "../../hooks/useAuth";
+import { useEffect, useState } from "react";
+import { availabilityService } from "../../services/availabilityService";
+import { formatSofiaDayLabel, formatSofiaTime } from "../../utils/dates";
+import { endTime } from "../../utils/time";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -21,6 +25,43 @@ const MotionSection = motion.section;
 ---------------------------------------------------------- */
 export default function Home() {
   const { email } = useAuth()
+
+  const [isLoadingSlots, setIsLoadingSlots] = useState(true)
+  const [nextSlots, setNextSlots] = useState({ date: null, slots: [] })
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadNextSlots() {
+      try {
+        setIsLoadingSlots(true);
+
+        const res = await availabilityService.getNextSlots(7, 120)
+
+        if (!cancelled) {
+          setNextSlots(res || { date: null, slots: [] });
+        }
+      } catch (err) {
+        console.error('Failed to load next free slots for home card:', err);
+        
+        if (!cancelled) {
+          setNextSlots({ date: null, slots: [] })
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingSlots(false)
+        }
+      }
+    }
+
+    loadNextSlots()
+
+    return () => {
+      cancelled = true;
+    }
+  }, [])
+
+  const allFreeSlots = nextSlots.slots || [];  
   
   return (
     <div className="dark">
@@ -45,7 +86,7 @@ export default function Home() {
                     <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
                   </Link>
                   <Link to="/client" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-5 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] font-semibold">My Dashboard</Link>
-                  <Link to="/mine" className="inline-flex items-center justify-center rounded-2xl border border-transparent px-5 py-2.5 font-semibold text-white bg-[#0B1220]/20 hover:bg-white/10">My Appointments</Link>
+                  <Link to="/schedule" className="inline-flex items-center justify-center rounded-2xl border border-transparent px-5 py-2.5 font-semibold text-white bg-[#0B1220]/20 hover:bg-white/10">View Schedule</Link>
                 </div>
               )}
               {!email && (
@@ -67,24 +108,89 @@ export default function Home() {
 
             {/* Card preview */}
             <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5">
-              <div className="flex items-center justify-between">
+              {isLoadingSlots ? (
+                <div className="animate-pulse space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                      <div className="mt-2 h-5 w-40 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                    </div>
+                    <div className="h-7 w-16 rounded-xl bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="h-14 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-[#F9FAFB] dark:bg-[#020617]"
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : !nextSlots.date || allFreeSlots.length === 0 ? (
                 <div>
                   <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Next available</div>
-                  <div className="text-xl font-semibold">Today 15:00–17:00</div>
-                </div>
-                <div className="rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] px-3 py-1 text-sm font-semibold">Open</div>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
-                {["Tue", "Wed", "Thu"].map((d,i)=> (
-                  <div key={d} className={`rounded-xl border px-3 py-2 ${i===0?"bg-[#2F80ED]/10 border-[#2F80ED]/40":"border-[#E5E7EB] dark:border-[#1F2937]"}`}>
-                    <div className="font-semibold">{d}</div>
-                    <div className="text-[#334155] dark:text-[#94A3B8]">15:00 – 17:00</div>
+                  <div className="mt-1 text-xl font-semibold">
+                    No free slots in the next 7 days
                   </div>
-                ))}
-              </div>
-              <Link to='/create' className="mt-4 inline-flex items-center gap-2 rounded-2xl w-full border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">
-                Book this slot <ChevronRight className="h-4 w-4"/>
-              </Link>
+                  <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
+                    Please check again later or contact the office directly.
+                  </p>
+                </div>
+              ) : (
+                (() => {
+                  const first = new Date(allFreeSlots[0])                 
+                  const last = endTime(String(formatSofiaTime(first)), 120)
+
+                  return (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                            Next available
+                          </div>
+                          <div className="text-xl font-semibold">
+                            {formatSofiaDayLabel(first)}{' '}
+                            {formatSofiaTime(first)}–{last}
+                          </div>
+                        </div>
+                        <Link to='/create' className="rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] px-3 py-1 text-sm font-semibold">
+                          Open
+                        </Link>
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+                        {allFreeSlots.slice(0, 3).map((iso, idx) => {
+                          const d = new Date(iso);
+                          return (
+                            <div
+                              key={iso}
+                              className={`rounded-xl border px-3 py-2 ${
+                                idx === 0
+                                  ? "bg-[#2F80ED]/10 border-[#2F80ED]/40"
+                                  : "border-[#E5E7EB] dark:border-[#1F2937]"
+                              }`}
+                            >
+                              <div className="font-semibold">
+                                {formatSofiaTime(d)}
+                              </div>
+                              <div className="text-[#334155] dark:text-[#94A3B8]">
+                                Starts at {formatSofiaTime(d)}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <Link
+                        to="/create"
+                        className="mt-4 inline-flex items-center gap-2 rounded-2xl w-full border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
+                      >
+                        Book this slot <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </>
+                  )
+                })()
+              )}
             </div>
           </div>
         </section>

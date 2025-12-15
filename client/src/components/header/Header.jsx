@@ -17,7 +17,6 @@ export default function Header({ initialActive = "Home" }) {
   const { email, role } = useContext(UserContext)
 
   const guestItems = [
-    { label: "Home", href: "/" },
     { label: "Register", href: "/register" },
     { label: "Login", href: "/login" },
     { label: "Create appointment", href: "/create" },
@@ -36,7 +35,6 @@ export default function Header({ initialActive = "Home" }) {
   const clientItems = [
     { label: "Home", href: "/" },
     { label: "Dashboard", href: "/client" },
-    { label: "Appointments", href: "/appointments" },
     { label: "Create appointment", href: "/create" },
     { label: "Schedule", href: "/schedule" },
     { label: "Logout", href: "/logout" },
@@ -73,15 +71,27 @@ export default function Header({ initialActive = "Home" }) {
       {/* Top bar */}
       <div className="mx-auto max-w-7xl px-5 py-3 flex items-center justify-between">
         {/* Brand */}
-        <Link to="/" className="flex items-center gap-2 font-semibold select-none">
-          <CalendarIcon className="h-5 w-5" />
-          <span className="relative leading-tight">
-            <span className="bg-gradient-to-r from-[#2F80ED] via-[#06B6D4] to-[#7C3AED] bg-clip-text text-transparent font-semibold">
-              LexSchedule
+        {role === "Client" ? (
+          <Link to="/" className="flex items-center gap-2 font-semibold select-none">
+            <CalendarIcon className="h-5 w-5" />
+            <span className="relative leading-tight">
+              <span className="bg-gradient-to-r from-[#2F80ED] via-[#06B6D4] to-[#7C3AED] bg-clip-text text-transparent font-semibold">
+                LexSchedule
+              </span>
+              <span className="pointer-events-none absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
             </span>
-            <span className="pointer-events-none absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
-          </span>
-        </Link>
+          </Link>
+        ) : (
+          <Link className="flex items-center gap-2 font-semibold select-none">
+            <CalendarIcon className="h-5 w-5" />
+            <span className="relative leading-tight">
+              <span className="bg-gradient-to-r from-[#2F80ED] via-[#06B6D4] to-[#7C3AED] bg-clip-text text-transparent font-semibold">
+                LexSchedule
+              </span>
+              <span className="pointer-events-none absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
+            </span>
+          </Link>
+        )}
 
         {/* Desktop nav */}
         <nav className="hidden md:block">

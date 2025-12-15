@@ -25,5 +25,9 @@ export const availabilityService = {
         }
 
         return request.get(`${baseUrl}/slots?${params.toString()}`)
+    },
+
+    getNextSlots(days = 7, durationMin = 120) {
+        return request.get(`${baseUrl}/next?days=${days}&duration=${durationMin}`)
     }
 }

@@ -63,3 +63,44 @@ export function prettyDate(iso) {
         year: 'numeric',
     })
 }
+
+export function sofiaYmd(isoOrDate) {
+    const d = typeof isoOrDate === 'string' ? new Date(isoOrDate) : isoOrDate;
+
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: SOFIA_TZ,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).formatToParts(d);
+
+    const get = (type) => parts.find((p) => p.type === type)?.value;
+
+    return {
+        year: Number(get('year')),
+        month: Number(get('month')),
+        day: Number(get('day')),
+    }
+}
+
+function sameSofiaDay(a, b) {
+    const da = sofiaYmd(a)
+    const db = sofiaYmd(b)
+
+    return da.year === db.year && da.month === db.month && da.day === db.day;
+}
+
+export function formatSofiaDayLabel(iso) {
+    const now = new Date();
+    const tommorow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    if (sameSofiaDay(iso, now)) return 'Today';
+    if (sameSofiaDay(iso, tommorow)) return 'Tommorow';
+
+    return new Intl.DateTimeFormat('en-GB', {
+        timeZone: SOFIA_TZ,
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+    }).format(new Date(iso));
+}
