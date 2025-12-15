@@ -17,6 +17,7 @@ import appointmentsService from "../../services/appointmentsService";
 import Dates from "./calendar/Dates";
 import UpcomingList from "./upcoming/UpcomingList";
 import timeOffService from "../../services/timeOffService";
+import { availabilityService } from "../../services/availabilityService";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -25,9 +26,14 @@ const MotionAside = motion.aside;
 
 export default function AdminDashboard() {
   const timestamp = new Date();
+
   const [appointments, setAppointments] = useState([]);
   const [timeOffItems, setTimeOffItems] = useState([])
   const [isLoading, setIsLoading] = useState(true);
+
+  const [freeSlots, setFreeSlots] = useState([]);
+  const [durationMin, setDurationMin] = useState('120');
+  const [_slotsLoading, setSlotsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true)
@@ -54,6 +60,21 @@ export default function AdminDashboard() {
     return appt > timestamp;
   });
 
+  const dateParam = timestamp.toISOString().slice(0,10);
+  
+
+  useEffect(() => {
+    if (!dateParam) return;
+
+    setSlotsLoading(true)
+
+    availabilityService.getSlots(dateParam, Number(durationMin))
+      .then(setFreeSlots)
+      .finally(() => setSlotsLoading(false))
+  }, [dateParam, durationMin])
+
+  const allFreeSlots = freeSlots.slots || [];
+
   if (isLoading) {
     return (
       <div className="p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
@@ -63,7 +84,6 @@ export default function AdminDashboard() {
   }
 
   return (
-    // <div className={isDark? 'dark':''}>
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
         {/* Hero / search */}
@@ -122,17 +142,40 @@ export default function AdminDashboard() {
             transition={{ duration: 0.3 }}
             className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
           >
-            <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
-              Slots today
-            </div>
-            <div className="mt-1 flex items-end gap-2">
-              <div className="text-2xl font-semibold">
-                {allAppointments.length}
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                Slots today
               </div>
-              <div className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                available
+              <div className="mt-1 flex items-end gap-2">
+                <div className="text-2xl font-semibold">
+                  {allFreeSlots.length}
+                </div>
+                <div className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                  available
+                </div>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                Duration:
+              </span>
+              <select 
+                value={durationMin} 
+                onChange={(e) => setDurationMin(e.target.value)}
+                className="text-xs rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-2 py-1"
+                >
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">60 min</option>
+                <option value="90">90 min</option>
+                <option value="100">100 min</option>
+                <option value="120">120 min</option>
+                <option value="135">135 min</option>
+              </select>
+            </div>
+          </div>
           </MotionDiv>
 
           <MotionDiv
