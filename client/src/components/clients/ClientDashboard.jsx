@@ -103,7 +103,7 @@ export default function ClientDashboard(){
                   <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{nextAppt1.service} · with Victor Todorov</div>
                   <div className="mt-2 flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><MapPin className="h-4 w-4"/>Law Office · 12 Vitosha Blvd</div>
-                    <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><Phone className="h-4 w-4"/>+359 8 911 6617</div>
+                    <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><Phone className="h-4 w-4"/><a href="tel:+359889116617">+359 88 911 6617</a></div>
                     <StatusPill status={nextAppt1.status} />
                   </div>
                 </div>

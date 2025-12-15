@@ -104,6 +104,62 @@ export default function Home() {
                 <div className="flex items-center gap-2"><Bell className="h-4 w-4"/>Reminders</div>
                 <div className="flex items-center gap-2"><Users className="h-4 w-4"/>Client-friendly</div>
               </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                {/* Call button */}
+                <a
+                  href="tel:+359889116617"
+                  className="
+                    inline-flex items-center gap-2 rounded-2xl 
+                    border border-[#E5E7EB] dark:border-[#1F2937] 
+                    px-4 py-2 text-sm font-semibold
+                    text-[#2F80ED] dark:text-[#60A5FA]
+                    bg-white dark:bg-[#0F172A]
+                    hover:bg-[#F0F6FF] dark:hover:bg-[#1E293B] 
+                    transition-colors
+                  "
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-4 w-4'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      d='M3 5.25c0-.966.784-1.75 1.75-1.75h2.086c.696 0 1.31.403 1.58 1.026l.933 2.18a1.75 1.75 0 01-.402 1.93l-1.172 1.171a14.95 14.95 0 006.313 6.313l1.17-1.171a1.75 1.75 0 011.93-.402l2.181.933c.623.27 1.026.884 1.026 1.58V19.25c0 .966-.784 1.75-1.75 1.75H18.75c-8.284 0-15-6.716-15-15V5.25z'
+                    />
+                  </svg>
+                  Call us: +359 889 116 617
+                </a>
+              
+                {/* Viber button */}
+                <a
+                  href="viber://chat?number=%2B359889116617"
+                  className="
+                    inline-flex items-center gap-2 rounded-2xl 
+                    border border-[#E5E7EB] dark:border-[#1F2937] 
+                    px-4 py-2 text-sm font-semibold
+                    text-[#7C3AED] dark:text-[#A855F7]
+                    bg-white dark:bg-[#0F172A]
+                    hover:bg-[#F5F3FF] dark:hover:bg-[#1E1B4B]
+                    transition-colors
+                  "
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="currentColor"
+                  >
+                    <path d="M18.5 3h-13A2.5 2.5 0 003 5.5v13.086l2.793-2.793A1 1 0 016.5 15.5h12A2.5 2.5 0 0021 13V5.5A2.5 2.5 0 0018.5 3zm-4.04 10.013c-.79.79-2.98.066-4.63-1.584-1.65-1.65-2.373-3.84-1.584-4.63.21-.21.53-.33.95-.33.27 0 .57.05.9.15a.75.75 0 01.52.53l.26 1.03a.75.75 0 01-.19.7l-.57.57c.21.55.69 1.17 1.16 1.64.47.47 1.09.95 1.64 1.16l.57-.57a.75.75 0 01.7-.19l1.03.26a.75.75 0 01.53.52c.2.76.22 1.35-.08 1.65z" />
+                  </svg>
+                  Chat on Viber
+                </a>
+              </div>
             </div>
 
             {/* Card preview */}
@@ -237,7 +293,18 @@ export default function Home() {
           <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold">Ready to book?</h3>
-              <p className="text-sm text-[#334155] dark:text-[#94A3B8]">Create an appointment as a guest, or sign in for faster checkout.</p>
+              <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                Create an appointment as a guest, or sign in for faster checkout.
+              </p>
+              <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
+                Prefer to talk with me?{" "}
+                <a
+                  href="tel:+359889116617"
+                  className="font-semibold text-[#2F80ED]"
+                >
+                  +359 88 911 6617
+                </a>
+              </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link to='/create' className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
