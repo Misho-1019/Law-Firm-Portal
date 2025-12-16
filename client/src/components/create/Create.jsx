@@ -11,10 +11,10 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { toUTCISO } from "../../utils/time";
-import appointmentsService from "../../services/appointmentsService";
 import useAuth from "../../hooks/useAuth";
 import { availabilityService } from "../../services/availabilityService";
 import { getDateAndTime } from "../../utils/dates";
+import { useCreateAppointment } from "../../api/appointmentApi";
 
 const MotionSection = motion.section;
 
@@ -29,15 +29,16 @@ function normalizeDuration(raw) {
 }
 
 export default function CreateAppointmentPage() {
+  const { id, role } = useAuth()
+  const navigate = useNavigate();
+  const { create } = useCreateAppointment()
+
   const [selectedTime, setSelectedTime] = useState("");
   const [mode, setMode] = useState("In-Person");
   const [date, setDate] = useState('')
   const [duration, setDuration] = useState('120')
   const [availableTimes, setAvailableTimes] = useState([])
   const [slotsLoading, setSlotsLoading] = useState(false)
-
-  const { id } = useAuth()
-  const navigate = useNavigate();
 
   const loadSlotsForDate = async (nextDate, currentDuration) => {
     if (!nextDate) {
@@ -91,9 +92,13 @@ export default function CreateAppointmentPage() {
     delete appointmentData.date;
     delete appointmentData.time;
 
-    await appointmentsService.create(appointmentData, id)
+    await create(appointmentData, id)
     
-    navigate('/appointments')
+    if (role === 'Admin') {
+      navigate('/appointments')
+    } else {
+      navigate('/client')
+    }
   };
 
   const handleDateChange = async (value) => {

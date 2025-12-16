@@ -9,6 +9,7 @@ import {
   Briefcase,
   XCircle,
   NotepadText,
+  Link,
 } from "lucide-react";
 import { Link as RRLink, useInRouterContext } from "react-router";
 import timeOffService, { buildTimeOffPayload } from "../../services/timeOffService";
@@ -273,13 +274,13 @@ export default function TimeOffPage() {
 
                   {/* CTA */}
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="submit"
+                    <Link
+                      to='/admin'
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40]"
                       title="Click to save any changes"
                     >
                       <Save className="h-4 w-4" /> Save block
-                    </button>
+                    </Link>
                     <button
                       type="button"
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
