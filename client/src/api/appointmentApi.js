@@ -67,3 +67,25 @@ export const useAppointment = (appointmentId) => {
         appointment,
     }
 }
+
+export const usePatchAppointment = () => {
+    const { request } = useAuth();
+
+    const patch = (appointmentData, appointmentId) =>
+        request.patch(`${baseUrl}/${appointmentId}`, { ...appointmentData, _id: appointmentId })
+
+    return {
+        patch,
+    }
+}
+
+export const useDeleteAppointment = () => {
+    const { request } = useAuth();
+
+    const deleteAppointment = (appointmentId) =>
+        request.delete(`${baseUrl}/${appointmentId}`)
+
+    return {
+        deleteAppointment,
+    }
+}

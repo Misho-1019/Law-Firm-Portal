@@ -17,7 +17,7 @@ import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTimeDefaults } from "../../utils/dates";
 import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
-import { useAppointment } from "../../api/appointmentApi";
+import { useAppointment, usePatchAppointment } from "../../api/appointmentApi";
 
 const MotionSection = motion.section;
 
@@ -26,6 +26,7 @@ export default function EditAppointmentPage() {
   const navigate = useNavigate()
   const { role } = useAuth()
   const { appointment } = useAppointment(appointmentId)
+  const { patch } = usePatchAppointment()
 
   const [selectedTime, setSelectedTime] = useState("");
 
@@ -60,7 +61,7 @@ export default function EditAppointmentPage() {
     delete appointmentData.date
     delete appointmentData.time
 
-    await appointmentsService.patch(appointmentData, appointmentId)
+    await patch(appointmentData, appointmentId)
     
     navigate(`/appointments/${appointmentId}/details`)
   }
