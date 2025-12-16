@@ -13,7 +13,6 @@ import {
   Loader2
 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
-import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTimeDefaults } from "../../utils/dates";
 import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";

@@ -15,9 +15,9 @@ import {
   X
 } from "lucide-react";
 import { Link } from "react-router";
-import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
 import ItemDashboard from "./item/ItemDashboard";
+import { useMyAppointments } from "../../api/appointmentApi";
 
 const MotionSection = motion.section;
 const MotionAside = motion.aside;
@@ -27,19 +27,12 @@ const MotionAside = motion.aside;
 ---------------------------------------------------------- */
 export default function ClientDashboard(){
   const timestamp = new Date()
-  const [appointments, setAppointments] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { appointments } = useMyAppointments()
 
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1)
 
-  useEffect(() => {
-    appointmentsService.getMine()
-      .then(setAppointments)
-      .finally(setIsLoading(false))
-  }, [])
-
-  const allAppointments = appointments[0] || []
+  const allAppointments = appointments.appointments || []
 
   const totalPages = Math.max(
     1,
@@ -77,14 +70,6 @@ export default function ClientDashboard(){
     { id:'d1', name:'NDA_draft.pdf', size:'124 KB' },
     { id:'d2', name:'Client_Onboarding.pdf', size:'88 KB' },
   ];
-
-  if (isLoading) {
-    return (
-      <div className="p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
-        Loading appointments…
-      </div>
-    );
-  }
 
   return (
     <div className='dark'>
