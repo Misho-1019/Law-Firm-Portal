@@ -54,3 +54,16 @@ export const useAppointments = () => {
 
     return { appointments }
 }
+
+export const useAppointment = (appointmentId) => {
+    const [appointment, setAppointment] = useState({})
+
+    useEffect(() => {
+        request.get(`${baseUrl}/${appointmentId}`)
+          .then(setAppointment)
+    }, [appointmentId])
+
+    return {
+        appointment,
+    }
+}

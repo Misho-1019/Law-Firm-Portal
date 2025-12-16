@@ -11,9 +11,9 @@ import {
   CheckCircle2,
   Trash2
 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { Link as RRLink, useInRouterContext, useNavigate, useParams } from "react-router";
 import appointmentsService from "../../services/appointmentsService";
+import { useAppointment } from "../../api/appointmentApi";
 
 const MotionSection = motion.section;
 
@@ -28,14 +28,9 @@ function SafeLink({ to, className, children }) {
 }
 
 export default function AppointmentDetails() {
-  const [appointment, setAppointment] = useState({})
   const { appointmentId } = useParams()
   const navigate = useNavigate()
-
-  useEffect(() => {
-    appointmentsService.getOne(appointmentId)
-      .then(setAppointment)
-  }, [ appointmentId])
+  const { appointment } = useAppointment(appointmentId)
 
   const appointmentDeleteClickHandler = async () => {
     const hasConfirm = confirm(`Are you sure you want to delete appointment(${appointmentId}) created by ${appointment.firstName} ${appointment.lastName}`)

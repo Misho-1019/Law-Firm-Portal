@@ -17,20 +17,17 @@ import appointmentsService from "../../services/appointmentsService";
 import { getDateAndTimeDefaults } from "../../utils/dates";
 import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
+import { useAppointment } from "../../api/appointmentApi";
 
 const MotionSection = motion.section;
 
 export default function EditAppointmentPage() {
-  const [selectedTime, setSelectedTime] = useState("");
-  const [appointment, setAppointment] = useState({})
   const { appointmentId } = useParams()
   const navigate = useNavigate()
   const { role } = useAuth()
+  const { appointment } = useAppointment(appointmentId)
 
-  useEffect(() => {
-    appointmentsService.getOne(appointmentId)
-      .then(setAppointment)
-  }, [appointmentId])
+  const [selectedTime, setSelectedTime] = useState("");
 
   const dateAndTime = getDateAndTimeDefaults(String(appointment?.startsAt));
   
