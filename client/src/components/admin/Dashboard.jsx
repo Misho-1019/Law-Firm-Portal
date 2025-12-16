@@ -13,11 +13,11 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
-import appointmentsService from "../../services/appointmentsService";
 import Dates from "./calendar/Dates";
 import UpcomingList from "./upcoming/UpcomingList";
 import timeOffService from "../../services/timeOffService";
 import { availabilityService } from "../../services/availabilityService";
+import { useAppointments } from "../../api/appointmentApi";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -26,8 +26,8 @@ const MotionAside = motion.aside;
 
 export default function AdminDashboard() {
   const timestamp = new Date();
+  const { appointments } = useAppointments()
 
-  const [appointments, setAppointments] = useState([]);
   const [timeOffItems, setTimeOffItems] = useState([])
   const [isLoading, setIsLoading] = useState(true);
 
@@ -39,17 +39,15 @@ export default function AdminDashboard() {
     setIsLoading(true)
 
     Promise.all([
-      appointmentsService.getAll(),
       timeOffService.getAll(),
     ])
-    .then(([appts, timeOff]) => {
-      setAppointments(appts);
+    .then(([timeOff]) => {
       setTimeOffItems(timeOff);
     })
     .finally(() => setIsLoading(false))
   }, [])
 
-  const allAppointments = appointments[0] || [];
+  const allAppointments = appointments.appointments || [];
 
   const pendingAppointments = allAppointments.filter(
     (x) => x.status === "PENDING"

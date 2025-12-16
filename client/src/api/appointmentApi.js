@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import request from "../utils/request";
 
@@ -41,4 +42,15 @@ export const useCreateAppointment = () => {
     return {
         create,
     }
+}
+
+export const useAppointments = () => {
+    const [appointments, setAppointments] = useState([])
+
+    useEffect(() => {
+        request.get(baseUrl)
+          .then(setAppointments)
+    }, [])
+
+    return { appointments }
 }

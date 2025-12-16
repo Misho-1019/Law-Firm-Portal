@@ -14,11 +14,11 @@ import {
 import { Link, useParams, useNavigate } from "react-router";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { useEffect, useState } from "react";
-import appointmentsService from "../../services/appointmentsService";
 import { availabilityService } from "../../services/availabilityService";
 import timeOffService from "../../services/timeOffService";
 import { endTime } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
+import { useAppointments } from "../../api/appointmentApi";
 
 const MotionSection = motion.section;
 
@@ -26,9 +26,7 @@ export default function DayDetailsPage() {
   const { date: dateParam } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
   const { role } = useAuth()
-
-  const [appointments, setAppointments] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { appointments } = useAppointments()
 
   const [freeSlots, setFreeSlots] = useState([])
   const [durationMin, setDurationMin] = useState('120')
@@ -43,13 +41,7 @@ export default function DayDetailsPage() {
     dateParam &&
     new Date().toISOString().slice(0, 10) === dateParam;
 
-  useEffect(() => {
-    appointmentsService.getAll()
-      .then(setAppointments)
-      .finally(() => setIsLoading(false))
-  }, [])
-
-  const allAppointments = appointments[0] || [];
+  const allAppointments = appointments.appointments || [];
 
   useEffect(() => {
     if(!dateParam) return
@@ -83,14 +75,6 @@ export default function DayDetailsPage() {
     const next = d.toISOString().slice(0, 10);
     navigate(`/day/${next}`);
   };
-
-  if (isLoading) {
-    return (
-      <div className="p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
-        Loading appointments…
-      </div>
-    );
-  }
 
   const todayAppts = allAppointments.filter(x => {
     const d = new Date(x?.startsAt)

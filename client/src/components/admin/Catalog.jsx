@@ -1,29 +1,25 @@
 /* UI-only, palette-matched (no functionality) */
 import { Calendar as CalendarIcon, ListFilter, Loader2, Clock, MapPin, Phone, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import appointmentsService from "../../services/appointmentsService";
 import ItemCatalog from "./item/ItemCatalog";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { motion } from "framer-motion";
 import { Link } from "react-router";
+import { useAppointments } from "../../api/appointmentApi";
 
 const MotionSection = motion.section
 
 export default function Catalog() {
   const timestamp = new Date()
-  const [appointments, setAppointments] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1)
 
-  useEffect(() => {
-    appointmentsService.getAll()
-        .then(setAppointments)
-        .finally(() => setIsLoading(false))
-  }, [])
+  const { appointments } = useAppointments()
 
-  const allAppointments = appointments[0] || [];
+  let allAppointments = appointments.appointments || [];
+
+  allAppointments = allAppointments.sort((a, b) => new Date(b.startsAt) - new Date(a.startsAt))  
 
   const totalPages = Math.max(1, Math.ceil(allAppointments.length / pageSize))
 
@@ -43,19 +39,11 @@ export default function Catalog() {
     return appt > timestamp
   })
   
-  const nextAppt1 = upcoming[0]
+  const nextAppt1 = upcoming[upcoming.length - 1]
   const pDate = prettyDate(String(nextAppt1?.startsAt))
   
 
   const { _day, _date, time } = getDateAndTime(String(new Date(nextAppt1?.startsAt)))
-  
-  if (isLoading) {
-    return (
-      <div className="p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
-        Loading appointments…
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -131,7 +119,37 @@ export default function Catalog() {
                     <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{nextAppt1.service} · with {nextAppt1.firstName} {nextAppt1.lastName}</div>
                     <div className="mt-2 flex flex-wrap gap-4 text-sm">
                       <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><MapPin className="h-4 w-4"/>Law Office · 12 Vitosha Blvd</div>
-                      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><Phone className="h-4 w-4"/>+359 8 911 6617</div>
+                      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]">
+                        {/* Call button */}
+                        <a
+                          href="tel:+359889116617"
+                          className="
+                            inline-flex items-center gap-2 rounded-2xl 
+                            border border-[#E5E7EB] dark:border-[#1F2937] 
+                            px-4 py-2 text-sm font-semibold
+                            text-[#2F80ED] dark:text-[#60A5FA]
+                            bg-white dark:bg-[#0F172A]
+                            hover:bg-[#F0F6FF] dark:hover:bg-[#1E293B] 
+                            transition-colors
+                          "
+                        >
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            className='h-4 w-4'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              d='M3 5.25c0-.966.784-1.75 1.75-1.75h2.086c.696 0 1.31.403 1.58 1.026l.933 2.18a1.75 1.75 0 01-.402 1.93l-1.172 1.171a14.95 14.95 0 006.313 6.313l1.17-1.171a1.75 1.75 0 011.93-.402l2.181.933c.623.27 1.026.884 1.026 1.58V19.25c0 .966-.784 1.75-1.75 1.75H18.75c-8.284 0-15-6.716-15-15V5.25z'
+                            />
+                          </svg>
+                          Call us: +359 889 116 617
+                        </a>
+                      </div>
                       <StatusPill status={nextAppt1.status} />
                     </div>
                   </div>
