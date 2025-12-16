@@ -41,14 +41,17 @@ export const useMyAppointments = () => {
 
 export const useAppointment = (appointmentId) => {
     const [appointment, setAppointment] = useState({})
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         request.get(`${baseUrl}/${appointmentId}`)
           .then(setAppointment)
+          .finally(() => setIsLoading(false));
     }, [appointmentId])
 
     return {
         appointment,
+        isLoading,
     }
 }
 

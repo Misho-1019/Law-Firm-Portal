@@ -30,9 +30,23 @@ function SafeLink({ to, className, children }) {
 export default function AppointmentDetails() {
   const { appointmentId } = useParams()
   const navigate = useNavigate()
-  const { appointment } = useAppointment(appointmentId)
+  const { appointment, isLoading } = useAppointment(appointmentId)
   const { deleteAppointment } = useDeleteAppointment()
-  const { role }= useAuth()
+  const { role, userId } = useAuth()
+
+  if (isLoading || !appointment) {
+    return (
+      <div className="dark">
+        <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
+          <main className="flex-1 flex items-center justify-center px-4 py-10">
+            <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
+              Loading appointment…
+            </p>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   const appointmentDeleteClickHandler = async () => {
     const hasConfirm = confirm(`Are you sure you want to delete appointment(${appointmentId}) created by ${appointment.firstName} ${appointment.lastName}`)
@@ -43,6 +57,8 @@ export default function AppointmentDetails() {
 
     navigate('/appointments')
   }
+
+  const isOwner = role === 'Client' && appointment?.creator === userId;  
 
   return (
     <div className="dark">
@@ -66,13 +82,15 @@ export default function AppointmentDetails() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <SafeLink
-                      to={`/appointments/${appointment.id}/update`}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-2 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40]"
-                      title="Open edit screen"
-                    >
-                      <PencilLine className="h-4 w-4" /> Edit
-                    </SafeLink>
+                    {role === 'Admin' || isOwner ? (
+                      <SafeLink
+                        to={`/appointments/${appointment.id}/update`}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-2 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40]"
+                        title="Open edit screen"
+                      >
+                        <PencilLine className="h-4 w-4" /> Edit
+                      </SafeLink>
+                    ) : ('')}
                     <SafeLink
                       to={-1}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-3 py-2 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
