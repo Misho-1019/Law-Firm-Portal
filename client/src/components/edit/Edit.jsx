@@ -12,7 +12,7 @@ import {
   Save,
   Loader2
 } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, Navigate, useNavigate, useParams } from "react-router";
 import { getDateAndTimeDefaults } from "../../utils/dates";
 import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
@@ -23,8 +23,8 @@ const MotionSection = motion.section;
 export default function EditAppointmentPage() {
   const { appointmentId } = useParams()
   const navigate = useNavigate()
-  const { role } = useAuth()
-  const { appointment } = useAppointment(appointmentId)
+  const { role, userId } = useAuth()
+  const { appointment, isLoading, error } = useAppointment(appointmentId)
   const { patch } = usePatchAppointment()
 
   const [selectedTime, setSelectedTime] = useState("");
@@ -63,6 +63,16 @@ export default function EditAppointmentPage() {
     await patch(appointmentData, appointmentId)
     
     navigate(`/appointments/${appointmentId}/details`)
+  }
+
+  if (isLoading) return <div>Loading...</div>
+
+  if (error || !appointment) return <div>Error loading appointment.</div>
+
+  const isOwner = role === 'CLient' && appointment?.creator === userId;
+
+  if (role !== 'Admin' || !isOwner) {
+    return <Navigate to='client' />;
   }
   
   return (
