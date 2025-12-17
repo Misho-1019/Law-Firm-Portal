@@ -17,7 +17,7 @@ import Dates from "./calendar/Dates";
 import UpcomingList from "./upcoming/UpcomingList";
 import { useAppointments } from "../../api/appointmentApi";
 import { useTimeOffs } from "../../api/timeOffApi";
-import { useGetCalendar, useGetSlots } from "../../api/availabilityApi";
+import { useGetSlots } from "../../api/availabilityApi";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -45,16 +45,7 @@ export default function AdminDashboard() {
     return appt > timestamp;
   });
 
-
   const allFreeSlots = freeSlots.slots || [];
-
-  const month = timestamp.toISOString().slice(0,7);
-  console.log(month);
-  
-  const { calendar } = useGetCalendar('2026-03', Number(durationMin))
-
-  console.log(calendar);
-  
 
   if (isLoading) {
     return (

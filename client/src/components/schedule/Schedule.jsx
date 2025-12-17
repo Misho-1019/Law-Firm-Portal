@@ -10,9 +10,9 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { Link, Link as RRLink, useInRouterContext, useNavigate } from "react-router";
-import scheduleService from "../../services/scheduleService";
 import useAuth from "../../hooks/useAuth";
 import { formatSofiaDate } from "../../utils/dates";
+import { useCalendarWeek } from "../../api/scheduleApi";
 
 const MotionSection = motion.section;
 
@@ -46,53 +46,28 @@ export default function SchedulePage() {
   const [anchor, setAnchor] = useState(() => new Date());
   const week = useMemo(() => computeWeek(anchor), [anchor]);
 
-  const [data, setData] = useState({});
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const daysRange = week.daysAtMidnight || []
+  const from = daysRange[0] ? fmtDate(daysRange[0]) : null
+  const to = daysRange[6] ? fmtDate(daysRange[6]) : null
 
-  useEffect(() => {
-    if (!week?.daysAtMidnight?.length) return;
+  const { weekData, isLoading, error } = useCalendarWeek(from, to)
 
-    const days = week.daysAtMidnight;
-    const from = fmtDate(days[0])
-    const to = fmtDate(days[6])
+  const data = useMemo(() => {
+    const byDate = {};
 
-    setIsLoading(true)
-    setError(null)
-
-    scheduleService.getCalendarWeek(from, to)
-      .then((payload) => {
-        const byDate = {};
-
-        (payload.days || []).forEach((day) => {
-          byDate[day.date] = (day.items || []).map((it) => ({
-            id: it.id,
-            type: it.type,
-            title: it.title,
-            start: it.startTime.split(':').map(Number),
-            end: it.endTime.split(':').map(Number),
-            node: it.node,
-          }))
-        })
-
-        setData(byDate)
-      })
-      .catch((err) => {
-        console.error('Failed to load calendar week', err);
-        setError('Failed to load schedule');
-        setData({})
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [week])
-
-  const [schedule, setSchedule] = useState({})
-
-  useEffect(() => {
-    scheduleService.getSchedule()
-      .then(setSchedule)
-  }, [])
+    (weekData?.days || []).forEach((day) => {
+      byDate[day.date] = (day.items || []).map((it) => ({
+        id: it.id,
+        type: it.type,
+        title: it.title,
+        start: it.startTime.split(':').map(Number),
+        end: it.endTime.split(':').map(Number),
+        note: it.note
+      }))
+    })
+    
+    return byDate;
+  }, [weekData])
 
   return (
     <div className="dark">
