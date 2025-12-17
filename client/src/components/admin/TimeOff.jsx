@@ -12,7 +12,7 @@ import {
   Link,
 } from "lucide-react";
 import { Link as RRLink, useInRouterContext } from "react-router";
-import timeOffService, { buildTimeOffPayload } from "../../services/timeOffService";
+import { buildTimeOffPayload, useCreateTimeOff } from "../../api/timeOffApi";
 
 const MotionSection = motion.section;
 
@@ -64,6 +64,7 @@ export default function TimeOffPage() {
   const [reason, setReason] = useState("Vacation");
   const [notes, setNotes] = useState("");
   const [selectedSlots, setSelectedSlots] = useState([]); // e.g. ["09:00","09:30"]
+  const { create } = useCreateTimeOff()
 
   const isPartial = mode === "Partial Day";
   const isSingleDay = startDate === endDate;
@@ -103,7 +104,7 @@ export default function TimeOffPage() {
     })
 
     try {
-      await timeOffService.create(payload)
+      await create(payload)
 
       resetForm();
     } catch (error) {
