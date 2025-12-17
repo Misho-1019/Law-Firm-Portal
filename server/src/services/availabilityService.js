@@ -8,9 +8,10 @@ import { toSofiaISO, SOFIA_TZ } from "../lib/time.js";
 const TZ = "Europe/Sofia";
 const SLOT_STEP_MIN = 30;
 const DEFAULT_DURATION_MIN = 120;
-const MIN_START_SPACING_MIN = 120;
-const WORK_START = '09:00';
-const WORK_END = '17:00';
+// Minimum gap between the end of one appointment and the start of another (in minutes)
+const MIN_GAP_MIN = 60;
+const WORK_START = "09:00";
+const WORK_END = "17:00";
 
 /**
  * Build an Interval [fromHHMM, toHHMM] for a given ISO date (local TZ).
@@ -74,12 +75,30 @@ function overlaps(startA, endA, startB, endB) {
 }
 
 /**
- * Ensure new slot respects spacing from existing appointment start times.
+ * Enforce a minimum gap between the candidate slot [slotStartUTC, slotEndUTC]
+ * and all existing appointment intervals.
+ *
+ * We require at least MIN_GAP_MIN minutes between:
+ *   - end of previous appointment and start of new one
+ *   - end of new appointment and start of next one
  */
-function respectsStartSpacing(slotStartUTC, existingStartUTC, spacingMin) {
-  return existingStartUTC.every(
-    (s) => Math.abs(slotStartUTC.diff(s, "minutes").minutes) >= spacingMin
-  );
+function respectsMinGap(slotStartUTC, slotEndUTC, existingIntervalsUTC, gapMin) {
+  return existingIntervalsUTC.every(({ start, end }) => {
+    // New slot completely before existing appointment
+    if (slotEndUTC <= start) {
+      const diff = start.diff(slotEndUTC, "minutes").minutes;
+      return diff >= gapMin;
+    }
+
+    // New slot completely after existing appointment
+    if (slotStartUTC >= end) {
+      const diff = slotStartUTC.diff(end, "minutes").minutes;
+      return diff >= gapMin;
+    }
+
+    // Anything else = overlap or “touching in the middle” → reject
+    return false;
+  });
 }
 
 function clampToWorkingWindow(fromStr, toStr) {
@@ -90,7 +109,7 @@ function clampToWorkingWindow(fromStr, toStr) {
   if (to > WORK_END) to = WORK_END;
 
   if (from >= to) return null;
-  return { from, to }
+  return { from, to };
 }
 
 function isoDateFromJS(d) {
@@ -213,7 +232,7 @@ export async function getBookableSlotsForDate({
       const startUTC = time.toUTC();
       const endUTC = time.plus({ minutes: durationMin }).toUTC();
 
-      // 1) Conflict with appointments?
+      // 1) Conflict with appointments (overlap)?
       const conflictAppointment = appointmentIntervalsUTC.some(
         ({ start, end }) => overlaps(startUTC, endUTC, start, end)
       );
@@ -225,12 +244,13 @@ export async function getBookableSlotsForDate({
       );
       if (conflictTimeOff) continue;
 
-      // 3) Respect min spacing between appointment starts
+      // 3) Respect minimum gap between appointments
       if (
-        !respectsStartSpacing(
+        !respectsMinGap(
           startUTC,
-          appointmentStartsUTC,
-          MIN_START_SPACING_MIN
+          endUTC,
+          appointmentIntervalsUTC,
+          MIN_GAP_MIN
         )
       )
         continue;
@@ -266,10 +286,10 @@ export async function getCalendarForMonth({
 
     const matches = timeOffList.filter(
       (x) => x.dateFrom <= dateISO && x.dateTo >= dateISO
-    )
+    );
 
     const hasTimeOff = matches.length > 0;
-    const isFullDayOff = matches.some((x) => !x.from && !x.to)
+    const isFullDayOff = matches.some((x) => !x.from && !x.to);
 
     const slots = await getBookableSlotsForDate({ dateISO, durationMin });
 
@@ -286,34 +306,34 @@ export async function getCalendarForMonth({
 }
 
 export async function update(data, id) {
-  const updateData = {}
+  const updateData = {};
 
   if (data.dateFrom !== undefined) {
-    updateData.dateFrom = data.dateFrom
+    updateData.dateFrom = data.dateFrom;
   }
 
   if (data.dateTo !== undefined) {
-    updateData.dateTo = data.dateTo
+    updateData.dateTo = data.dateTo;
   }
 
   if (data.from !== undefined) {
-    updateData.from = data.from
+    updateData.from = data.from;
   }
 
   if (data.to !== undefined) {
-    updateData.to = data.to
+    updateData.to = data.to;
   }
 
   if (data.reason !== undefined) {
-    updateData.reason = data.reason
+    updateData.reason = data.reason;
   }
 
   const item = await TimeOff.findByIdAndUpdate(id, updateData, {
     new: true,
-    runValidators: true
-  })
+    runValidators: true,
+  });
 
-  return item
+  return item;
 }
 
 export async function getCalendarWeek(fromStr, toStr) {
@@ -375,7 +395,7 @@ export async function getCalendarWeek(fromStr, toStr) {
         type: "working",
         title: "Working hours",
         startTime: clamped.from, // "HH:MM"
-        endTime: clamped.to,     // "HH:MM"
+        endTime: clamped.to, // "HH:MM"
         note: null,
       });
     });
@@ -422,7 +442,9 @@ export async function getCalendarWeek(fromStr, toStr) {
       const clamped = clampToWorkingWindow(timeFrom, timeTo);
       if (!clamped) return;
 
-      const noteParts = [appt.firstName || "", appt.lastName || ""].filter(Boolean);
+      const noteParts = [appt.firstName || "", appt.lastName || ""].filter(
+        Boolean
+      );
       const note = noteParts.join(" ") || null;
 
       items.push({
@@ -443,11 +465,14 @@ export async function getCalendarWeek(fromStr, toStr) {
   return { tz, days };
 }
 
-export async function getNextFreeSlotsRange(days = 7, durationMin = DEFAULT_DURATION_MIN) {
+export async function getNextFreeSlotsRange(
+  days = 7,
+  durationMin = DEFAULT_DURATION_MIN
+) {
   const nowLocal = DateTime.now().setZone(TZ);
   const nowUtc = nowLocal.toUTC();
 
-  let cursor = nowLocal.startOf('day')
+  let cursor = nowLocal.startOf("day");
 
   for (let offset = 0; offset < days; offset++) {
     const dateISO = cursor.toISODate();
@@ -455,24 +480,24 @@ export async function getNextFreeSlotsRange(days = 7, durationMin = DEFAULT_DURA
     let slots = await getBookableSlotsForDate({
       dateISO,
       durationMin,
-    })
+    });
 
     if (offset === 0) {
       slots = slots.filter((iso) => {
         const slotUtc = DateTime.fromISO(iso).toUTC();
 
         return slotUtc > nowUtc;
-      })
+      });
     }
 
     if (slots.length > 0) {
-      return { date: dateISO, slots }
+      return { date: dateISO, slots };
     }
 
-    cursor = cursor.plus({ days: 1 })
+    cursor = cursor.plus({ days: 1 });
   }
 
-  return { date: null, slots: [] }
+  return { date: null, slots: [] };
 }
 
 export default {
