@@ -13,12 +13,12 @@ import {
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
-import { useEffect, useState } from "react";
-import { availabilityService } from "../../services/availabilityService";
+import { useState } from "react";
 import { endTime } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
 import { useAppointments } from "../../api/appointmentApi";
 import { useTimeOffs } from "../../api/timeOffApi";
+import { useGetSlots } from "../../api/availabilityApi";
 
 const MotionSection = motion.section;
 
@@ -29,9 +29,9 @@ export default function DayDetailsPage() {
   const { appointments } = useAppointments()
   const { timeOffs: timeOff } = useTimeOffs()
 
-  const [freeSlots, setFreeSlots] = useState([])
   const [durationMin, setDurationMin] = useState('120')
-  const [_slotsLoading, setSlotsLoading] = useState(false)
+
+  const { freeSlots } = useGetSlots(dateParam, Number(durationMin))
 
   const titleDate = prettyDate(String(dateParam));
 
@@ -41,16 +41,6 @@ export default function DayDetailsPage() {
     new Date().toISOString().slice(0, 10) === dateParam;
 
   const allAppointments = appointments.appointments || [];
-
-  useEffect(() => {
-    if(!dateParam) return
-    
-    setSlotsLoading(true)
-
-    availabilityService.getSlots(dateParam, Number(durationMin))
-      .then(setFreeSlots)
-      .finally(() => setSlotsLoading(false))
-  }, [dateParam, durationMin])
 
   const allFreeSlots = freeSlots.slots || [];
 

@@ -12,9 +12,9 @@ import {
 import { Link } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import { availabilityService } from "../../services/availabilityService";
 import { formatSofiaDayLabel, formatSofiaTime } from "../../utils/dates";
 import { endTime } from "../../utils/time";
+import { useGetNextSlots } from "../../api/availabilityApi";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -25,6 +25,7 @@ const MotionSection = motion.section;
 ---------------------------------------------------------- */
 export default function Home() {
   const { email } = useAuth()
+  const { getNextSlots } = useGetNextSlots()
 
   const [isLoadingSlots, setIsLoadingSlots] = useState(true)
   const [nextSlots, setNextSlots] = useState({ date: null, slots: [] })
@@ -36,7 +37,7 @@ export default function Home() {
       try {
         setIsLoadingSlots(true);
 
-        const res = await availabilityService.getNextSlots(7, 120)
+        const res = await getNextSlots(7, 120)
 
         if (!cancelled) {
           setNextSlots(res || { date: null, slots: [] });
@@ -59,7 +60,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     }
-  }, [])
+  }, [getNextSlots])
 
   const allFreeSlots = nextSlots.slots || [];  
   

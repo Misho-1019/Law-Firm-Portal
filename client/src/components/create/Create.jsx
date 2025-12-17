@@ -12,9 +12,9 @@ import {
 import { useNavigate } from "react-router";
 import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
-import { availabilityService } from "../../services/availabilityService";
 import { getDateAndTime } from "../../utils/dates";
 import { useCreateAppointment } from "../../api/appointmentApi";
+import { getSlots } from "../../api/availabilityApi";
 
 const MotionSection = motion.section;
 
@@ -54,7 +54,7 @@ export default function CreateAppointmentPage() {
     setSelectedTime('')
 
     try {
-      const res = await availabilityService.getSlots(nextDate, effDuration);
+      const res = await getSlots(nextDate, effDuration);
       const slots = res.slots || [];
 
       const times = slots.map((iso) => {

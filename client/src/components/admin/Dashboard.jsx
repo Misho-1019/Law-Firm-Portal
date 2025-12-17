@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import {
@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 import Dates from "./calendar/Dates";
 import UpcomingList from "./upcoming/UpcomingList";
-import { availabilityService } from "../../services/availabilityService";
 import { useAppointments } from "../../api/appointmentApi";
 import { useTimeOffs } from "../../api/timeOffApi";
+import { useGetCalendar, useGetSlots } from "../../api/availabilityApi";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -29,9 +29,10 @@ export default function AdminDashboard() {
   const { appointments } = useAppointments()
   const { timeOffs: timeOffItems, isLoading} = useTimeOffs()
 
-  const [freeSlots, setFreeSlots] = useState([]);
   const [durationMin, setDurationMin] = useState('120');
-  const [_slotsLoading, setSlotsLoading] = useState(false);
+  const dateParam = timestamp.toISOString().slice(0,10);
+
+  const { freeSlots } = useGetSlots(dateParam, Number(durationMin))
 
   const allAppointments = appointments.appointments || [];
 
@@ -44,20 +45,16 @@ export default function AdminDashboard() {
     return appt > timestamp;
   });
 
-  const dateParam = timestamp.toISOString().slice(0,10);
-  
-
-  useEffect(() => {
-    if (!dateParam) return;
-
-    setSlotsLoading(true)
-
-    availabilityService.getSlots(dateParam, Number(durationMin))
-      .then(setFreeSlots)
-      .finally(() => setSlotsLoading(false))
-  }, [dateParam, durationMin])
 
   const allFreeSlots = freeSlots.slots || [];
+
+  const month = timestamp.toISOString().slice(0,7);
+  console.log(month);
+  
+  const { calendar } = useGetCalendar('2026-03', Number(durationMin))
+
+  console.log(calendar);
+  
 
   if (isLoading) {
     return (
