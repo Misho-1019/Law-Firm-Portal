@@ -44,23 +44,6 @@ export function buildTimeOffPayload({ mode, startDate, endDate, selectedSlots, r
     }
 }
 
-export default {
-    async getAll() {
-        const result = await request.get(`${baseUrl}/timeOff`)
-        
-        return result.items || [];
-    },
-    create(timeoffData) {
-        return request.post(`${baseUrl}/timeOff`, timeoffData)
-    },
-    update(timeoffData, timeOffId) {
-        return request.put(`${baseUrl}/timeOff/${timeOffId}`, timeoffData)
-    },
-    delete(timeOffId) {
-        return request.delete(`${baseUrl}/timeOff/${timeOffId}`)
-    }
-}
-
 export const useTimeOffs = () => {
     const [timeOffs, setTimeOffs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -86,5 +69,27 @@ export const useCreateTimeOff = () => {
 
     return {
         create,
+    }
+}
+
+export const useUpdateTimeOff = () => {
+    const { request } = useAuth()
+
+    const update = (timeoffData, timeOffId) =>
+        request.put(`${baseUrl}/timeOff/${timeOffId}`, timeoffData)
+
+    return {
+        update,
+    }
+}
+
+export const useDeleteTimeOff = () => {
+    const { request } = useAuth()
+
+    const deleteTimeOff = (timeOffId) =>
+        request.delete(`${baseUrl}/timeOff/${timeOffId}`)
+
+    return {
+        deleteTimeOff,
     }
 }

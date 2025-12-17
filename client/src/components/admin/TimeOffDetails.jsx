@@ -9,15 +9,16 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import timeOffService from "../../services/timeOffService";
 import useAuth from "../../hooks/useAuth";
-import { useTimeOffs } from "../../api/timeOffApi";
+import { useDeleteTimeOff, useTimeOffs, useUpdateTimeOff } from "../../api/timeOffApi";
 
 export default function TimeOffDetailsPage() {
   const { date } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
   const { role } = useAuth()
   const { timeOffs: timeOffItems, setTimeOffs: setTimeOffItems, isLoading } = useTimeOffs()
+  const { update } = useUpdateTimeOff()
+  const { deleteTimeOff } = useDeleteTimeOff()
 
   const [editingItem, setEditingItem] = useState(null)
   const [editValues, setEditValues] = useState({
@@ -52,7 +53,7 @@ export default function TimeOffDetailsPage() {
 
     if (!hasConfirm) return
 
-    await timeOffService.delete(id)
+    await deleteTimeOff(id)
 
     navigate('/admin')
   }
@@ -183,7 +184,7 @@ export default function TimeOffDetailsPage() {
                 try {
                   setIsSaving(true)
                   
-                  const res = await timeOffService.update(
+                  const res = await update(
                     editValues,
                     editingItem._id,
                   )
