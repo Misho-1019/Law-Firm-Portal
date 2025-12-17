@@ -11,14 +11,13 @@ import {
 } from "lucide-react";
 import timeOffService from "../../services/timeOffService";
 import useAuth from "../../hooks/useAuth";
+import { useTimeOffs } from "../../api/timeOffApi";
 
 export default function TimeOffDetailsPage() {
   const { date } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
   const { role } = useAuth()
-
-  const [isLoading, setIsLoading] = useState(true)
-  const [timeOffItems, setTimeOffItems] = useState([])
+  const { timeOffs: timeOffItems, setTimeOffs: setTimeOffItems, isLoading } = useTimeOffs()
 
   const [editingItem, setEditingItem] = useState(null)
   const [editValues, setEditValues] = useState({
@@ -41,12 +40,6 @@ export default function TimeOffDetailsPage() {
           year: "numeric",
       });
   }, [date]);
-
-  useEffect(() => {
-    timeOffService.getAll()
-      .then(setTimeOffItems)
-      .finally(() => setIsLoading(false))
-  }, [])
   
   const partialOffs = timeOffItems.filter(x => (x.dateFrom === date && x.dateTo === date) || (x.dateFrom <= date && x.dateTo >= date)) 
   

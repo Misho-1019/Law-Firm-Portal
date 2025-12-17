@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 import Dates from "./calendar/Dates";
 import UpcomingList from "./upcoming/UpcomingList";
-import timeOffService from "../../services/timeOffService";
 import { availabilityService } from "../../services/availabilityService";
 import { useAppointments } from "../../api/appointmentApi";
+import { useTimeOffs } from "../../api/timeOffApi";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -27,25 +27,11 @@ const MotionAside = motion.aside;
 export default function AdminDashboard() {
   const timestamp = new Date();
   const { appointments } = useAppointments()
-
-  const [timeOffItems, setTimeOffItems] = useState([])
-  const [isLoading, setIsLoading] = useState(true);
+  const { timeOffs: timeOffItems, isLoading} = useTimeOffs()
 
   const [freeSlots, setFreeSlots] = useState([]);
   const [durationMin, setDurationMin] = useState('120');
   const [_slotsLoading, setSlotsLoading] = useState(false);
-
-  useEffect(() => {
-    setIsLoading(true)
-
-    Promise.all([
-      timeOffService.getAll(),
-    ])
-    .then(([timeOff]) => {
-      setTimeOffItems(timeOff);
-    })
-    .finally(() => setIsLoading(false))
-  }, [])
 
   const allAppointments = appointments.appointments || [];
 

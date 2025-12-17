@@ -15,10 +15,10 @@ import { Link, useParams, useNavigate } from "react-router";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { useEffect, useState } from "react";
 import { availabilityService } from "../../services/availabilityService";
-import timeOffService from "../../services/timeOffService";
 import { endTime } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
 import { useAppointments } from "../../api/appointmentApi";
+import { useTimeOffs } from "../../api/timeOffApi";
 
 const MotionSection = motion.section;
 
@@ -27,12 +27,11 @@ export default function DayDetailsPage() {
   const navigate = useNavigate();
   const { role } = useAuth()
   const { appointments } = useAppointments()
+  const { timeOffs: timeOff } = useTimeOffs()
 
   const [freeSlots, setFreeSlots] = useState([])
   const [durationMin, setDurationMin] = useState('120')
   const [_slotsLoading, setSlotsLoading] = useState(false)
-
-  const [timeOff, setTimeOff] = useState([])
 
   const titleDate = prettyDate(String(dateParam));
 
@@ -54,11 +53,6 @@ export default function DayDetailsPage() {
   }, [dateParam, durationMin])
 
   const allFreeSlots = freeSlots.slots || [];
-
-  useEffect(() => {
-    timeOffService.getAll()
-      .then(setTimeOff)
-  }, [])
 
   const goPrevDay = () => {
     if (!dateParam) return;
