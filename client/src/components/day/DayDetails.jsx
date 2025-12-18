@@ -403,11 +403,13 @@ export default function DayDetailsPage() {
                   ) : (
                     allFreeSlots.map((t, i) => {
                       const { _day, _date, time } = getDateAndTime(String(new Date(t)))
+
+                      const prefillDate = t.slice(0, 10);
                       
                       return (
                       <Link
                         key={i}
-                        to={`/create`}
+                        to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(time)}&duration=${encodeURIComponent(durationMin)}`}
                         className="text-xs rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
                       >
                         {time}

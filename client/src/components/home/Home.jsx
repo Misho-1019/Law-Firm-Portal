@@ -12,7 +12,7 @@ import {
 import { Link } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import { formatSofiaDayLabel, formatSofiaTime } from "../../utils/dates";
+import { formatSofiaDate, formatSofiaDayLabel, formatSofiaTime } from "../../utils/dates";
 import { endTime } from "../../utils/time";
 import { useGetNextSlots } from "../../api/availabilityApi";
 
@@ -60,7 +60,8 @@ export default function Home() {
     return () => {
       cancelled = true;
     }
-  }, [getNextSlots])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const allFreeSlots = nextSlots.slots || [];  
   
@@ -198,6 +199,9 @@ export default function Home() {
                   const first = new Date(allFreeSlots[0])                 
                   const last = endTime(String(formatSofiaTime(first)), 120)
 
+                  const prefillDate = formatSofiaDate(first)
+                  const prefillTime = formatSofiaTime(first)
+
                   return (
                     <>
                       <div className="flex items-center justify-between">
@@ -210,7 +214,10 @@ export default function Home() {
                             {formatSofiaTime(first)}–{last}
                           </div>
                         </div>
-                        <Link to='/create' className="rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] px-3 py-1 text-sm font-semibold">
+                        <Link 
+                          to='/create' 
+                          className="rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] px-3 py-1 text-sm font-semibold"
+                        >
                           Open
                         </Link>
                       </div>
@@ -218,9 +225,14 @@ export default function Home() {
                       <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
                         {allFreeSlots.slice(0, 3).map((iso, idx) => {
                           const d = new Date(iso);
+
+                          const prefillDate = formatSofiaDate(d);
+                          const prefillTime = formatSofiaTime(d);
+                          
                           return (
-                            <div
+                            <Link
                               key={iso}
+                              to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(prefillTime)}&duration=${encodeURIComponent('120')}`}
                               className={`rounded-xl border px-3 py-2 ${
                                 idx === 0
                                   ? "bg-[#2F80ED]/10 border-[#2F80ED]/40"
@@ -233,13 +245,13 @@ export default function Home() {
                               <div className="text-[#334155] dark:text-[#94A3B8]">
                                 Starts at {formatSofiaTime(d)}
                               </div>
-                            </div>
+                            </Link>
                           );
                         })}
                       </div>
 
                       <Link
-                        to="/create"
+                        to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(prefillTime)}&duration=${encodeURIComponent('120')}`}
                         className="mt-4 inline-flex items-center gap-2 rounded-2xl w-full border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
                       >
                         Book this slot <ChevronRight className="h-4 w-4" />

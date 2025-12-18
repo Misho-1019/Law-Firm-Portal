@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -9,7 +9,7 @@ import {
   MonitorSmartphone,
   ChevronRight,
 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
 import { getDateAndTime } from "../../utils/dates";
@@ -33,6 +33,7 @@ export default function CreateAppointmentPage() {
   const { id, role } = useAuth()
   const navigate = useNavigate();
   const { create } = useCreateAppointment()
+  const [searchParams] = useSearchParams()
 
   const [selectedTime, setSelectedTime] = useState("");
   const [mode, setMode] = useState("In-Person");
@@ -74,6 +75,26 @@ export default function CreateAppointmentPage() {
       setSlotsLoading(false)
     }
   }
+
+  useEffect(() => {
+    const dateParam = searchParams.get('date')
+    const timeParam = searchParams.get('time')
+    const durationParam = searchParams.get('duration')
+
+    
+    if (dateParam) {
+      const validDate = new Date(dateParam).toISOString().slice(0, 10);
+      setDate(validDate)
+      setDuration(durationParam)
+      loadSlotsForDate(validDate, durationParam)
+    }
+
+    if (timeParam) {
+      setSelectedTime(timeParam)
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const formAction = async (formData) => {
     try {
