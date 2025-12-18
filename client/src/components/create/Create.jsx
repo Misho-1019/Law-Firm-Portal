@@ -15,6 +15,7 @@ import useAuth from "../../hooks/useAuth";
 import { getDateAndTime } from "../../utils/dates";
 import { useCreateAppointment } from "../../api/appointmentApi";
 import { getSlots } from "../../api/availabilityApi";
+import { showToast } from "../../utils/toastUtils";
 
 const MotionSection = motion.section;
 
@@ -75,29 +76,41 @@ export default function CreateAppointmentPage() {
   }
 
   const formAction = async (formData) => {
-    const date = formData.get("date");
-    const time = formData.get("time");
+    try {
+      const date = formData.get("date");
+      const time = formData.get("time");
 
-    const rawDuration = formData.get("durationMin")
-    let durationMin = normalizeDuration(rawDuration)
+      if (!date || !time) {
+        showToast('Please select a date and time.', 'warning')
+        return;
+      }
+  
+      const rawDuration = formData.get("durationMin")
+      let durationMin = normalizeDuration(rawDuration)
+  
+      const startsAt = toUTCISO(date, time, "Europe/Sofia");
+  
+      const appointmentData = {
+        ...Object.fromEntries(formData),
+        startsAt,
+        durationMin,
+      };
+  
+      delete appointmentData.date;
+      delete appointmentData.time;
+  
+      await create(appointmentData, id)
 
-    const startsAt = toUTCISO(date, time, "Europe/Sofia");
-
-    const appointmentData = {
-      ...Object.fromEntries(formData),
-      startsAt,
-      durationMin,
-    };
-
-    delete appointmentData.date;
-    delete appointmentData.time;
-
-    await create(appointmentData, id)
-    
-    if (role === 'Admin') {
-      navigate('/appointments')
-    } else {
-      navigate('/client')
+      showToast('Appointment created successfully!', 'success')
+      
+      if (role === 'Admin') {
+        navigate('/appointments')
+      } else {
+        navigate('/client')
+      }
+    } catch (error) {
+      showToast('Failed to create appointment. Please try again.', 'error')
+      console.error('Error creating appointment:', error);
     }
   };
 

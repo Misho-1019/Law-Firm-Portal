@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Link as RRLink, useInRouterContext } from "react-router";
 import { buildTimeOffPayload, useCreateTimeOff } from "../../api/timeOffApi";
+import { showToast } from "../../utils/toastUtils";
 
 const MotionSection = motion.section;
 
@@ -103,11 +104,19 @@ export default function TimeOffPage() {
       reason,
     })
 
+    if (mode === 'Partial Day' && startDate === endDate && selectedSlots.length === 0) {
+      showToast('Please select at least one time slot.', 'warning');
+      return;
+    }
+
     try {
       await create(payload)
 
+      showToast('Time off block created successfully.', 'success');
+
       resetForm();
     } catch (error) {
+      showToast('Error creating time off block.', 'error');
       console.error('Error creating time off:', error);
     }
   }
@@ -275,13 +284,13 @@ export default function TimeOffPage() {
 
                   {/* CTA */}
                   <div className="flex items-center justify-end gap-2">
-                    <Link
-                      to='/admin'
+                    <button
+                      type="submit"
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40]"
                       title="Click to save any changes"
                     >
                       <Save className="h-4 w-4" /> Save block
-                    </Link>
+                    </button>
                     <button
                       type="button"
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"

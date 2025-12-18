@@ -17,8 +17,19 @@ import { getDateAndTimeDefaults } from "../../utils/dates";
 import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
 import { useAppointment, usePatchAppointment } from "../../api/appointmentApi";
+import { showToast } from "../../utils/toastUtils";
 
 const MotionSection = motion.section;
+
+function normalizeDuration(duration) {
+  let d = Number(duration)
+
+  if (!Number.isFinite(d)) d = 120;
+
+  d = Math.max(15, Math.min(480, d))
+
+  return d;
+}
 
 export default function EditAppointmentPage() {
   const { appointmentId } = useParams()
@@ -29,50 +40,60 @@ export default function EditAppointmentPage() {
 
   const [selectedTime, setSelectedTime] = useState("");
 
-  const dateAndTime = getDateAndTimeDefaults(String(appointment?.startsAt));
+  const dateAndTime = appointment?.startsAt
+    ? getDateAndTimeDefaults(String(appointment.startsAt))
+    : { date: '', time: '' };
   
   useEffect(() => {
-    if (appointment.startsAt) {
+    if (appointment?.startsAt) {
       const { date, time } = getDateAndTimeDefaults(String(appointment?.startsAt));
       setSelectedTime(time);
     }
   }, [appointment?.startsAt])
 
   const formAction = async (formData) => {
-    const date = formData.get('date')
-    const time = formData.get('time')
-    const rawDuration = formData.get('durationMin')
+    try {
+      const date = formData.get('date')
+      const time = formData.get('time')
+      const rawDuration = formData.get('durationMin')
+      
+      if (!date || !time) {
+        showToast('Please select a date and time.', 'warning')
+        return;
+      }
 
-    const startsAt = toUTCISO(date, time, 'Europe/Sofia')
+      const durationMin = normalizeDuration(rawDuration)
+  
+      const startsAt = toUTCISO(date, time, 'Europe/Sofia')
+  
+      const appointmentData = {
+        ...Object.fromEntries(formData),
+        startsAt,
+        durationMin,
+      }
+  
+      delete appointmentData.date
+      delete appointmentData.time
+  
+      await patch(appointmentData, appointmentId)
 
-    let durationMin = Number(rawDuration)
-
-    if (!Number.isFinite(durationMin)) durationMin = 120;
-
-    durationMin = Math.max(15, Math.min(480, durationMin))
-
-    const appointmentData = {
-      ...Object.fromEntries(formData),
-      startsAt,
-      durationMin,
+      showToast('Appointment updated successfully!', 'success')
+      
+      navigate(`/appointments/${appointmentId}/details`)
+    } catch (error) {
+      showToast('Failed to update appointment. Please try again.', 'error')
     }
-
-    delete appointmentData.date
-    delete appointmentData.time
-
-    await patch(appointmentData, appointmentId)
-    
-    navigate(`/appointments/${appointmentId}/details`)
   }
 
   if (isLoading) return <div>Loading...</div>
 
   if (error || !appointment) return <div>Error loading appointment.</div>
 
-  const isOwner = role === 'CLient' && appointment?.creator === userId;
+  const isAdmin = role === 'Admin';
+  const isOwner = role === 'Client' && appointment?.creator === userId;
 
-  if (role !== 'Admin' || !isOwner) {
-    return <Navigate to='client' />;
+  if (!isAdmin && !isOwner) {
+    return <Navigate to='/client' />;
   }
   
   return (

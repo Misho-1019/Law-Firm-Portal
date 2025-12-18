@@ -14,6 +14,7 @@ import {
 import { Link as RRLink, useInRouterContext, useNavigate, useParams } from "react-router";
 import { useAppointment, useDeleteAppointment } from "../../api/appointmentApi";
 import useAuth from "../../hooks/useAuth";
+import { showToast } from "../../utils/toastUtils";
 
 const MotionSection = motion.section;
 
@@ -54,6 +55,8 @@ export default function AppointmentDetails() {
     if (!hasConfirm) return;
 
     await deleteAppointment(appointmentId)
+
+    showToast('Appointment deleted successfully.', 'success');
 
     navigate('/appointments')
   }

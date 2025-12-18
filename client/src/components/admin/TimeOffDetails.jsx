@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import { useDeleteTimeOff, useTimeOffs, useUpdateTimeOff } from "../../api/timeOffApi";
+import { showToast } from "../../utils/toastUtils";
 
 export default function TimeOffDetailsPage() {
   const { date } = useParams(); // expected "YYYY-MM-DD"
@@ -54,6 +55,8 @@ export default function TimeOffDetailsPage() {
     if (!hasConfirm) return
 
     await deleteTimeOff(id)
+
+    showToast('Time off block deleted successfully.', 'success');
 
     navigate('/admin')
   }
@@ -189,6 +192,8 @@ export default function TimeOffDetailsPage() {
                     editingItem._id,
                   )
 
+                  showToast('Time off block updated successfully.', 'success');
+
                   const updated = res.updatedTimeOff || res;
 
                   setTimeOffItems((prev) =>
@@ -198,6 +203,7 @@ export default function TimeOffDetailsPage() {
                   setEditingItem(null)
                 } catch (error) {
                   console.error('Failed to update time off:', error);
+                  showToast('Error updating time off block.', 'error');
                 } finally {
                   setIsSaving(false)
                 }
