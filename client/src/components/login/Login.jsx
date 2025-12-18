@@ -7,10 +7,10 @@ import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useLogin } from "../../api/authApi";
 import { useUserContext } from "../../context/UserContext";
-import { toast } from "react-toastify";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
+import { showToast } from "../../utils/toastUtils";
 
 const MotionSection = motion.section;
 
@@ -38,19 +38,11 @@ export default function Login() {
 
       userLoginHandler(authData)
 
-      toast.success('Login successful', {
-        position: 'top-center',
-        autoClose: 2000,
-        theme: 'light',
-      })
+      showToast('Login successful', 'success')
 
       navigate('/')
     } catch (error) {
-      toast.error(error.message || 'Login failed', {
-        position: 'top-center',
-        autoClose: 2000,
-        theme: 'light'
-      })
+      showToast(error.message || 'Login failed', 'error')
     }
   }
 

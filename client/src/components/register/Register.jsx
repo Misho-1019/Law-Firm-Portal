@@ -12,10 +12,10 @@ import {
 import { useRegister } from "../../api/authApi";
 import { useState } from "react";
 import { useUserContext } from "../../context/UserContext";
-import { toast } from "react-toastify";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
+import { showToast } from "../../utils/toastUtils";
 
 const MotionSection = motion.section;
 
@@ -47,19 +47,11 @@ export default function Register() {
 
       userLoginHandler(authData)
 
-      toast.success('Registration successful', {
-        position: 'top-center',
-        autoClose: 2000,
-        theme: 'light',
-      })
+      showToast('Registration successful', 'success')
 
       navigate('/')
     } catch (error) {
-      toast.error(error.message || 'Registration failed', {
-        position: 'top-center',
-        autoClose: 2000,
-        theme: 'light'
-      })
+      showToast(error.message || 'Registration failed', 'error')
     }
   }
 
