@@ -62,7 +62,8 @@ export default function SchedulePage() {
         title: it.title,
         start: it.startTime.split(':').map(Number),
         end: it.endTime.split(':').map(Number),
-        note: it.note
+        note: it.note,
+        creator: it.creator,
       }))
     })
     
@@ -217,7 +218,9 @@ function DayColumn({ date, items }) {
 }
 
 function EventChip({ item }) {
-  const { role } = useAuth()
+  const { role, userId } = useAuth()
+  const isAdmin = role === 'Admin';
+  const isOwner = role === 'Client' && item?.creator === userId;
   const isBooked = item.type === "appointment";
   const isOff = item.type === "timeoff";
   const base = "rounded-2xl border px-3.5 py-2.5 text-sm sm:text-base";
@@ -243,7 +246,7 @@ function EventChip({ item }) {
             </div>
           ) : null}
         </div>
-        {isBooked && role === 'Admin' ? (
+        {isBooked && (isAdmin || isOwner) ? (
           <div className="shrink-0" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
             <SafeLink
               to={`/appointments/${item.id}/details`}

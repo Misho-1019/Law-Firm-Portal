@@ -142,35 +142,37 @@ export default function TimeOffDetailsPage() {
                     </div>
 
                     {/* Placeholder right side – later: delete/edit buttons */}
-                    <div className="flex flex-col gap-2 text-xs">
-                      {/* Edit button – later you can turn this into a Link to your edit page */}
-                      <button
-                        type="button"
-                        className="inline-flex items-center justify-center gap-1 rounded-xl border border-[#2F80ED] text-[#2F80ED] px-3 py-1.5 font-semibold hover:bg-[#2F80ED] hover:text-white transition-colors"
-                        onClick={() => {
-                          setEditingItem(item);
-                          setEditValues({
-                            dateFrom: item.dateFrom,
-                            dateTo: item.dateTo,
-                            from: item.from || '',
-                            to: item.to || '',
-                            reason: item.reason || '',
-                          })
-                        }}
-                      >
-                        <Pencil className="h-3 w-3" />
-                        Edit
-                      </button>
-                    
-                      {/* Delete button – later you’ll wire timeOffService.delete(item._id) */}
-                      <button
-                        className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-500/70 text-red-600 dark:text-red-300 px-3 py-1.5 font-semibold hover:bg-red-50 dark:hover:bg-red-900/40 transition-colors"
-                        onClick={() => timeOffDeleteHandler(item._id, item.dateFrom, item.dateTo, item.from, item.to)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Delete
-                      </button>
-                    </div>
+                    {role === 'Admin' && (
+                      <div className="flex flex-col gap-2 text-xs">
+                        {/* Edit button – later you can turn this into a Link to your edit page */}
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-[#2F80ED] text-[#2F80ED] px-3 py-1.5 font-semibold hover:bg-[#2F80ED] hover:text-white transition-colors"
+                          onClick={() => {
+                            setEditingItem(item);
+                            setEditValues({
+                              dateFrom: item.dateFrom,
+                              dateTo: item.dateTo,
+                              from: item.from || '',
+                              to: item.to || '',
+                              reason: item.reason || '',
+                            })
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" />
+                          Edit
+                        </button>
+                      
+                        {/* Delete button – later you’ll wire timeOffService.delete(item._id) */}
+                        <button
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-500/70 text-red-600 dark:text-red-300 px-3 py-1.5 font-semibold hover:bg-red-50 dark:hover:bg-red-900/40 transition-colors"
+                          onClick={() => timeOffDeleteHandler(item._id, item.dateFrom, item.dateTo, item.from, item.to)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })

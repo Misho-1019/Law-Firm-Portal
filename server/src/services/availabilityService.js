@@ -368,7 +368,7 @@ export async function getCalendarWeek(fromStr, toStr) {
       $lte: rangeEndUtc,
     },
   })
-    .select("startsAt durationMin service firstName lastName")
+    .select("startsAt durationMin service firstName lastName creator")
     .lean();
 
   const days = [];
@@ -454,6 +454,7 @@ export async function getCalendarWeek(fromStr, toStr) {
         startTime: clamped.from,
         endTime: clamped.to,
         note,
+        creator: appt.creator?.toString?.() || appt.creator
       });
     });
 
