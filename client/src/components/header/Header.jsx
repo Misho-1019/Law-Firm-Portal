@@ -36,7 +36,7 @@ export default function Header({ initialActive = "Home" }) {
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Time Off", href: "/timeoff", icon: Gavel },
     { label: "Schedule", href: "/schedule", icon: Clock3 },
-    { label: "Change Your Schedule", href: "/scheduleditor", icon: Wrench },
+    // { label: "Change Your Schedule", href: "/scheduleditor", icon: Wrench },
     { label: "Logout", href: "/logout", icon: LogOut },
   ];
 

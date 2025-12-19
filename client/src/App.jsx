@@ -44,7 +44,7 @@ function App() {
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/timeoff" element={<TimeOffPage />} />
-            <Route path="/scheduleditor" element={<ScheduleEditor />} />
+            {/* <Route path="/scheduleditor" element={<ScheduleEditor />} /> */}
           </Route>
           <Route element={<ClientGuard />}>
             <Route path="/client" element={<ClientDashboard />} />

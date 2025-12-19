@@ -2,6 +2,7 @@
 /* UI-only, palette-matched (no functionality) */
 import { Calendar as CalendarIcon, Clock, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router";
 
 const MotionSection = motion.section;
 
@@ -25,13 +26,13 @@ export default function ScheduleEditor() {
             </div>
           </div>
 
-          <button
-            type="button"
+          <Link
+            to='/schedule'
             className="inline-flex items-center gap-2 rounded-2xl border border-[#1F2937] px-4 py-2 text-sm text-[#E5E7EB] hover:bg-[#020617]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to overview
-          </button>
+          </Link>
         </div>
 
         <MotionSection
