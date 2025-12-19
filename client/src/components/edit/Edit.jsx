@@ -40,6 +40,9 @@ export default function EditAppointmentPage() {
 
   const [selectedTime, setSelectedTime] = useState("");
 
+  const isAppointmentReady =
+  appointment && Object.keys(appointment).length > 0;
+
   const dateAndTime = appointment?.startsAt
     ? getDateAndTimeDefaults(String(appointment.startsAt))
     : { date: '', time: '' };
@@ -85,12 +88,12 @@ export default function EditAppointmentPage() {
     }
   }
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading || !isAppointmentReady) return <div>Loading...</div>
 
-  if (error || !appointment) return <div>Error loading appointment.</div>
+  if (error) return <div>Error loading appointment.</div>
 
   const isAdmin = role === 'Admin';
-  const isOwner = role === 'Client' && appointment?.creator === userId;
+  const isOwner = role === 'Client' && appointment?.creator === userId;  
 
   if (!isAdmin && !isOwner) {
     return <Navigate to='/client' />;
