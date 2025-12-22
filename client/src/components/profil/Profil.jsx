@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   User,
@@ -139,6 +139,8 @@ function AvatarInitials({ name }) {
 /** ✅ UI-only Profile page (no editing, no state) */
 export default function ProfilePage() {
   const { role, email, firstName, lastName, phone } = useAuth();
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
 
   const data = useMemo(
     () => ({
@@ -339,18 +341,51 @@ export default function ProfilePage() {
               <div className="p-4 pb-3">
                 <h3 className="text-lg font-semibold">Security</h3>
                 <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Quick shortcuts (UI-only).
+                  Change your password (you’ll log in again).
                 </p>
               </div>
               <GradientDivider />
-              <div className="p-5 space-y-2">
-                <OutlineBlueLink to="#">
-                  Change password <ChevronRight className="h-4 w-4" />
-                </OutlineBlueLink>
-                <OutlineBlueLink to="#">
-                  Two-factor settings <ChevronRight className="h-4 w-4" />
-                </OutlineBlueLink>
+
+              <div className="p-5">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordForm((s) => !s)}
+                  className="w-full inline-flex items-center justify-between gap-2 rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 font-semibold hover:bg-[#2F80ED] hover:text-white transition-colors"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    Change password
+                  </span>
+                  <ChevronRight
+                    className={`h-4 w-4 transition-transform ${
+                      showPasswordForm ? "rotate-90" : ""
+                    }`}
+                  />
+                </button>
+              
+                <AnimatePresence initial={false}>
+                  {showPasswordForm && (
+                    <MotionDiv
+                      key="pwform"
+                      initial={{ height: 0, opacity: 0, y: -6 }}
+                      animate={{ height: "auto", opacity: 1, y: 0 }}
+                      exit={{ height: 0, opacity: 0, y: -6 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-4">
+                        <ChangePasswordForm />
+                      </div>
+                    </MotionDiv>
+                  )}
+                </AnimatePresence>
+              
+                <div className="mt-4">
+                  <OutlineBlueLink to="#">
+                    Two-factor settings <ChevronRight className="h-4 w-4" />
+                  </OutlineBlueLink>
+                </div>
               </div>
+
             </Card>
           </div>
         </MotionSection>
