@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User";
 
 const SECRET = process.env.SECRET_KEY || 'BASICSECRET';
 
-export const authMiddleware = (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
     const token = req.cookies['auth'];
 
     if(!token) return next();
@@ -10,8 +11,16 @@ export const authMiddleware = (req, res, next) => {
     try {
         const decodedToken = jwt.verify(token, SECRET)
 
-        req.user = decodedToken
-        res.locals.user = decodedToken
+        const user = await User.findById(decodedToken._id).select('role tokenVersion')
+
+        const tokenVersion = decodedToken.tokenVersion ?? 0;
+        if (!user || user.tokenVersion !== tokenVersion) {
+            res.clearCookie('auth')
+            return res.status(401).json({ message: 'Session expired. Please log in again.' })
+        }
+
+        req.user = {_id: user._id.toString(), role: user.role, tokenVersion: user.tokenVersion }
+        res.locals.user = req.user;
 
         next();
     } catch (error) {

@@ -62,4 +62,24 @@ authController.get('/logout', isAuth, (req, res) => {
     }
 })
 
+authController.put('/users/me/password', isAuth, async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() }) 
+    }
+
+    const { currentPassword, newPassword } = req.body || {};
+    const userId = req.user._id;
+
+    try {
+        await authService.changeMyPassword(currentPassword, newPassword, userId)
+
+        return res.json({ ok: true })
+    } catch (err) {
+        console.error("changeMyPassword:", err);
+        return res.status(400).json({ message: "Server error." });
+    }
+})
+
 export default authController;
