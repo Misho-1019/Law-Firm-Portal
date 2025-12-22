@@ -26,9 +26,12 @@ export default {
         return {
             token,
             _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
             username: user.username,
             email: user.email,
             role: user.role,
+            phone: user.phone
         }
     },
     async login(email, password) {
@@ -56,9 +59,12 @@ export default {
         return {
             token,
             _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
             username: user.username,
             email: user.email,
             role: user.role,
+            phone: user.phone
         } 
     }
 }

@@ -20,12 +20,15 @@ import { showToast } from "../../utils/toastUtils";
 const MotionSection = motion.section;
 
 const schema = yup.object({
+  firstName: yup.string().required('Name is required'),
+  lastName: yup.string().required('Last name is required'),
   username: yup.string().min(2, 'Username must be at least 2 characters').required('Username is required'),
   email: yup.string().email('Invalid email format').required('Email is required'),
   password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
   confirmPassword: yup.string()
     .oneOf([yup.ref('password'), null], 'Passwords must match')
     .required('Confirm Password is required'),
+  phone: yup.string().matches(/^\+[1-9]\d{1,14}$/, 'Invalid phone number'),
 })
 
 export default function Register() {
@@ -43,7 +46,7 @@ export default function Register() {
 
   const registerHandler = async (data) => {
     try {
-      const authData = await registerUser(data.username, data.email, data.password)
+      const authData = await registerUser( data.firstName, data.lastName, data.username, data.email, data.password, data.phone)
 
       userLoginHandler(authData)
 
@@ -84,6 +87,34 @@ export default function Register() {
                   onSubmit={handleSubmit(registerHandler)}
                   noValidate
                 >
+                  {/* firstName */}
+                  <Field
+                    label="First Name"
+                    id="firstName"
+                    name="firstName"
+                    icon={<User className="h-4 w-4" />}
+                    {...register("firstName")}
+                    aria-invalid={!!errors.firstName}
+                    placeholder="Ivan"
+                    hint="Min 2 characters. Will be visible to staff."
+                    autoComplete="firstName"
+                  />
+                  {errors.firstName && <p className="text-red-600 text-sm">{errors.firstName.message}</p>}
+
+                  {/* Last Name */}
+                  <Field
+                    label="Last Name"
+                    id="lastName"
+                    name="lastName"
+                    icon={<User className="h-4 w-4" />}
+                    {...register("lastName")}
+                    aria-invalid={!!errors.lastName}
+                    placeholder="Petrov"
+                    hint="Min 2 characters. Will be visible to staff."
+                    autoComplete="lastName"
+                  />
+                  {errors.lastName && <p className="text-red-600 text-sm">{errors.lastName.message}</p>}
+
                   {/* Username */}
                   <Field
                     label="Username"
@@ -144,10 +175,13 @@ export default function Register() {
                     id="phone"
                     name="phone"
                     type="tel"
+                    {...register("phone")}
+                    aria-invalid={!!errors.phone}
                     icon={<PhoneIcon className="h-4 w-4" />}
                     placeholder="+359 88 123 4567"
                     autoComplete="tel"
                   />
+                  {errors.phone && <p className="text-red-600 text-sm">{errors.phone.message}</p>}
 
                   {/* CTA (button type=button to avoid form submit) */}
                   <button
@@ -185,10 +219,13 @@ export default function Register() {
                     </h2>
                     <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
+                      <li>First Name: required</li>
+                      <li>Last Name: required</li>
                       <li>Username: min 2 chars</li>
                       <li>Email: name@domain.tld</li>
                       <li>Password: ≥ 6, letters/numbers/_ only</li>
                       <li>Role: Client (default)</li>
+                      <li>Phone: Phone Number</li>
                     </ul>
                   </div>
                   <p className="text-xs text-white/70">
