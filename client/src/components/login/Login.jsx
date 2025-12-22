@@ -3,7 +3,7 @@
 // - Pure presentational components with Framer Motion + Tailwind
 
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useLogin } from "../../api/authApi";
 import { useUserContext } from "../../context/UserContext";
@@ -11,6 +11,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { showToast } from "../../utils/toastUtils";
+import { useState } from "react";
 
 const MotionSection = motion.section;
 
@@ -45,10 +46,6 @@ export default function Login() {
       showToast(error.message || 'Login failed', 'error')
     }
   }
-
-  // const [_, loginAction, isPending] = useActionState(loginHandler, {
-  //   email: '', password: ''
-  // })
 
   return (
     <div className="dark">
@@ -149,6 +146,9 @@ function Field({ id, label, icon, type = "text", name, placeholder = "", ...inpu
 }
 
 function PasswordField({ id, label, name, placeholder, ...inputProps }) {
+  const [show, setShow] = useState(false)
+  const ToggleIcon = show ? Eye : EyeOff;
+  
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
@@ -157,32 +157,23 @@ function PasswordField({ id, label, name, placeholder, ...inputProps }) {
           <Lock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
           <input
             id={id}
-            type="password"
+            type={show ? 'text' : 'password'}
             name={name}
             placeholder={placeholder}
             className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
             autoComplete="current-password"
             {...inputProps}
           />
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            aria-label={show ? "Hide password" : "Show password"}
+            className="p-1 rounded-md hover:bg-[rgb(0,0,0,0.05)] dark:hover:bg-[rgb(255,255,255,0.08)] text-[#334155] dark:text-[#94A3B8]"
+          >
+            <ToggleIcon className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-/* ----------------------------------------------------------
-   Minimal UI smoke tests (commented for Vitest/Jest)
----------------------------------------------------------- */
-/*
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
-
-describe('Login UI-only', () => {
-  it('renders without crashing', () => {
-    const { getByText, getByLabelText } = render(<Login />);
-    getByText(/sign in/i);
-    getByLabelText(/email/i);
-    getByLabelText(/password/i);
-  });
-});
-*/

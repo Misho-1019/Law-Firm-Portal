@@ -1,13 +1,13 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router";
-import { Lock, Save } from "lucide-react";
+import { Lock, Save, Eye, EyeOff } from "lucide-react";
 import { useChangePassword } from "../../../api/authApi";
 import { UserContext } from "../../../context/UserContext";
 
 export default function ChangePasswordForm() {
   const navigate = useNavigate();
   const { changePassword } = useChangePassword();
-  const { userLogoutHandler } = useContext(UserContext)
+  const { userLogoutHandler } = useContext(UserContext);
 
   const [currentPassword, setCurrent] = useState("");
   const [newPassword, setNew] = useState("");
@@ -28,7 +28,7 @@ export default function ChangePasswordForm() {
       setIsSaving(true);
       await changePassword(currentPassword, newPassword);
 
-      userLogoutHandler()
+      userLogoutHandler();
 
       // tokenVersion bump => old cookie JWT becomes invalid
       navigate("/login");
@@ -41,44 +41,34 @@ export default function ChangePasswordForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      <label className="block">
-        <div className="text-xs font-medium text-[#334155] dark:text-[#94A3B8]">
-          Current password
-        </div>
-        <input
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrent(e.target.value)}
-          className="mt-1 w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-4 py-2 text-sm outline-none focus:ring-4 focus:ring-[#2F80ED]/20"
-        />
-      </label>
+      <PasswordField 
+        label='Current password'
+        value={currentPassword}
+        onChange={(e) => setCurrent(e.target.value)}
+        autoComplete='current-password'
+        placeholder='••••••••'
+      />
 
-      <label className="block">
-        <div className="text-xs font-medium text-[#334155] dark:text-[#94A3B8]">
-          New password
-        </div>
-        <input
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNew(e.target.value)}
-          className="mt-1 w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-4 py-2 text-sm outline-none focus:ring-4 focus:ring-[#2F80ED]/20"
-        />
-      </label>
+      <PasswordField 
+        label='New password'
+        value={newPassword}
+        onChange={(e) => setNew(e.target.value)}
+        autoComplete='new-password'
+        placeholder='••••••••'
+      />
 
-      <label className="block">
-        <div className="text-xs font-medium text-[#334155] dark:text-[#94A3B8]">
-          Confirm new password
-        </div>
-        <input
-          type="password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="mt-1 w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-4 py-2 text-sm outline-none focus:ring-4 focus:ring-[#2F80ED]/20"
-        />
-      </label>
+      <PasswordField 
+        label='Confirm password'
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+        autoComplete='confirm-password'
+        placeholder='••••••••'
+      />
 
       {error ? (
-        <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{error}</div>
+        <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
+          {error}
+        </div>
       ) : null}
 
       <button
@@ -91,5 +81,52 @@ export default function ChangePasswordForm() {
         <Save className="h-4 w-4" />
       </button>
     </form>
+  );
+}
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  name,
+  placeholder,
+  autoComplete,
+  id,
+}) {
+  const [show, setShow] = useState(false);
+  const ToggleIcon = show ? Eye : EyeOff;
+
+  return (
+    <label className="block">
+      <div className="text-xs font-medium text-[#334155] dark:text-[#94A3B8]">
+        {label}
+      </div>
+
+      <div className="mt-1 w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-4 py-2 text-sm outline-none focus-within:ring-4 focus-within:ring-[#2F80ED]/20">
+        <div className="flex items-center gap-2">
+          <Lock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
+
+          <input
+            id={id}
+            name={name}
+            value={value}
+            type={show ? 'text' : 'password'}
+            onChange={onChange}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            className="w-full bg-transparent outline-none placeholder:text-[#334155] dark:placeholder:text-[#94A3B8]"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            aria-label={show ? 'Hide password': 'Show password'}
+            className="p-1 rounded-md hover:bg-[rgb(0,0,0,0.05)] dark:hover:bg-[rgb(255,255,255,0.08)] text-[#334155] dark:text-[#94A3B8]"
+          >
+            <ToggleIcon className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </label>
   );
 }
