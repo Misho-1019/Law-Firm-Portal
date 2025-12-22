@@ -42,6 +42,10 @@ const userSchema = new Schema({
         type: String,
         required: true,
         trim: true,
+    },
+    tokenVersion: {
+        type: Number,
+        default: 0,
     }
 }, 
 {
