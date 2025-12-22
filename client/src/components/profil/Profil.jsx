@@ -16,6 +16,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import ChangePasswordForm from "./password/Password";
 
 const MotionDiv = motion.div;
 const MotionSection = motion.section;

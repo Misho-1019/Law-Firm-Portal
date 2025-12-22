@@ -30,22 +30,36 @@ export const useRegister = () => {
 }
 
 export const useLogout = () => {
-    const { token, userLogoutHandler } = useContext(UserContext)
+    const { userLogoutHandler } = useContext(UserContext)
 
     useEffect(() => {
-        if (!token) return;
-
-        const options = {
-            headers: {
-                'X-Authorization': token
-            }
-        }
-
-        request.get(`${baseUrl}/logout`, null, options)
+        request.get(`${baseUrl}/logout`)
             .finally(userLogoutHandler)
-    }, [token, userLogoutHandler])
+    }, [userLogoutHandler])
 
     return {
-        isLoggedOut: !!token,
+        isLoggedOut: true,
     }
+}
+
+export const useChangePassword = () => {
+    const abortRef = useRef(new AbortController())
+
+    const changePassword = async (currentPassword, newPassword) => {
+        const result = await request.put(`
+            ${baseUrl}/users/me/password`, 
+            { currentPassword, newPassword}, 
+            { signal: abortRef.current.signal }
+        )
+
+        return result;
+    }
+
+    useEffect(() => {
+        const abortController = abortRef.current;
+
+        return () => abortController.abort();
+    }, [])
+
+    return { changePassword }
 }

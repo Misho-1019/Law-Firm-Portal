@@ -75,6 +75,8 @@ authController.put('/users/me/password', isAuth, async (req, res) => {
     try {
         await authService.changeMyPassword(currentPassword, newPassword, userId)
 
+        res.clearCookie('auth', { httpOnly: true })
+
         return res.json({ ok: true })
     } catch (err) {
         console.error("changeMyPassword:", err);
