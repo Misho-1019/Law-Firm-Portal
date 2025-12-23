@@ -26,7 +26,7 @@ export function buildLoginEmail({ username, meta }) {
 }
 
 export function buildPasswordChangedEmail({ username, meta }) {
-    const safe = (v) = (v ? String(v) : '-')
+    const safe = (v) => (v ? String(v) : '-')
 
     return {
         subject: "✅ Your password was changed",

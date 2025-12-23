@@ -3,8 +3,9 @@ import authService from "../services/authService.js";
 import { isAuth, isGuest } from "../middlewares/authMiddleware.js";
 import { loginUserChecks, registerUserChecks } from "../validators/user.js";
 import { validationResult } from "express-validator";
-import { buildRegisterEmail } from "../lib/authEmails.js";
+import { buildPasswordChangedEmail, buildRegisterEmail } from "../lib/authEmails.js";
 import { sendEmail } from "../lib/mailer.js";
+import User from "../models/User.js";
 
 const authController = Router();
 
@@ -89,7 +90,27 @@ authController.put('/users/me/password', isAuth, async (req, res) => {
     const userId = req.user._id;
 
     try {
+        const user = await User.findById(userId).select('email username')
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found!' })
+        }
+
         await authService.changeMyPassword(currentPassword, newPassword, userId)
+
+        if (!EMAILS_DISABLED) {
+            const meta = {
+                ip: (req.headers['x-forwarded-for']?.toString().split(',')[0] || req.ip)?.trim(),
+                ua: req.headers['user-agent'] || '',
+                time: new Date().toISOString(),
+            }
+
+            const { subject, html } = buildPasswordChangedEmail({ username: user.username, meta })
+
+            sendEmail({ to: user.email, subject, html }).catch((e) =>
+                console.error('[email] password change failed', e?.message || e) 
+            )
+        }
 
         res.clearCookie('auth', { httpOnly: true })
 

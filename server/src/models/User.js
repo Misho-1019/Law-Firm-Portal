@@ -29,7 +29,6 @@ const userSchema = new Schema({
         type: String, 
         required: true,
         minLength: 6,
-        match: /^\w+$/,
         trim: true,
     },
     role: {
