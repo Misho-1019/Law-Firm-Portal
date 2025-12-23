@@ -46,7 +46,23 @@ const userSchema = new Schema({
     tokenVersion: {
         type: Number,
         default: 0,
-    }
+    },
+    lastLoginAt: { 
+        type: Date, 
+        default: null 
+    },
+    lastLoginIp: { 
+        type: String, 
+        default: "" 
+    },
+    lastLoginUa: { 
+        type: String, 
+        default: "" 
+    },
+    lastLoginAlertAt: { 
+        type: Date, 
+        default: null 
+    }, // when we last emailed an alert
 }, 
 {
     timestamps: { createdAt: 'createdAt'},
