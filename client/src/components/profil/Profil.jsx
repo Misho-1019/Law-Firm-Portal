@@ -173,14 +173,22 @@ export default function ProfilePage() {
               </div>
 
               <p className="mt-2 text-sm text-[#334155] dark:text-[#94A3B8]">
-                Personal details, role and preferences — same palette as the admin
-                dashboard.
+                Personal details, role and preferences.
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge tone="blue">
-                  <ShieldCheck className="mr-2 h-3.5 w-3.5" />
-                  {role}
+                  {role === 'Admin' ? (
+                    <div className="flex flex-wrap gap-0">
+                      <ShieldCheck className="mr-2 h-3.5 w-3.5" />
+                      {role}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-0">
+                      <User className="mr-2 h-3.5 w-3.5" />
+                      {role}
+                    </div>
+                  )}
                 </Badge>
                 <Badge>
                   <Briefcase className="mr-2 h-3.5 w-3.5" />
@@ -378,12 +386,6 @@ export default function ProfilePage() {
                     </MotionDiv>
                   )}
                 </AnimatePresence>
-              
-                <div className="mt-4">
-                  <OutlineBlueLink to="#">
-                    Two-factor settings <ChevronRight className="h-4 w-4" />
-                  </OutlineBlueLink>
-                </div>
               </div>
 
             </Card>

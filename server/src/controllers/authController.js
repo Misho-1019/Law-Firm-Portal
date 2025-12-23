@@ -3,10 +3,14 @@ import authService from "../services/authService.js";
 import { isAuth, isGuest } from "../middlewares/authMiddleware.js";
 import { loginUserChecks, registerUserChecks } from "../validators/user.js";
 import { validationResult } from "express-validator";
+import { buildLoginEmail, buildRegisterEmail } from "../lib/authEmails.js";
+import { sendEmail } from "../lib/mailer.js";
 
 const authController = Router();
 
 const isProd = process.env.NODE_ENV === 'production';
+
+const EMAIL_DISABLED = process.env.EMAIL_DISABLED === '1';
 
 authController.post('/register', isGuest, registerUserChecks, async (req, res) => {
     const errors = validationResult(req);
@@ -22,6 +26,14 @@ authController.post('/register', isGuest, registerUserChecks, async (req, res) =
 
         // res.cookie('auth', result.token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
         res.cookie('auth', result.token, { httpOnly: true }); // 2 hours
+
+        if (!EMAIL_DISABLED) {
+            const { subject, html } = buildRegisterEmail({ username: result.username })
+
+            sendEmail({ to: result.email, subject, html }).catch((e) => 
+                console.error('[email] register failed:', e?.message || e)
+            )
+        }
 
         res.status(201).json(result)
     } catch (error) {
@@ -42,6 +54,20 @@ authController.post('/login', isGuest, loginUserChecks, async (req, res) => {
 
         // res.cookie('auth', result.token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
         res.cookie('auth', result.token, { httpOnly: true }); // 2 hours
+
+        if (!EMAIL_DISABLED) {
+            const meta = {
+                ip: (req.headers['x-forwared-for']?.toString().split(',')[0] || req.ip)?.trim(),
+                ua: req.headers['user-agent'],
+                time: new Date().toISOString()
+            }
+
+            const { subject, html } = buildLoginEmail({ username: result.username, meta })
+
+            sendEmail({ to: result.email, subject, html}).catch((e) =>
+                console.error('[email] login failed', e?.message || e)
+            )
+        }
 
         res.status(200).json(result);
     } catch (err) {

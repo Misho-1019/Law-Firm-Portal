@@ -6,8 +6,9 @@ dotenv.config();
 const GMAIL_USER = (process.env.GMAIL_USER || "").trim();
 const GMAIL_APP_PASS = (process.env.GMAIL_APP_PASS || "").replace(/\s+/g, "");
 const IS_PROD = process.env.NODE_ENV === "production";
+const EMAIL_DISABLED = process.env.EMAIL_DISABLED === '1'
 
-if (!GMAIL_USER || !GMAIL_APP_PASS) {
+if (!EMAIL_DISABLED && (!GMAIL_USER || !GMAIL_APP_PASS)) {
   throw new Error(`[mailer] Missing GMAIL_USER or GMAIL_APP_PASS`);
 }
 
@@ -27,6 +28,10 @@ transporter.verify((err) => {
 
 /** sendEmail({ to, subject, html?, text? }) */
 export async function sendEmail({ to, subject, html, text }) {
+  if (process.env.EMAIL_DISABLED === '1') {
+    return { skipped: true, reason: 'EMAIL_DISABLED' }
+  }
+
   const recipients = Array.isArray(to) ? to.filter(Boolean) : [to].filter(Boolean);
   if (!recipients.length) return { skipped: true, reason: "missing recipient" };
 
