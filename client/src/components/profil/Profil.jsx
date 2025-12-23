@@ -14,6 +14,7 @@ import {
   PencilLine,
   Camera,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import ChangePasswordForm from "./password/Password";
@@ -47,9 +48,10 @@ function Badge({ children, tone = "neutral" }) {
   );
 }
 
-function Card({ children, className = "" }) {
+function Card({ children, className = "", ...props }) {
   return (
     <div
+      {...props}
       className={
         "rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm " +
         className
@@ -199,14 +201,14 @@ export default function ProfilePage() {
 
             {/* UI-only actions */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <PrimaryLinkButton to="#">
-                <PencilLine className="h-4 w-4" />
-                Edit profile
-              </PrimaryLinkButton>
-
-              <OutlineBlueLink to="#">
-                Change photo <ChevronRight className="h-4 w-4" />
-              </OutlineBlueLink>
+              <button
+                type="button"
+                onClick={() => document.getElementById('security')?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5 border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Security <ChevronDown className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -345,7 +347,7 @@ export default function ProfilePage() {
               </div>
             </Card>
 
-            <Card>
+            <Card id='security' className="scroll-mt-28">
               <div className="p-4 pb-3">
                 <h3 className="text-lg font-semibold">Security</h3>
                 <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
