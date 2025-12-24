@@ -42,7 +42,7 @@ function App() {
             <Route path="/timeoff/:date" element={<TimeOffDetailsPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/day/:date" element={<DayDetailsPage />} />
-            <Route path="/profil" element={<ProfilePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutMePage />} />
           </Route>
           <Route element={<AdminGuard />}>
