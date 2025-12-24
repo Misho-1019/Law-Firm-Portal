@@ -3,7 +3,7 @@ import { DateTime, Interval } from "luxon";
 import Appointment from "../models/Appointment.js";
 import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
-import { toSofiaISO, SOFIA_TZ } from "../lib/time.js";
+import { SOFIA_TZ } from "../lib/time.js";
 
 const TZ = "Europe/Sofia";
 const SLOT_STEP_MIN = 30;
@@ -112,10 +112,6 @@ function clampToWorkingWindow(fromStr, toStr) {
   return { from, to };
 }
 
-function isoDateFromJS(d) {
-  return d.toISOString().slice(0, 10);
-}
-
 /**
  * Get allowed working intervals for a date:
  * - If WorkingSchedule configured for that weekday → use it.
@@ -213,10 +209,9 @@ export async function getBookableSlotsForDate({
 
   if (!allowed.length) return [];
 
-  const {
-    intervalsUTC: appointmentIntervalsUTC,
-    startsUTC: appointmentStartsUTC,
-  } = await getDayAppointments(dateISO);
+  const { intervalsUTC: appointmentIntervalsUTC } = await getDayAppointments(
+    dateISO
+  );
 
   const timeOffIntervals = await getTimeOffIntervalsForDate(dateISO);
 
@@ -308,25 +303,11 @@ export async function getCalendarForMonth({
 export async function update(data, id) {
   const updateData = {};
 
-  if (data.dateFrom !== undefined) {
-    updateData.dateFrom = data.dateFrom;
-  }
-
-  if (data.dateTo !== undefined) {
-    updateData.dateTo = data.dateTo;
-  }
-
-  if (data.from !== undefined) {
-    updateData.from = data.from;
-  }
-
-  if (data.to !== undefined) {
-    updateData.to = data.to;
-  }
-
-  if (data.reason !== undefined) {
-    updateData.reason = data.reason;
-  }
+  if (data.dateFrom !== undefined) updateData.dateFrom = data.dateFrom;
+  if (data.dateTo !== undefined) updateData.dateTo = data.dateTo;
+  if (data.from !== undefined) updateData.from = data.from;
+  if (data.to !== undefined) updateData.to = data.to;
+  if (data.reason !== undefined) updateData.reason = data.reason;
 
   const item = await TimeOff.findByIdAndUpdate(id, updateData, {
     new: true,
@@ -354,9 +335,9 @@ export async function getCalendarWeek(fromStr, toStr) {
     dateTo: { $gte: fromStr },
   }).lean();
 
-  // 3) Load appointments in that range (in UTC, then later filter per local date)
-  const rangeStartLocal = DateTime.fromISO(fromStr, { zone: TZ }).startOf("day");
-  const rangeEndLocal = DateTime.fromISO(toStr, { zone: TZ }).endOf("day");
+  // 3) Load appointments in that range (in UTC)
+  const rangeStartLocal = DateTime.fromISO(fromStr, { zone: tz }).startOf("day");
+  const rangeEndLocal = DateTime.fromISO(toStr, { zone: tz }).endOf("day");
 
   const rangeStartUtc = rangeStartLocal.toUTC().toJSDate();
   const rangeEndUtc = rangeEndLocal.toUTC().toJSDate();
@@ -371,14 +352,25 @@ export async function getCalendarWeek(fromStr, toStr) {
     .select("startsAt durationMin service firstName lastName creator")
     .lean();
 
-  const days = [];
-  const cursor = new Date(fromStr + "T00:00:00.000Z");
-  const end = new Date(toStr + "T00:00:00.000Z");
+  // Group appointments by LOCAL (tz) date to avoid O(days * appts)
+  const apptsByDate = new Map();
+  for (const appt of appointments) {
+    const startLocal = DateTime.fromJSDate(appt.startsAt).setZone(tz);
+    const localDate = startLocal.toISODate();
+    if (!apptsByDate.has(localDate)) apptsByDate.set(localDate, []);
+    apptsByDate.get(localDate).push(appt);
+  }
 
-  while (cursor <= end) {
-    const dateIso = isoDateFromJS(cursor); // "YYYY-MM-DD"
-    // weekday in your WorkingSchedule: 0=Sunday,1=Monday,... (you used getUTCDay())
-    const weekday = cursor.getUTCDay();
+  const days = [];
+
+  // IMPORTANT: iterate days in LOCAL TZ, not with JS Date + "Z" midnight
+  let cur = DateTime.fromISO(fromStr, { zone: tz }).startOf("day");
+  const end = DateTime.fromISO(toStr, { zone: tz }).startOf("day");
+
+  while (cur <= end) {
+    const dateIso = cur.toISODate(); // "YYYY-MM-DD"
+    // weekday convention: 0=Sunday, 1=Monday, ... 6=Saturday
+    const weekday = cur.weekday === 7 ? 0 : cur.weekday;
 
     const items = [];
 
@@ -421,13 +413,10 @@ export async function getCalendarWeek(fromStr, toStr) {
       });
     });
 
-    // 4c) Appointments on this date (Sofia local time)
-    appointments.forEach((appt) => {
-      // Convert startsAt (UTC in DB) to Sofia local
-      const startLocal = DateTime.fromJSDate(appt.startsAt).setZone(TZ);
-
-      const localDate = startLocal.toISODate(); // "YYYY-MM-DD"
-      if (localDate !== dateIso) return;
+    // 4c) Appointments on this date (LOCAL time)
+    const dayAppts = apptsByDate.get(dateIso) || [];
+    for (const appt of dayAppts) {
+      const startLocal = DateTime.fromJSDate(appt.startsAt).setZone(tz);
 
       const dur =
         Number(appt.durationMin) > 0
@@ -439,9 +428,8 @@ export async function getCalendarWeek(fromStr, toStr) {
       const timeFrom = startLocal.toFormat("HH:mm");
       const timeTo = endLocal.toFormat("HH:mm");
 
-      const clamped = clampToWorkingWindow(timeFrom, timeTo);
-      if (!clamped) return;
-
+      // IMPORTANT: Do NOT clamp appointments to working window.
+      // Appointments are "facts" and must always be returned.
       const noteParts = [appt.firstName || "", appt.lastName || ""].filter(
         Boolean
       );
@@ -451,16 +439,15 @@ export async function getCalendarWeek(fromStr, toStr) {
         id: appt._id.toString(),
         type: "appointment",
         title: appt.service || "Appointment",
-        startTime: clamped.from,
-        endTime: clamped.to,
+        startTime: timeFrom,
+        endTime: timeTo,
         note,
-        creator: appt.creator?.toString?.() || appt.creator
+        creator: appt.creator?.toString?.() || appt.creator,
       });
-    });
+    }
 
     days.push({ date: dateIso, items });
-
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    cur = cur.plus({ days: 1 });
   }
 
   return { tz, days };
@@ -486,7 +473,6 @@ export async function getNextFreeSlotsRange(
     if (offset === 0) {
       slots = slots.filter((iso) => {
         const slotUtc = DateTime.fromISO(iso).toUTC();
-
         return slotUtc > nowUtc;
       });
     }

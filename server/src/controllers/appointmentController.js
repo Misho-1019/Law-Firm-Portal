@@ -66,7 +66,7 @@ appointmentController.get("/mine", isAuth, async (req, res) => {
       sort,
     } = req.query;
 
-    const result = await appointmentService.listMine(req.user.id, {
+    const result = await appointmentService.listMine(req.user._id, {
       status,
       from,
       to,
@@ -119,7 +119,7 @@ appointmentController.post("/create", isAuth, createAppointmentChecks, async (re
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   const appointmentData = { ...req.body };
-  const creatorId = req.user?.id;
+  const creatorId = req.user?._id;
 
   // ✅ pull the fields you reference
   const { startsAt, durationMin } = appointmentData;
@@ -157,7 +157,7 @@ appointmentController.patch("/:appointmentId", isAuth, idParamCheck, updateAppoi
 
     const appointmentId = req.params.appointmentId;
     const appointmentData = { ...req.body };
-    const userId = req.user?.id;
+    const userId = req.user?._id;
 
     try {
       const existingAppointment = await appointmentService.getOne(appointmentId);
