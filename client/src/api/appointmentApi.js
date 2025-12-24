@@ -28,14 +28,19 @@ export const useAppointments = () => {
 
 export const useMyAppointments = () => {
     const [appointments, setAppointments] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
+        setIsLoading(true)
+
         request.get(`${baseUrl}/mine`)
           .then(setAppointments)
+          .finally(() => setIsLoading(false))
     }, [])
 
     return {
-        myAppointments: appointments
+        myAppointments: appointments,
+        isLoading
     }
 }
 

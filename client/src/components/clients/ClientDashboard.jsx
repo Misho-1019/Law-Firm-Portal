@@ -27,7 +27,7 @@ const MotionAside = motion.aside;
 ---------------------------------------------------------- */
 export default function ClientDashboard(){
   const timestamp = new Date()
-  const { myAppointments } = useMyAppointments()
+  const { myAppointments, isLoading } = useMyAppointments()
 
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1)
@@ -79,25 +79,95 @@ export default function ClientDashboard(){
         <main className="mx-auto max-w-7xl px-5 py-8 grid gap-6 lg:grid-cols-3">
           {/* Next appointment highlight */}
           <MotionSection initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:.3}} className="lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
-            <div className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED]"><Clock className="h-5 w-5"/></div>
-                <div>
-                  <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Next appointment</div>
-                  <div className="text-xl font-semibold">{pDate} - {time}</div>
-                  <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{nextAppt1.service} · with Victor Todorov</div>
-                  <div className="mt-2 flex flex-wrap gap-4 text-sm">
-                    <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><MapPin className="h-4 w-4"/>Law Office · 12 Vitosha Blvd</div>
-                    <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><Phone className="h-4 w-4"/><a href="tel:+359889116617">+359 88 911 6617</a></div>
-                    <StatusPill status={nextAppt1.status} />
+            {isLoading ? (
+              <div className="p-6 md:p-7">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-5 w-40 rounded bg-white/10" />
+                  <div className="h-7 w-72 rounded bg-white/10" />
+                  <div className="h-4 w-56 rounded bg-white/10" />
+                </div>
+              </div>
+            ) :
+            upcomingAppt.length > 0 ? (
+              <div className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED]"><Clock className="h-5 w-5"/></div>
+                  <div>
+                    <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Next appointment</div>
+                    <div className="text-xl font-semibold">{pDate} - {time}</div>
+                    <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{nextAppt1.service} · with Victor Todorov</div>
+                    <div className="mt-2 flex flex-wrap gap-4 text-sm">
+                      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><MapPin className="h-4 w-4"/>Law Office · 12 Vitosha Blvd</div>
+                      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><Phone className="h-4 w-4"/><a href="tel:+359889116617">+359 88 911 6617</a></div>
+                      <StatusPill status={nextAppt1.status} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to={`/appointments/${nextAppt1._id}/update`} className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Reschedule</Link>
+                  <Link className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Cancel</Link>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 md:p-7 flex items-center justify-center">
+                <div className="w-full max-w-xl text-center">
+                  {/* Icon */}
+                  <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl
+                                  bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                    <Clock className="h-7 w-7" />
+                  </div>
+            
+                  {/* Title */}
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-[#0B1220] dark:text-white">
+                      No upcoming appointment
+                    </h3>
+            
+                    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold
+                                     bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#2F80ED]" />
+                      Available
+                    </span>
+                  </div>
+            
+                  {/* Subtitle */}
+                  <p className="mt-2 text-sm md:text-base leading-relaxed text-[#334155] dark:text-[#94A3B8]">
+                    You’re all set for now. Book a time that works for you and we’ll confirm it shortly.
+                  </p>
+            
+                  {/* Actions */}
+                  <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <Link
+                      to="/create"
+                      className="inline-flex items-center justify-center rounded-2xl bg-[#2F80ED] text-white
+                                 px-5 py-2.5 font-semibold shadow-sm hover:opacity-95 transition"
+                    >
+                      Book an appointment
+                    </Link>
+            
+                    <Link
+                      to="/schedule"
+                      className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                 px-5 py-2.5 text-[#334155] dark:text-[#94A3B8]
+                                 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] transition"
+                    >
+                      View schedule
+                    </Link>
+                  </div>
+            
+                  {/* Micro hint */}
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-xl
+                                  border border-[#E5E7EB] dark:border-[#1F2937]
+                                  bg-[#F5F7FA] dark:bg-[#0E1726]
+                                  px-3 py-2 text-xs text-[#334155] dark:text-[#94A3B8]">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-[#2F80ED]/10 text-[#2F80ED]">
+                      <CalendarIcon className="h-4 w-4" />
+                    </span>
+                    <span>Tip: booking ahead helps you get your preferred slot.</span>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link to={`/appointments/${nextAppt1._id}/update`} className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Reschedule</Link>
-                <Link className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Cancel</Link>
-              </div>
-            </div>
+            )}
             <div className="mx-5 mb-5 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
           </MotionSection>
 
@@ -113,11 +183,16 @@ export default function ClientDashboard(){
             <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
 
             <ul className="p-4 space-y-3">
-              {paginatedAppointments.map(appointment => <ItemDashboard key={appointment._id} {...appointment}/> )}
-              <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
-                <span>No more items.</span>
-                <ChevronRight className="h-4 w-4"/>
-              </li>
+              {allAppointments.length === 0 ? (
+                <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
+                  <span>No appointments yet.</span>
+                  <ChevronRight className="h-4 w-4"/>
+                </li>
+              ) : (
+                <div>
+                  {paginatedAppointments.map(appointment => <ItemDashboard key={appointment._id} {...appointment}/> )}
+                </div>
+              )}
             </ul>
 
             {/* Pagination (static/disabled) */}
