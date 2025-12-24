@@ -16,7 +16,7 @@ import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { useState } from "react";
 import { endTime } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
-import { useAppointments } from "../../api/appointmentApi";
+import { useAppointments, useMyAppointments } from "../../api/appointmentApi";
 import { useTimeOffs } from "../../api/timeOffApi";
 import { useGetSlots } from "../../api/availabilityApi";
 
@@ -27,6 +27,7 @@ export default function DayDetailsPage() {
   const navigate = useNavigate();
   const { role } = useAuth()
   const { appointments } = useAppointments()
+  const { myAppointments } = useMyAppointments()
   const { timeOffs: timeOff } = useTimeOffs()
 
   const [durationMin, setDurationMin] = useState('120')
@@ -65,6 +66,14 @@ export default function DayDetailsPage() {
     const isoDay = d.toISOString().slice(0, 10)
     return isoDay === dateParam;
   })
+
+  const clientAppts = myAppointments.appointments || []
+  
+  const myApptsToday = clientAppts.filter(x => {
+    const d = new Date(x?.startsAt)
+    const isoDay = d.toISOString().slice(0, 10)
+    return isoDay === dateParam
+  })  
 
   let hasTimeOff = timeOff.filter((x) => {
     if (!x?.dateFrom || !x?.dateTo) return false;
@@ -129,10 +138,10 @@ export default function DayDetailsPage() {
                 <Clock className="h-4 w-4 text-[#94A3B8]" />
               </div>
               <div className="mt-2 text-2xl font-semibold">
-                {todayAppts.length}
+                {role === 'Admin' ? todayAppts.length : myApptsToday.length}
               </div>
               <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
-                Total booked for this day
+                {role === 'Admin' ? 'Total booked for this day' : 'Booked by me for this day'}
               </p>
             </div>
 
@@ -208,7 +217,7 @@ export default function DayDetailsPage() {
                     </p>
                   </div>
                   <span className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1 text-[11px] text-[#334155] dark:text-[#94A3B8]">
-                    UI only – data pending
+                    Clients and Admin
                   </span>
                 </div>
                 <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
@@ -220,7 +229,9 @@ export default function DayDetailsPage() {
                       <MapPin className="h-4 w-4" />
                       Working hours
                     </h3>
-                    <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
+
+                    {role === 'Admin' && (
+                      <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
                       {todayAppts.length === 0 ? (
                         <p className="text-xs text-[#9CA3AF]">
                           No appointments scheduled for this date yet or appointments which you don't have permission to see. Look at the 'Free start times' 
@@ -231,7 +242,6 @@ export default function DayDetailsPage() {
 
                       const end = endTime(String(time), Number(appointment.durationMin))                    
 
-                      if (role === 'Admin') {
                         return (
                           <Link
                             key={appointment._id}
@@ -246,10 +256,26 @@ export default function DayDetailsPage() {
                             </span>
                           </Link>
                         )
-                      } else {
+                      }))}
+                    </ul>
+                    )}
+
+                    {role === 'Client' && (
+                      <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
+                      {myApptsToday.length === 0 ? (
+                        <p className="text-xs text-[#9CA3AF]">
+                          No appointments scheduled for this date yet or appointments which you don't have permission to see. Look at the 'Free start times' 
+                          section to see available slots.
+                        </p>
+                      ) : (myApptsToday.map((appointment) => {
+                      const {_day, _date, time} = getDateAndTime(String(new Date(appointment.startsAt)));
+
+                      const end = endTime(String(time), Number(appointment.durationMin))                    
+
                         return (
-                          <li
+                          <Link
                             key={appointment._id}
+                            to={`/appointments/${appointment._id}/details`}
                             className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5"
                           >
                             <span>
@@ -258,12 +284,11 @@ export default function DayDetailsPage() {
                             <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
                               Working
                             </span>
-                          </li>
+                          </Link>
                         )
-                      }
-                      
                       }))}
                     </ul>
+                    )}
                   </div>
 
                   {/* Time off blocks */}
@@ -327,6 +352,7 @@ export default function DayDetailsPage() {
                 </div>
                 <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
 
+              {role === 'Admin' &&
                 <ul className="p-4 space-y-3 text-sm">
                   {todayAppts.map((appt) => {
                     const { _day, _date, time } = getDateAndTime(String(new Date(appt.startsAt)))
@@ -366,10 +392,56 @@ export default function DayDetailsPage() {
 
                   {todayAppts.length === 0 && (
                     <li className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-6 text-center text-xs text-[#9CA3AF]">
-                      No appointments scheduled for this date yet.
+                      No appointments for you scheduled for this date yet.
                     </li>
                   )}
                 </ul>
+              } 
+              {role === 'Client' &&
+                <ul className="p-4 space-y-3 text-sm">
+                  {myApptsToday.map((appt) => {
+                    const { _day, _date, time } = getDateAndTime(String(new Date(appt.startsAt)))
+
+                    const end = endTime(time, Number(appt.durationMin))
+
+                    return (
+                      <li
+                        key={appt._id}
+                        className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-3 flex flex-col gap-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-[#94A3B8]" />
+                            <span className="font-medium">
+                              {time} – {end}
+                            </span>
+                          </div>
+                          <StatusPill status={appt.status} />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <span className="text-xs rounded-full bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5">
+                            {appt.service}
+                          </span>
+                          <span className="text-xs rounded-full bg-[#111827]/5 dark:bg-[#F9FAFB]/5 px-2 py-0.5 flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {appt.mode}
+                          </span>
+                          <span className="text-xs rounded-full bg-[#F97316]/10 text-[#F97316] px-2 py-0.5 flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {appt.firstName} {appt.lastName}
+                          </span>
+                        </div>
+                      </li>
+                    )
+                  })}
+
+                  {myApptsToday.length === 0 && (
+                    <li className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-6 text-center text-xs text-[#9CA3AF]">
+                      No appointments for you scheduled for this date yet.
+                    </li>
+                  )}
+                </ul>
+              }
               </MotionSection>
             </div>
 

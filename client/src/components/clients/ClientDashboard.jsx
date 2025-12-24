@@ -27,12 +27,12 @@ const MotionAside = motion.aside;
 ---------------------------------------------------------- */
 export default function ClientDashboard(){
   const timestamp = new Date()
-  const { appointments } = useMyAppointments()
+  const { myAppointments } = useMyAppointments()
 
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1)
 
-  const allAppointments = appointments.appointments || []
+  const allAppointments = myAppointments.appointments || []
 
   const totalPages = Math.max(
     1,

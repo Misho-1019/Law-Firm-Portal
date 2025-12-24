@@ -35,7 +35,7 @@ export const useMyAppointments = () => {
     }, [])
 
     return {
-        appointments
+        myAppointments: appointments
     }
 }
 
