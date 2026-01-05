@@ -14,6 +14,8 @@ import {
   UserPlus,
   LogIn,
   Gavel,
+  UserCheck2Icon,
+  IdCard
 } from "lucide-react";
 import { Link } from "react-router";
 import { UserContext } from "../../context/UserContext";
@@ -28,6 +30,7 @@ export default function Header({ initialActive = "Home" }) {
   const guestItems = [
     { label: "Register", href: "/register", icon: UserPlus },
     { label: "Login", href: "/login", icon: LogIn },
+    { label: "About", href: "/about", icon: UserCheck2Icon },
     { label: "Create appointment", href: "/create", icon: CalendarRange },
   ];
 
@@ -37,6 +40,7 @@ export default function Header({ initialActive = "Home" }) {
     { label: "Time Off", href: "/timeoff", icon: Gavel },
     { label: "Schedule", href: "/schedule", icon: Clock3 },
     // { label: "Change Your Schedule", href: "/scheduleditor", icon: Wrench },
+    { label: "About", href: "/about", icon: UserCheck2Icon },
     { label: "Logout", href: "/logout", icon: LogOut },
   ];
 
@@ -44,6 +48,8 @@ export default function Header({ initialActive = "Home" }) {
     { label: "Home", href: "/", icon: Home },
     { label: "Dashboard", href: "/client", icon: LayoutDashboard },
     { label: "Schedule", href: "/schedule", icon: CalendarIcon },
+    { label: "About", href: "/about", icon: UserCheck2Icon },
+    { label: "My Profile", href: "/profile", icon: IdCard },
     { label: "Logout", href: "/logout", icon: LogOut },
   ];
 

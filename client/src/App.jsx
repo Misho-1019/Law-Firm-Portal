@@ -33,6 +33,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<AboutMePage />} />
           <Route element={<AuthGuard />}>
             <Route path="/logout" element={<Logout />} />
             <Route path="/appointments" element={<Catalog />} />
@@ -43,7 +44,6 @@ function App() {
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/day/:date" element={<DayDetailsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/about" element={<AboutMePage />} />
           </Route>
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<AdminDashboard />} />
