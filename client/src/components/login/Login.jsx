@@ -12,6 +12,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { showToast } from "../../utils/toastUtils";
 import { useState } from "react";
+import useAuth from "../../hooks/useAuth";
 
 const MotionSection = motion.section;
 
@@ -24,6 +25,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useLogin()
   const { userLoginHandler } = useUserContext()
+  const { role } = useAuth()
 
   const {
     register,
@@ -41,7 +43,11 @@ export default function Login() {
 
       showToast('Login successful', 'success')
 
-      navigate('/')
+      if (role === 'Admin') {
+        navigate('/admin')
+      } else if (role === 'Client') {
+        navigate('/')
+      }
     } catch (error) {
       showToast(error.message || 'Login failed', 'error')
     }
@@ -56,13 +62,20 @@ export default function Login() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-md rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-hidden"
+            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
-            <div className="p-6 md:p-7">
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+            {/* Content */}
+            <div className="relative p-6 md:p-7">
               <h1 className="text-2xl font-semibold">Sign in</h1>
-              <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">Use your email and password.</p>
-
-              {/* UI-only form (no handlers) */}
+              <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
+                Use your email and password.
+              </p>
+        
               <form className="mt-6 space-y-5" onSubmit={handleSubmit(loginHandler)} noValidate>
                 {/* Email */}
                 <Field
@@ -71,46 +84,55 @@ export default function Login() {
                   type="email"
                   name="email"
                   icon={<Mail className="h-4 w-4" />}
-                  {...register('email')}
-                  aria-invalid={!!errors.email}   
+                  {...register("email")}
+                  aria-invalid={!!errors.email}
                   placeholder="name@domain.tld"
                 />
                 {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
-
+        
                 {/* Password */}
                 <PasswordField
                   label="Password"
                   id="password"
                   name="password"
-                  {...register('password')}
+                  {...register("password")}
                   aria-invalid={!!errors.password}
                   placeholder="••••••••"
                 />
                 {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
-
+        
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#334155] dark:text-[#94A3B8]">
-                    {/* Plain anchor to avoid Router dependency */}
-                    Forgot your password? <Link to="/forgot" className="text-[#2F80ED] hover:underline">Reset</Link>
+                    Forgot your password?{" "}
+                    <Link to="/forgot" className="text-[#2F80ED] hover:underline">
+                      Reset
+                    </Link>
                   </span>
                 </div>
-
+        
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 font-semibold focus:outline-none bg-[#2F80ED] text-white hover:bg-[#266DDE] focus:ring-4 focus:ring-[#2F80ED]/40"
+                  className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 font-semibold
+                             focus:outline-none bg-[#2F80ED] text-white hover:bg-[#266DDE]
+                             focus:ring-4 focus:ring-[#2F80ED]/40"
                 >
                   Sign in <ArrowRight className="h-4 w-4" />
-                  <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
+                  <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]" />
                 </button>
-
+        
                 <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                  No account? <Link className="text-[#2F80ED] hover:underline" to="/register">Register</Link>.
+                  No account?{" "}
+                  <Link className="text-[#2F80ED] hover:underline" to="/register">
+                    Register
+                  </Link>
+                  .
                 </p>
               </form>
             </div>
           </MotionSection>
         </main>
+
 
         <footer className="py-6 text-center text-sm text-[#334155] dark:text-[#94A3B8]">
           © {new Date().getFullYear()} LexSchedule. All rights reserved.

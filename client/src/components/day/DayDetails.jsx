@@ -130,68 +130,94 @@ export default function DayDetailsPage() {
             transition={{ duration: 0.3 }}
             className="grid gap-4 md:grid-cols-3"
           >
-            <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Appointments
-                </span>
-                <Clock className="h-4 w-4 text-[#94A3B8]" />
-              </div>
-              <div className="mt-2 text-2xl font-semibold">
-                {role === 'Admin' ? todayAppts.length : myApptsToday.length}
-              </div>
-              <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
-                {role === 'Admin' ? 'Total booked for this day' : 'Booked by me for this day'}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Free start times
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
-                    Duration:
+            {/* Card 1 */}
+            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
+              {/* Soft glow background */}
+              <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+              <div className="relative p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                    Appointments
                   </span>
-                  <select 
-                    value={durationMin} 
-                    onChange={(e) => setDurationMin(e.target.value)}
-                    className="text-xs rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-2 py-1"
-                  >
-                    <option value="15">15 min</option>
-                    <option value="30">30 min</option>
-                    <option value="45">45 min</option>
-                    <option value="60">60 min</option>
-                    <option value="90">90 min</option>
-                    <option value="100">100 min</option>
-                    <option value="120">120 min</option>
-                    <option value="135">135 min</option>
-                  </select>
+                  <Clock className="h-4 w-4 text-[#94A3B8]" />
                 </div>
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <div className="mt-2 text-2xl font-semibold">
+                  {role === "Admin" ? todayAppts.length : myApptsToday.length}
+                </div>
+                <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
+                  {role === "Admin" ? "Total booked for this day" : "Booked by me for this day"}
+                </p>
               </div>
-              <div className="mt-2 text-2xl font-semibold">
-                {freeSlots.slots?.length}
-              </div>
-              <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
-                Potential new appointment starts ({durationMin} min)
-              </p>
             </div>
-
-            <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Time off & blocks
-                </span>
-                <AlertCircle className="h-4 w-4 text-amber-400" />
+          
+            {/* Card 2 */}
+            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
+              {/* Soft glow background */}
+              <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+              <div className="relative p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                    Free start times
+                  </span>
+          
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                      Duration:
+                    </span>
+                    <select
+                      value={durationMin}
+                      onChange={(e) => setDurationMin(e.target.value)}
+                      className="text-xs rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                 bg-white/60 dark:bg-[#0F1117]/60 px-2 py-1"
+                    >
+                      <option value="15">15 min</option>
+                      <option value="30">30 min</option>
+                      <option value="45">45 min</option>
+                      <option value="60">60 min</option>
+                      <option value="90">90 min</option>
+                      <option value="100">100 min</option>
+                      <option value="120">120 min</option>
+                      <option value="135">135 min</option>
+                    </select>
+                  </div>
+          
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                </div>
+          
+                <div className="mt-2 text-2xl font-semibold">{freeSlots.slots?.length}</div>
+                <p className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
+                  Potential new appointment starts ({durationMin} min)
+                </p>
               </div>
-              <div className="mt-2 text-2xl font-semibold">
-                {hasTimeOff.length ? "Yes" : "No"}
+            </div>
+          
+            {/* Card 3 */}
+            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
+              {/* Soft glow background */}
+              <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+              <div className="relative p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                    Time off & blocks
+                  </span>
+                  <AlertCircle className="h-4 w-4 text-amber-400" />
+                </div>
+          
+                <div className="mt-2 text-2xl font-semibold">{hasTimeOff.length ? "Yes" : "No"}</div>
+          
+                <Link
+                  to={`/timeoff/${dateParam}`}
+                  className="mt-1 inline-flex text-xs text-[#334155] dark:text-[#94A3B8] underline"
+                >
+                  Check if time off is for the whole day!
+                </Link>
               </div>
-              <Link to={`/timeoff/${dateParam}`} className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8] underline">
-                Check if time off is for the whole day!
-              </Link>
             </div>
           </MotionSection>
 
@@ -204,129 +230,144 @@ export default function DayDetailsPage() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.05 }}
-                className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+                className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                           border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
               >
-                <div className="p-4 pb-3 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Working hours & time off
-                    </h2>
-                    <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                      Admin schedule plus time off blocks for this date.
-                    </p>
-                  </div>
-                  <span className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1 text-[11px] text-[#334155] dark:text-[#94A3B8]">
-                    Clients and Admin
-                  </span>
-                </div>
-                <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
-
-                <div className="p-4 grid gap-3 md:grid-cols-2">
-                  {/* Working intervals */}
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Working hours
-                    </h3>
-
-                    {role === 'Admin' && (
-                      <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
-                      {todayAppts.length === 0 ? (
-                        <p className="text-xs text-[#9CA3AF]">
-                          No appointments scheduled for this date yet or appointments which you don't have permission to see. Look at the 'Free start times' 
-                          section to see available slots.
-                        </p>
-                      ) : (todayAppts.map((appointment) => {
-                      const {_day, _date, time} = getDateAndTime(String(new Date(appointment.startsAt)));
-
-                      const end = endTime(String(time), Number(appointment.durationMin))                    
-
-                        return (
-                          <Link
-                            key={appointment._id}
-                            to={`/appointments/${appointment._id}/details`}
-                            className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5"
-                          >
-                            <span>
-                              {time} – {end}
-                            </span>
-                            <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
-                              Working
-                            </span>
-                          </Link>
-                        )
-                      }))}
-                    </ul>
-                    )}
-
-                    {role === 'Client' && (
-                      <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
-                      {myApptsToday.length === 0 ? (
-                        <p className="text-xs text-[#9CA3AF]">
-                          No appointments scheduled for this date yet or appointments which you don't have permission to see. Look at the 'Free start times' 
-                          section to see available slots.
-                        </p>
-                      ) : (myApptsToday.map((appointment) => {
-                      const {_day, _date, time} = getDateAndTime(String(new Date(appointment.startsAt)));
-
-                      const end = endTime(String(time), Number(appointment.durationMin))                    
-
-                        return (
-                          <Link
-                            key={appointment._id}
-                            to={`/appointments/${appointment._id}/details`}
-                            className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5"
-                          >
-                            <span>
-                              {time} – {end}
-                            </span>
-                            <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
-                              Working
-                            </span>
-                          </Link>
-                        )
-                      }))}
-                    </ul>
-                    )}
-                  </div>
-
-                  {/* Time off blocks */}
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-amber-400" />
-                      Time off
-                    </h3>
-                    {hasTimeOff.length === 0 ? (
-                      <p className="text-xs text-[#9CA3AF]">
-                        No time off recorded for this date.
+                {/* Soft glow background (same style) */}
+                <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+              
+                {/* Content */}
+                <div className="relative">
+                  <div className="p-4 pb-3 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold flex items-center gap-2">
+                        <Clock className="h-5 w-5" />
+                        Working hours & time off
+                      </h2>
+                      <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                        Admin schedule plus time off blocks for this date.
                       </p>
-                    ) : (
-                      <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
-                        {hasTimeOff.map((t) => (
-                          <li
-                            key={t._id}
-                            className="flex items-center justify-between rounded-xl border border-[#F87171]/60 dark:border-[#B91C1C]/80 bg-red-50/60 dark:bg-red-900/30 px-3 py-1.5"
-                          >
-                            <div>
-                              <div className="font-medium text-red-700 dark:text-red-200 text-xs">
-                                {t.from ? (
+                    </div>
+                    <span className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] bg-white/40 dark:bg-[#0F1117]/40 px-3 py-1 text-[11px] text-[#334155] dark:text-[#94A3B8]">
+                      Clients and Admin
+                    </span>
+                  </div>
+              
+                  <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
+              
+                  <div className="p-4 grid gap-3 md:grid-cols-2">
+                    {/* Working intervals */}
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Working hours
+                      </h3>
+              
+                      {role === "Admin" && (
+                        <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
+                          {todayAppts.length === 0 ? (
+                            <p className="text-xs text-[#9CA3AF]">
+                              No appointments scheduled for this date yet or appointments
+                              which you don't have permission to see. Look at the "Free start
+                              times" section to see available slots.
+                            </p>
+                          ) : (
+                            todayAppts.map((appointment) => {
+                              const { time } = getDateAndTime(
+                                String(new Date(appointment.startsAt))
+                              );
+              
+                              const end = endTime(String(time), Number(appointment.durationMin));
+              
+                              return (
+                                <Link
+                                  key={appointment._id}
+                                  to={`/appointments/${appointment._id}/details`}
+                                  className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                             bg-white/40 dark:bg-[#0F1117]/40 px-3 py-1.5"
+                                >
                                   <span>
-                                    {t.from} – {t.to}
+                                    {time} – {end}
                                   </span>
-                                ) : (
-                                  <span>Whole day off</span>
-                                )}
+                                  <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
+                                    Working
+                                  </span>
+                                </Link>
+                              );
+                            })
+                          )}
+                        </ul>
+                      )}
+              
+                      {role === "Client" && (
+                        <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
+                          {myApptsToday.length === 0 ? (
+                            <p className="text-xs text-[#9CA3AF]">
+                              No appointments scheduled for this date yet or appointments
+                              which you don't have permission to see. Look at the "Free start
+                              times" section to see available slots.
+                            </p>
+                          ) : (
+                            myApptsToday.map((appointment) => {
+                              const { time } = getDateAndTime(
+                                String(new Date(appointment.startsAt))
+                              );
+              
+                              const end = endTime(String(time), Number(appointment.durationMin));
+              
+                              return (
+                                <Link
+                                  key={appointment._id}
+                                  to={`/appointments/${appointment._id}/details`}
+                                  className="flex items-center justify-between rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                             bg-white/40 dark:bg-[#0F1117]/40 px-3 py-1.5"
+                                >
+                                  <span>
+                                    {time} – {end}
+                                  </span>
+                                  <span className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF]">
+                                    Working
+                                  </span>
+                                </Link>
+                              );
+                            })
+                          )}
+                        </ul>
+                      )}
+                    </div>
+              
+                    {/* Time off blocks */}
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-400" />
+                        Time off
+                      </h3>
+              
+                      {hasTimeOff.length === 0 ? (
+                        <p className="text-xs text-[#9CA3AF]">No time off recorded for this date.</p>
+                      ) : (
+                        <ul className="space-y-1.5 text-sm text-[#334155] dark:text-[#94A3B8]">
+                          {hasTimeOff.map((t) => (
+                            <li
+                              key={t._id}
+                              className="flex items-center justify-between rounded-xl border border-[#F87171]/60 dark:border-[#B91C1C]/80
+                                         bg-red-50/60 dark:bg-red-900/30 px-3 py-1.5"
+                            >
+                              <div>
+                                <div className="font-medium text-red-700 dark:text-red-200 text-xs">
+                                  {t.from ? <span>{t.from} – {t.to}</span> : <span>Whole day off</span>}
+                                </div>
+                                <div className="text-[11px] text-red-700/80 dark:text-red-200/80">
+                                  {t.reason}
+                                </div>
                               </div>
-                              <div className="text-[11px] text-red-700/80 dark:text-red-200/80">
-                                {t.reason}
-                              </div>
-                            </div>
-                            <MinusCircle className="h-4 w-4 text-red-500 dark:text-red-300" />
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                              <MinusCircle className="h-4 w-4 text-red-500 dark:text-red-300" />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
                 </div>
               </MotionSection>
@@ -336,112 +377,125 @@ export default function DayDetailsPage() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
-                className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+                className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                           border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
               >
-                <div className="p-4 pb-3 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                      <CalendarIcon className="h-5 w-5" />
-                      Appointments for this day
-                    </h2>
-                    <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                      Both admin and clients will see the same timeline, with
-                      permissions handled later.
-                    </p>
+                {/* Soft glow background (same style) */}
+                <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+              
+                {/* Content */}
+                <div className="relative">
+                  <div className="p-4 pb-3 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold flex items-center gap-2">
+                        <CalendarIcon className="h-5 w-5" />
+                        Appointments for this day
+                      </h2>
+                      <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                        Both admin and clients will see the same timeline, with permissions handled later.
+                      </p>
+                    </div>
                   </div>
+              
+                  <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
+              
+                  {role === "Admin" && (
+                    <ul className="p-4 space-y-3 text-sm">
+                      {todayAppts.map((appt) => {
+                        const { time } = getDateAndTime(String(new Date(appt.startsAt)));
+                        const end = endTime(time, Number(appt.durationMin));
+              
+                        return (
+                          <li
+                            key={appt._id}
+                            className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                       bg-white/40 dark:bg-[#0F1117]/40 px-3 py-3 flex flex-col gap-1"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-[#94A3B8]" />
+                                <span className="font-medium">
+                                  {time} – {end}
+                                </span>
+                              </div>
+                              <StatusPill status={appt.status} />
+                            </div>
+              
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                              <span className="text-xs rounded-full bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5">
+                                {appt.service}
+                              </span>
+                              <span className="text-xs rounded-full bg-[#111827]/5 dark:bg-[#F9FAFB]/5 px-2 py-0.5 flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {appt.mode}
+                              </span>
+                              <span className="text-xs rounded-full bg-[#F97316]/10 text-[#F97316] px-2 py-0.5 flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                {appt.firstName} {appt.lastName}
+                              </span>
+                            </div>
+                          </li>
+                        );
+                      })}
+              
+                      {todayAppts.length === 0 && (
+                        <li className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937]
+                                       bg-white/40 dark:bg-[#0F1117]/40 px-3 py-6 text-center text-xs text-[#9CA3AF]">
+                          No appointments for you scheduled for this date yet.
+                        </li>
+                      )}
+                    </ul>
+                  )}
+              
+                  {role === "Client" && (
+                    <ul className="p-4 space-y-3 text-sm">
+                      {myApptsToday.map((appt) => {
+                        const { time } = getDateAndTime(String(new Date(appt.startsAt)));
+                        const end = endTime(time, Number(appt.durationMin));
+              
+                        return (
+                          <li
+                            key={appt._id}
+                            className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                       bg-white/40 dark:bg-[#0F1117]/40 px-3 py-3 flex flex-col gap-1"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-[#94A3B8]" />
+                                <span className="font-medium">
+                                  {time} – {end}
+                                </span>
+                              </div>
+                              <StatusPill status={appt.status} />
+                            </div>
+              
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                              <span className="text-xs rounded-full bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5">
+                                {appt.service}
+                              </span>
+                              <span className="text-xs rounded-full bg-[#111827]/5 dark:bg-[#F9FAFB]/5 px-2 py-0.5 flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {appt.mode}
+                              </span>
+                              <span className="text-xs rounded-full bg-[#F97316]/10 text-[#F97316] px-2 py-0.5 flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                {appt.firstName} {appt.lastName}
+                              </span>
+                            </div>
+                          </li>
+                        );
+                      })}
+              
+                      {myApptsToday.length === 0 && (
+                        <li className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937]
+                                       bg-white/40 dark:bg-[#0F1117]/40 px-3 py-6 text-center text-xs text-[#9CA3AF]">
+                          No appointments for you scheduled for this date yet.
+                        </li>
+                      )}
+                    </ul>
+                  )}
                 </div>
-                <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
-
-              {role === 'Admin' &&
-                <ul className="p-4 space-y-3 text-sm">
-                  {todayAppts.map((appt) => {
-                    const { _day, _date, time } = getDateAndTime(String(new Date(appt.startsAt)))
-
-                    const end = endTime(time, Number(appt.durationMin))
-
-                    return (
-                      <li
-                        key={appt._id}
-                        className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-3 flex flex-col gap-1"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-[#94A3B8]" />
-                            <span className="font-medium">
-                              {time} – {end}
-                            </span>
-                          </div>
-                          <StatusPill status={appt.status} />
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className="text-xs rounded-full bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5">
-                            {appt.service}
-                          </span>
-                          <span className="text-xs rounded-full bg-[#111827]/5 dark:bg-[#F9FAFB]/5 px-2 py-0.5 flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {appt.mode}
-                          </span>
-                          <span className="text-xs rounded-full bg-[#F97316]/10 text-[#F97316] px-2 py-0.5 flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {appt.firstName} {appt.lastName}
-                          </span>
-                        </div>
-                      </li>
-                    )
-                  })}
-
-                  {todayAppts.length === 0 && (
-                    <li className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-6 text-center text-xs text-[#9CA3AF]">
-                      No appointments for you scheduled for this date yet.
-                    </li>
-                  )}
-                </ul>
-              } 
-              {role === 'Client' &&
-                <ul className="p-4 space-y-3 text-sm">
-                  {myApptsToday.map((appt) => {
-                    const { _day, _date, time } = getDateAndTime(String(new Date(appt.startsAt)))
-
-                    const end = endTime(time, Number(appt.durationMin))
-
-                    return (
-                      <li
-                        key={appt._id}
-                        className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-3 flex flex-col gap-1"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-[#94A3B8]" />
-                            <span className="font-medium">
-                              {time} – {end}
-                            </span>
-                          </div>
-                          <StatusPill status={appt.status} />
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className="text-xs rounded-full bg-[#2F80ED]/10 text-[#2F80ED] px-2 py-0.5">
-                            {appt.service}
-                          </span>
-                          <span className="text-xs rounded-full bg-[#111827]/5 dark:bg-[#F9FAFB]/5 px-2 py-0.5 flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {appt.mode}
-                          </span>
-                          <span className="text-xs rounded-full bg-[#F97316]/10 text-[#F97316] px-2 py-0.5 flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {appt.firstName} {appt.lastName}
-                          </span>
-                        </div>
-                      </li>
-                    )
-                  })}
-
-                  {myApptsToday.length === 0 && (
-                    <li className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-6 text-center text-xs text-[#9CA3AF]">
-                      No appointments for you scheduled for this date yet.
-                    </li>
-                  )}
-                </ul>
-              }
               </MotionSection>
             </div>
 
@@ -452,42 +506,50 @@ export default function DayDetailsPage() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.08 }}
-                className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+                className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                           border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
               >
-                <div className="p-4 pb-3 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold">
-                      Free start times
-                    </h2>
-                    <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                      Generated from working hours, time off and existing
-                      appointments.
-                    </p>
+                {/* Soft glow background (same style) */}
+                <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+              
+                {/* Content */}
+                <div className="relative">
+                  <div className="p-4 pb-3 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold">Free start times</h2>
+                      <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                        Generated from working hours, time off and existing appointments.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
-
-                <div className="p-4 flex flex-wrap gap-2">
-                  {allFreeSlots.length === 0 ? (
-                    <p className="text-xs text-[#9CA3AF]">
-                      No free start times for this day.
-                    </p>
-                  ) : (
-                    allFreeSlots.map((t, i) => {
-                      const { _day, _date, time } = getDateAndTime(String(new Date(t)))
-
-                      const prefillDate = t.slice(0, 10);
-                      
-                      return (
-                      <Link
-                        key={i}
-                        to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(time)}&duration=${encodeURIComponent(durationMin)}`}
-                        className="text-xs rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
-                      >
-                        {time}
-                      </Link>
-                    )})
-                  )}
+              
+                  <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
+              
+                  <div className="p-4 flex flex-wrap gap-2">
+                    {allFreeSlots.length === 0 ? (
+                      <p className="text-xs text-[#9CA3AF]">No free start times for this day.</p>
+                    ) : (
+                      allFreeSlots.map((t, i) => {
+                        const { time } = getDateAndTime(String(new Date(t)));
+                        const prefillDate = t.slice(0, 10);
+              
+                        return (
+                          <Link
+                            key={i}
+                            to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(
+                              time
+                            )}&duration=${encodeURIComponent(durationMin)}`}
+                            className="text-xs rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                       bg-white/40 dark:bg-[#0F1117]/40 px-3 py-1.5
+                                       hover:bg-[#2F80ED] hover:text-white transition-colors"
+                          >
+                            {time}
+                          </Link>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
               </MotionSection>
 
@@ -496,28 +558,43 @@ export default function DayDetailsPage() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.12 }}
-                className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+                className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                           border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
               >
-                <div className="p-4 flex items-start gap-3 text-sm">
-                  <div className="mt-1">
-                    <Info className="h-4 w-4 text-[#2F80ED]" />
+                {/* Soft glow background (same style) */}
+                <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+              
+                {/* Content */}
+                <div className="relative p-4 flex items-start gap-3 text-sm">
+                  <div className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-xl
+                                  bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                    <Info className="h-4 w-4" />
                   </div>
-                  <div className="space-y-1">
+              
+                  <div className="space-y-1 min-w-0">
                     <h3 className="font-semibold">How this page will work</h3>
+              
                     <p className="text-[#334155] dark:text-[#94A3B8] text-xs">
-                      • Admin: see working schedule, time off and all
-                      appointments for this day, plus free slots for new
-                      bookings.
+                      • <span className="font-semibold">Admin:</span> see working schedule, time off and all
+                      appointments for this day, plus free slots for new bookings.
                     </p>
+              
                     <p className="text-[#334155] dark:text-[#94A3B8] text-xs">
-                      • Clients: see only their appointments and available
+                      • <span className="font-semibold">Clients:</span> see only their appointments and available
                       start times for new bookings (other clients anonymized).
                     </p>
+              
                     {isToday && (
-                      <p className="text-[#16A34A] text-xs font-medium">
-                        This is today – live state will be especially
-                        important once functionality is wired in.
-                      </p>
+                      <div className="mt-2 inline-flex items-center gap-2 rounded-xl
+                                      border border-emerald-200/60 dark:border-emerald-900/60
+                                      bg-emerald-50/60 dark:bg-emerald-900/20
+                                      px-3 py-2 text-xs text-emerald-700 dark:text-emerald-200">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span className="font-medium">
+                          This is today – live state will be especially important once functionality is wired in.
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>

@@ -85,7 +85,7 @@ export default function TimeOffDetailsPage() {
               </p>
             </div>
             <Link
-              to="/admin"
+              to={role === 'Admin' ? '/admin' : '/client'}
               className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
             >
               <ArrowLeft className="h-4 w-4" /> Back to dashboard
@@ -97,82 +97,139 @@ export default function TimeOffDetailsPage() {
           {/* List container */}
           <section className="space-y-4">
             {partialOffs.length === 0 ? (
-              <div className="rounded-2xl bg-white dark:bg-[#111827] border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
-                No time off blocks exist for this date yet.
+              <div
+                className="relative overflow-hidden rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937]
+                           bg-white/60 dark:bg-[#0F1117]/50 p-6 text-sm text-[#334155] dark:text-[#94A3B8] shadow-sm"
+              >
+                {/* Soft glow background */}
+                <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+                <div className="relative flex items-start gap-3">
+                  <div className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                    <CalendarIcon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-[#0B1220] dark:text-white">
+                      No time off blocks yet
+                    </div>
+                    <div className="mt-1 text-xs text-[#334155] dark:text-[#94A3B8]">
+                      When admin adds time off, it will appear here for this date.
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               partialOffs.map((item) => {
                 const isFullDay = !item.from && !item.to;
-
+          
                 return (
                   <div
                     key={item._id}
-                    className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] p-4 flex items-start justify-between gap-4"
+                    className="relative overflow-hidden rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                               bg-white/60 dark:bg-[#0F1117]/50 p-4 shadow-sm"
                   >
-                    <div className="space-y-2">
-                      {/* Date range */}
-                      <div className="flex items-center gap-2 text-sm font-semibold">
-                        <CalendarIcon className="h-4 w-4" />
-                        <span>
-                          {item.dateFrom === item.dateTo
-                            ? item.dateFrom
-                            : `${item.dateFrom} → ${item.dateTo}`}
-                        </span>
-                      </div>
-
-                      {/* Time info */}
-                      <div className="flex items-center gap-2 text-xs text-[#334155] dark:text-[#94A3B8]">
-                        <Clock className="h-4 w-4" />
-                        {isFullDay ? (
-                          <span>Full day (09:00 – 17:00)</span>
-                        ) : (
-                          <span>
-                            Partial day: {item.from} – {item.to}
+                    {/* Soft glow background */}
+                    <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+                    <div className="relative flex items-start justify-between gap-4">
+                      <div className="space-y-2">
+                        {/* Date range */}
+                        <div className="flex items-center gap-2 text-sm font-semibold">
+                          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                            <CalendarIcon className="h-4 w-4" />
                           </span>
-                        )}
-                      </div>
-
-                      {/* Reason */}
-                      {item.reason && (
+                          <span className="text-[#0B1220] dark:text-white">
+                            {item.dateFrom === item.dateTo
+                              ? item.dateFrom
+                              : `${item.dateFrom} → ${item.dateTo}`}
+                          </span>
+                        </div>
+          
+                        {/* Time info */}
                         <div className="flex items-center gap-2 text-xs text-[#334155] dark:text-[#94A3B8]">
-                          <Briefcase className="h-4 w-4" />
-                          <span>{item.reason}</span>
+                          <Clock className="h-4 w-4" />
+                          {isFullDay ? (
+                            <span>Full day (09:00 – 17:00)</span>
+                          ) : (
+                            <span>
+                              Partial day: {item.from} – {item.to}
+                            </span>
+                          )}
+                        </div>
+          
+                        {/* Reason */}
+                        {item.reason && (
+                          <div className="flex items-center gap-2 text-xs text-[#334155] dark:text-[#94A3B8]">
+                            <Briefcase className="h-4 w-4" />
+                            <span className="truncate">{item.reason}</span>
+                          </div>
+                        )}
+          
+                        {/* Small badge */}
+                        <div className="pt-1">
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold
+                                        ring-1 ${
+                                          isFullDay
+                                            ? "bg-red-500/10 text-red-600 dark:text-red-300 ring-red-500/20"
+                                            : "bg-amber-500/10 text-amber-700 dark:text-amber-200 ring-amber-500/20"
+                                        }`}
+                          >
+                            <span
+                              className={`inline-block h-1.5 w-1.5 rounded-full ${
+                                isFullDay ? "bg-red-500" : "bg-amber-500"
+                              }`}
+                            />
+                            {isFullDay ? "Whole day off" : "Partial time off"}
+                          </span>
+                        </div>
+                      </div>
+          
+                      {/* Actions */}
+                      {role === "Admin" && (
+                        <div className="flex flex-col gap-2 text-xs shrink-0">
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center gap-1 rounded-xl
+                                       border border-[#2F80ED] text-[#2F80ED] px-3 py-1.5 font-semibold
+                                       hover:bg-[#2F80ED] hover:text-white transition-colors"
+                            onClick={() => {
+                              setEditingItem(item);
+                              setEditValues({
+                                dateFrom: item.dateFrom,
+                                dateTo: item.dateTo,
+                                from: item.from || "",
+                                to: item.to || "",
+                                reason: item.reason || "",
+                              });
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                            Edit
+                          </button>
+          
+                          <button
+                            className="inline-flex items-center justify-center gap-1 rounded-xl
+                                       border border-red-500/70 text-red-600 dark:text-red-300 px-3 py-1.5 font-semibold
+                                       hover:bg-red-50 dark:hover:bg-red-900/40 transition-colors"
+                            onClick={() =>
+                              timeOffDeleteHandler(
+                                item._id,
+                                item.dateFrom,
+                                item.dateTo,
+                                item.from,
+                                item.to
+                              )
+                            }
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Delete
+                          </button>
                         </div>
                       )}
                     </div>
-
-                    {/* Placeholder right side – later: delete/edit buttons */}
-                    {role === 'Admin' && (
-                      <div className="flex flex-col gap-2 text-xs">
-                        {/* Edit button – later you can turn this into a Link to your edit page */}
-                        <button
-                          type="button"
-                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-[#2F80ED] text-[#2F80ED] px-3 py-1.5 font-semibold hover:bg-[#2F80ED] hover:text-white transition-colors"
-                          onClick={() => {
-                            setEditingItem(item);
-                            setEditValues({
-                              dateFrom: item.dateFrom,
-                              dateTo: item.dateTo,
-                              from: item.from || '',
-                              to: item.to || '',
-                              reason: item.reason || '',
-                            })
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                          Edit
-                        </button>
-                      
-                        {/* Delete button – later you’ll wire timeOffService.delete(item._id) */}
-                        <button
-                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-500/70 text-red-600 dark:text-red-300 px-3 py-1.5 font-semibold hover:bg-red-50 dark:hover:bg-red-900/40 transition-colors"
-                          onClick={() => timeOffDeleteHandler(item._id, item.dateFrom, item.dateTo, item.from, item.to)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
                   </div>
                 );
               })
@@ -332,130 +389,158 @@ function QuickEditForm({ item, values, onChange, onCancel, onSave, isSaving }) {
   const isSingleDay = values.dateFrom === values.dateTo;
 
   return (
-    <section className="mt-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] p-5 space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">Quick edit</h2>
-          <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
-            Adjust dates, hours or reason for this time off block.
-          </p>
-        </div>
-        <span className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
-          Editing ID: <span className="font-mono">{item._id}</span>
-        </span>
-      </div>
-
-      <div className="mx-0 h-[1px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/50 to-transparent" />
-
-      {/* Date range */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
-            Date from
-          </label>
-          <input
-            type="date"
-            className="w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-3 py-2 text-sm outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.35]"
-            value={values.dateFrom}
-            onChange={handleFieldChange("dateFrom")}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
-            Date to
-          </label>
-          <input
-            type="date"
-            className="w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-3 py-2 text-sm outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.35]"
-            value={values.dateTo}
-            onChange={handleFieldChange("dateTo")}
-          />
-        </div>
-      </div>
-
-      {/* Time range as 30-min slots */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
-            Time range (09:00 – 17:00)
-          </label>
+    <section
+      className="relative mt-6 overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                 border border-[#E5E7EB] dark:border-[#1F2937] p-5 space-y-4 shadow-sm"
+    >
+      {/* Soft glow background (same style) */}
+      <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+    
+      <div className="relative">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Quick edit</h2>
+            <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
+              Adjust dates, hours or reason for this time off block.
+            </p>
+          </div>
           <span className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
-            {isSingleDay
-              ? "Click slots to select a range"
-              : "Multi-day blocks are treated as full-day; time slots are disabled."}
+            Editing ID: <span className="font-mono">{item._id}</span>
           </span>
         </div>
-      
-        {isSingleDay ? (
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-            {allSlots.map((slot) => {
-              const isSelected = selectedSlots.includes(slot);
-              return (
-                <button
-                  key={slot}
-                  type="button"
-                  onClick={() => handleSlotToggle(slot)}
-                  className={[
-                    "text-xs rounded-xl border px-2 py-1.5 text-center transition-colors",
-                    isSelected
-                      ? "bg-[#2F80ED] text-white border-[#2F80ED]"
-                      : "bg-transparent text-[#334155] dark:text-[#E5E7EB] border-[#E5E7EB] dark:border-[#1F2937] hover:bg-[#F5F7FA] dark:hover:bg-[#020617]",
-                  ].join(" ")}
-                >
-                  {slot}
-                </button>
-              );
-            })}
+    
+        <div className="mx-0 h-[1px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/50 to-transparent" />
+    
+        {/* Date range */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
+              Date from
+            </label>
+            <input
+              type="date"
+              className="w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                         bg-white/60 dark:bg-[#0F1117]/50 px-3 py-2 text-sm outline-none
+                         focus:ring-4 focus:ring-[rgb(47,128,237)/0.35]"
+              value={values.dateFrom}
+              onChange={handleFieldChange("dateFrom")}
+            />
           </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2 text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
-            For multi-day time off (e.g. {values.dateFrom} → {values.dateTo}), all
-            days are treated as full-day blocks. If you want partial hours, convert
-            it to a single-day block first.
+    
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
+              Date to
+            </label>
+            <input
+              type="date"
+              className="w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                         bg-white/60 dark:bg-[#0F1117]/50 px-3 py-2 text-sm outline-none
+                         focus:ring-4 focus:ring-[rgb(47,128,237)/0.35]"
+              value={values.dateTo}
+              onChange={handleFieldChange("dateTo")}
+            />
           </div>
-        )}
-      </div>
-
-
-      {/* Reason */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
-          Reason
-        </label>
-        <input
-          type="text"
-          className="w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-3 py-2 text-sm outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.35] placeholder:text-[#9CA3AF] dark:placeholder:text-[#6B7280]"
-          placeholder="Vacation, court hearing, admin day..."
-          value={values.reason}
-          onChange={handleFieldChange("reason")}
-        />
-      </div>
-
-      {/* Info + actions */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2">
-        <p className="text-xs text-[#64748B] dark:text-[#9CA3AF]">
-          {isFullDay
-            ? "This block is currently treated as a full-day time off. Select slots to convert it to a partial-day block."
-            : "This block is a partial-day time off. Clear all slots to turn it into a full-day block."}
-        </p>
-
-        <div className="flex items-center gap-2 justify-end">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex items-center justify-center gap-1 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 text-xs font-semibold text-[#334155] dark:text-[#E5E7EB] hover:bg-[#F5F7FA] dark:hover:bg-[#020617]"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled={isSaving}
-            onClick={onSave}
-            className="inline-flex items-center justify-center gap-1 rounded-xl border border-[#2F80ED] bg-[#2F80ED] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#266DDE] disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isSaving ? "Saving…" : "Save changes"}
-          </button>
+        </div>
+    
+        {/* Time range as 30-min slots */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
+              Time range (09:00 – 17:00)
+            </label>
+            <span className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
+              {isSingleDay
+                ? "Click slots to select a range"
+                : "Multi-day blocks are treated as full-day; time slots are disabled."}
+            </span>
+          </div>
+    
+          {isSingleDay ? (
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {allSlots.map((slot) => {
+                const isSelected = selectedSlots.includes(slot);
+                return (
+                  <button
+                    key={slot}
+                    type="button"
+                    onClick={() => handleSlotToggle(slot)}
+                    className={[
+                      "text-xs rounded-xl border px-2 py-1.5 text-center transition-colors",
+                      "shadow-sm",
+                      isSelected
+                        ? "bg-[#2F80ED] text-white border-[#2F80ED]"
+                        : "bg-white/60 dark:bg-[#0F1117]/50 text-[#334155] dark:text-[#E5E7EB] border-[#E5E7EB] dark:border-[#1F2937] hover:bg-[#F5F7FA] dark:hover:bg-[#020617]",
+                    ].join(" ")}
+                  >
+                    {slot}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div
+              className="rounded-2xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937]
+                         bg-white/60 dark:bg-[#0F1117]/50 px-3 py-2 text-[11px]
+                         text-[#64748B] dark:text-[#9CA3AF]"
+            >
+              For multi-day time off (e.g. {values.dateFrom} → {values.dateTo}), all
+              days are treated as full-day blocks. If you want partial hours, convert
+              it to a single-day block first.
+            </div>
+          )}
+        </div>
+    
+        {/* Reason */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-[#334155] dark:text-[#E5E7EB]">
+            Reason
+          </label>
+          <input
+            type="text"
+            className="w-full rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                       bg-white/60 dark:bg-[#0F1117]/50 px-3 py-2 text-sm outline-none
+                       focus:ring-4 focus:ring-[rgb(47,128,237)/0.35]
+                       placeholder:text-[#9CA3AF] dark:placeholder:text-[#6B7280]"
+            placeholder="Vacation, court hearing, admin day..."
+            value={values.reason}
+            onChange={handleFieldChange("reason")}
+          />
+        </div>
+    
+        {/* Info + actions */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2">
+          <p className="text-xs text-[#64748B] dark:text-[#9CA3AF]">
+            {isFullDay
+              ? "This block is currently treated as a full-day time off. Select slots to convert it to a partial-day block."
+              : "This block is a partial-day time off. Clear all slots to turn it into a full-day block."}
+          </p>
+    
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex items-center justify-center gap-1 rounded-xl
+                         border border-[#E5E7EB] dark:border-[#1F2937]
+                         bg-white/60 dark:bg-[#0F1117]/50 px-3 py-1.5 text-xs font-semibold
+                         text-[#334155] dark:text-[#E5E7EB]
+                         hover:bg-[#F5F7FA] dark:hover:bg-[#020617]"
+            >
+              Cancel
+            </button>
+    
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={onSave}
+              className="inline-flex items-center justify-center gap-1 rounded-xl
+                         border border-[#2F80ED] bg-[#2F80ED] px-3 py-1.5 text-xs font-semibold
+                         text-white hover:bg-[#266DDE]
+                         disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isSaving ? "Saving…" : "Save changes"}
+            </button>
+          </div>
         </div>
       </div>
     </section>

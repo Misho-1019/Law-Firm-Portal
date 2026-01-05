@@ -108,9 +108,14 @@ export default function EditAppointmentPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-5xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-visible"
+            className="relative w-full max-w-5xl overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
-            <div className="grid lg:grid-cols-5">
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+            <div className="relative grid lg:grid-cols-5">
               {/* Form side */}
               <div className="lg:col-span-3 p-6 md:p-8">
                 <div className="flex items-center gap-2">
@@ -121,11 +126,10 @@ export default function EditAppointmentPage() {
                   Adjust service, timing, and notes. Times are shown in{" "}
                   <span className="font-medium">Europe/Sofia</span>.
                 </p>
-
-                {/* UI-only form (no real submit) */}
+        
                 <form
                   className="mt-6 space-y-5"
-                  key={appointment?.id || <div><Loader2 className="h-4 w-4" />Loading...</div>}
+                  key={appointment?.id || "loading"}
                   action={formAction}
                   noValidate
                 >
@@ -137,18 +141,18 @@ export default function EditAppointmentPage() {
                       name="firstName"
                       placeholder="Mila"
                       icon={<FileText className="h-4 w-4" />}
-                      defaultValue={appointment?.firstName || ''}
-                      />
+                      defaultValue={appointment?.firstName || ""}
+                    />
                     <Field
                       label="Last name"
                       id="lastName"
                       name="lastName"
                       placeholder="Georgieva"
                       icon={<FileText className="h-4 w-4" />}
-                      defaultValue={appointment?.lastName || ''}
+                      defaultValue={appointment?.lastName || ""}
                     />
                   </div>
-
+        
                   {/* Service */}
                   <Field
                     label="Service"
@@ -156,10 +160,10 @@ export default function EditAppointmentPage() {
                     name="service"
                     placeholder="Contract review, Initial consultation, ..."
                     icon={<FileText className="h-4 w-4" />}
-                    defaultValue={appointment?.service || ''}
+                    defaultValue={appointment?.service || ""}
                   />
-
-                  {/* Mode (visual only) */}
+        
+                  {/* Mode */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Mode</label>
                     <div className="grid grid-cols-2 gap-3">
@@ -179,7 +183,7 @@ export default function EditAppointmentPage() {
                       />
                     </div>
                   </div>
-
+        
                   {/* Date */}
                   <Field
                     label="Date"
@@ -190,15 +194,13 @@ export default function EditAppointmentPage() {
                     hint="Format: YYYY-MM-DD"
                     defaultValue={dateAndTime.date}
                   />
-
-                  {/* Time grid (09:00–17:00) */}
+        
+                  {/* Time grid */}
                   <div className="space-y-1.5">
-                    <label
-                      className="text-sm font-medium flex items-center gap-2"
-                      htmlFor="time"
-                    >
+                    <label className="text-sm font-medium flex items-center gap-2" htmlFor="time">
                       <Clock className="h-4 w-4" /> Time (09:00–17:00)
                     </label>
+        
                     <TimeGrid
                       id="time"
                       name="time"
@@ -208,18 +210,14 @@ export default function EditAppointmentPage() {
                       end="17:00"
                       stepMinutes={30}
                     />
-                    {/* hidden input for future wiring */}
-                    <input
-                      type="hidden"
-                      name="time"
-                      value={selectedTime || ""}
-                    />
+        
+                    <input type="hidden" name="time" value={selectedTime || ""} />
+        
                     <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                      Business hours only. Actual availability may vary by
-                      bookings/spacing.
+                      Business hours only. Actual availability may vary by bookings/spacing.
                     </p>
                   </div>
-
+        
                   {/* Duration */}
                   <Field
                     label="Duration (minutes)"
@@ -233,11 +231,11 @@ export default function EditAppointmentPage() {
                     hint="Allowed range: 15–480. Default is 120."
                     defaultValue={appointment?.durationMin || 120}
                   />
-
-                  {role === 'Admin' && (
+        
+                  {role === "Admin" && (
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium">Status</label>
-                      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2">
+                      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] bg-white/60 dark:bg-[#0F1117]/50 px-3 py-2">
                         <select
                           name="status"
                           defaultValue={appointment?.status}
@@ -251,7 +249,7 @@ export default function EditAppointmentPage() {
                       </div>
                     </div>
                   )}
-
+        
                   {/* Notes */}
                   <Field
                     label="Notes (optional)"
@@ -259,22 +257,26 @@ export default function EditAppointmentPage() {
                     name="notes"
                     placeholder="Anything we should know before the meeting?"
                     textarea
-                    defaultValue={appointment?.notes || ''}
+                    defaultValue={appointment?.notes || ""}
                   />
-
+        
                   {/* Actions */}
                   <div className="flex items-center justify-between gap-2 pt-2">
                     <Link
                       to={-1}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/70 dark:bg-[#111827]/70
+                                 px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white
+                                 border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm
+                                 hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       Back
                     </Link>
-
+        
                     <button
                       type="submit"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white disabled:opacity-70"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED]
+                                 px-4 py-2.5 font-semibold text-white disabled:opacity-70"
                       title="Submit changes"
                     >
                       <Save className="h-4 w-4" />
@@ -283,14 +285,19 @@ export default function EditAppointmentPage() {
                   </div>
                 </form>
               </div>
-
+        
               {/* Side panel */}
-              <aside className="lg:col-span-2 hidden lg:block bg-[#0E1726] text-white">
-                <div className="h-full p-6 flex flex-col justify-between">
+              <aside className="lg:col-span-2 hidden lg:block relative overflow-hidden bg-[#0E1726] text-white">
+                {/* Side panel glow */}
+                <div className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-[#2F80ED]/20 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+                {/* Optional subtle texture */}
+                <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background:radial-gradient(circle_at_25%_20%,#ffffff_0%,transparent_40%),radial-gradient(circle_at_85%_0%,#2F80ED_0%,transparent_45%),radial-gradient(circle_at_20%_90%,#7C3AED_0%,transparent_50%)]" />
+        
+                <div className="relative h-full p-6 flex flex-col justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold relative pb-2">
-                      Editing tips
-                    </h2>
+                    <h2 className="text-lg font-semibold relative pb-2">Editing tips</h2>
                     <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
                       <li>Times are in Europe/Sofia (EET/EEST).</li>
@@ -298,10 +305,10 @@ export default function EditAppointmentPage() {
                       <li>Switch between Online and In-Person as needed.</li>
                     </ul>
                   </div>
+        
                   <div className="space-y-2 text-xs text-white/70">
                     <p>
-                      Reminders (24h/1h) are based on the final start time once
-                      wired to the backend.
+                      Reminders (24h/1h) are based on the final start time once wired to the backend.
                     </p>
                     <p>Cancelling may be restricted in the last 24h.</p>
                   </div>

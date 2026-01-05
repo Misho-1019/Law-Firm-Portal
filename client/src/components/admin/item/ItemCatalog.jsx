@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { formatSofiaDate, formatSofiaTime } from "../../../utils/dates";
+import { CalendarIcon } from "lucide-react";
 
 function StatusBadge({ status = "Confirmed" }) {
   const base =
@@ -24,36 +25,78 @@ export default function ItemCatalog({ appointments }) {
     <ul className="divide-y divide-slate-200/40 overflow-hidden rounded-2xl border border-slate-200/40 bg-slate-100/40 dark:divide-slate-800/60 dark:border-slate-800/60 dark:bg-slate-900/40">
       {/* Row 1 */}
       {appointments.map((a) => (
-        <li className="p-4" key={a._id}>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-[#334155] dark:text-[#94A3B8]">
-                {`${a.notes} · ${a.mode}`}
-              </p>
-              <p className="mt-0.5 text-xs text-[#334155]/70 dark:text-[#94A3B8]/70">
-                {`${formatSofiaDate(a.startsAt)}, ${formatSofiaTime(a.startsAt)}`} (Europe/Sofia)
-              </p>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <StatusBadge status={a.status} />
-                <span className="text-xs text-[#334155]/70 dark:text-[#94A3B8]/70">
-                  Created: {`${formatSofiaDate(a.createdAt)}, ${formatSofiaTime(a.createdAt)}`}
-                </span>
+        <li
+          key={a._id}
+          className="relative overflow-hidden rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                     bg-white dark:bg-[#111827] shadow-sm"
+        >
+          {/* SAME background design (the “card glow” look) */}
+          <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+          <div className="relative p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <div className="flex items-start gap-3">
+                  <span
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl
+                               bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20 shrink-0"
+                  >
+                    <CalendarIcon className="h-5 w-5" />
+                  </span>
+        
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold tracking-tight text-[#0B1220] dark:text-white truncate">
+                      {`${a.notes || "Appointment"} · ${a.mode}`}
+                    </p>
+        
+                    <p className="mt-0.5 text-xs text-[#334155]/70 dark:text-[#94A3B8]/70">
+                      {`${formatSofiaDate(a.startsAt)}, ${formatSofiaTime(a.startsAt)}`} (Europe/Sofia)
+                    </p>
+        
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <StatusBadge status={a.status} />
+        
+                      <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px]
+                                       bg-white/60 dark:bg-[#0F1117]/50
+                                       border border-[#E5E7EB] dark:border-[#1F2937]
+                                       text-[#334155]/70 dark:text-[#94A3B8]/70">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#2F80ED]/70" />
+                        Created: {`${formatSofiaDate(a.createdAt)}, ${formatSofiaTime(a.createdAt)}`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        
+              <div className="flex items-center gap-2 justify-end shrink-0">
+                <Link
+                  to={`/appointments/${a._id}/details`}
+                  className="inline-flex items-center justify-center rounded-xl
+                             border border-[#E5E7EB] dark:border-[#1F2937]
+                             bg-white/60 dark:bg-[#0F1117]/50
+                             px-3 py-2 text-xs font-semibold
+                             text-[#334155] dark:text-[#94A3B8]
+                             hover:bg-[#F5F7FA] dark:hover:bg-[#020617] transition-colors"
+                >
+                  View
+                </Link>
+        
+                <Link
+                  to={`/appointments/${a._id}/update`}
+                  className="inline-flex items-center justify-center rounded-xl
+                             bg-[#0B1220] dark:bg-white
+                             px-3 py-2 text-xs font-semibold
+                             text-white dark:text-[#0B1220]
+                             hover:opacity-90 transition"
+                >
+                  Edit
+                </Link>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Link
-                to={`/appointments/${a._id}/details`}
-                className="rounded-xl border border-slate-200/40 px-3 py-2 text-xs font-medium text-[#334155] hover:bg-slate-200/30 dark:border-slate-800/60 dark:text-[#94A3B8] dark:hover:bg-slate-800/50"
-              >
-                View
-              </Link>
-              <Link
-                to={`/appointments/${a._id}/update`}
-                className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
-              >
-                Edit
-              </Link>
-            </div>
+        
+            {/* Optional: subtle divider like your other cards */}
+            <div className="mt-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/30 to-transparent" />
           </div>
         </li>
       ))}

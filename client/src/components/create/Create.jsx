@@ -160,20 +160,22 @@ export default function CreateAppointmentPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-5xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-visible"
+            className="relative w-full max-w-5xl overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
-            <div className="grid lg:grid-cols-5">
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+            <div className="relative grid lg:grid-cols-5">
               {/* Form side */}
               <div className="lg:col-span-3 p-6 md:p-8">
-                <h1 className="text-2xl font-semibold">
-                  Create an appointment
-                </h1>
+                <h1 className="text-2xl font-semibold">Create an appointment</h1>
                 <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
                   Choose a time that works for you. Times are shown in{" "}
                   <span className="font-medium">Europe/Sofia</span>.
                 </p>
-
-                {/* ✅ Properly closed <form> */}
+        
                 <form className="mt-6 space-y-5" action={formAction} noValidate>
                   {/* First / Last name */}
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -192,7 +194,7 @@ export default function CreateAppointmentPage() {
                       icon={<FileText className="h-4 w-4" />}
                     />
                   </div>
-
+        
                   {/* Service */}
                   <Field
                     label="Service"
@@ -201,8 +203,8 @@ export default function CreateAppointmentPage() {
                     placeholder="Initial consultation, Contract review, ..."
                     icon={<FileText className="h-4 w-4" />}
                   />
-
-                  {/* Mode (visual only) */}
+        
+                  {/* Mode */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Mode</label>
                     <div className="grid grid-cols-2 gap-3">
@@ -224,7 +226,7 @@ export default function CreateAppointmentPage() {
                       />
                     </div>
                   </div>
-
+        
                   <Field
                     label="Date"
                     id="date"
@@ -235,49 +237,42 @@ export default function CreateAppointmentPage() {
                     value={date}
                     onChange={(e) => handleDateChange(e.target.value)}
                   />
-
-                  {/* Time grid (09:00–17:00) */}
+        
+                  {/* Time grid */}
                   <div className="space-y-1.5">
-                    <label
-                      className="text-sm font-medium flex items-center gap-2"
-                      htmlFor="time"
-                    >
+                    <label className="text-sm font-medium flex items-center gap-2" htmlFor="time">
                       <Clock className="h-4 w-4" /> Time (09:00–17:00)
                     </label>
+        
                     <TimeGrid
                       id="time"
                       name="time"
                       value={selectedTime}
                       onChange={setSelectedTime}
-                      slots={date ? availableTimes : [] }
+                      slots={date ? availableTimes : []}
                     />
-                    {/* keep a hidden input so forms still have a value if you later wire this up */}
-                    <input
-                      type="hidden"
-                      name="time"
-                      value={selectedTime || ""}
-                    />
-
+        
+                    <input type="hidden" name="time" value={selectedTime || ""} />
+        
                     {slotsLoading && (
                       <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
                         Loading availability…
                       </p>
                     )}
-
+        
                     {!slotsLoading && date && availableTimes.length === 0 && (
                       <p className="text-xs text-[#DC2626]">
-                        No available slots for this date. Please pick another
-                        day or change the duration.
+                        No available slots for this date. Please pick another day or change the duration.
                       </p>
                     )}
-
+        
                     {!date && (
                       <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
                         Select a date to see available times.
                       </p>
                     )}
                   </div>
-
+        
                   {/* Duration */}
                   <Field
                     label="Duration (minutes)"
@@ -293,7 +288,7 @@ export default function CreateAppointmentPage() {
                     value={duration}
                     onChange={handleDurationChange}
                   />
-
+        
                   {/* Notes */}
                   <Field
                     label="Notes (optional)"
@@ -302,8 +297,7 @@ export default function CreateAppointmentPage() {
                     placeholder="Anything we should know before the meeting?"
                     icon={<FileText className="h-4 w-4" />}
                   />
-
-                  {/* CTA (disabled) */}
+        
                   <button
                     type="submit"
                     className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white"
@@ -313,16 +307,17 @@ export default function CreateAppointmentPage() {
                     Create appointment
                   </button>
                 </form>
-                {/* ← closes form correctly */}
               </div>
-
+        
               {/* Side panel */}
-              <aside className="lg:col-span-2 hidden lg:block bg-[#0E1726] text-white">
-                <div className="h-full p-6 flex flex-col justify-between">
+              <aside className="lg:col-span-2 hidden lg:block relative overflow-hidden bg-[#0E1726] text-white">
+                {/* Side panel glow */}
+                <div className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-[#2F80ED]/20 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+                <div className="relative h-full p-6 flex flex-col justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold relative pb-2">
-                      Booking tips
-                    </h2>
+                    <h2 className="text-lg font-semibold relative pb-2">Booking tips</h2>
                     <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
                       <li>Times are in Europe/Sofia (EET/EEST).</li>
@@ -332,9 +327,7 @@ export default function CreateAppointmentPage() {
                     </ul>
                   </div>
                   <div className="space-y-2 text-xs text-white/70">
-                    <p>
-                      We’ll send reminders (24h/1h) based on your chosen time.
-                    </p>
+                    <p>We’ll send reminders (24h/1h) based on your chosen time.</p>
                     <p>Cancelling may be restricted in the last 24h.</p>
                   </div>
                 </div>

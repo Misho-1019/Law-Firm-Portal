@@ -36,12 +36,22 @@ function GradientDivider() {
 function Card({ children, className = "" }) {
   return (
     <div
-      className={
-        "rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm " +
-        className
-      }
+      className={[
+        "relative overflow-hidden",
+        "rounded-2xl bg-white dark:bg-[#111827]",
+        "border border-[#E5E7EB] dark:border-[#1F2937]",
+        "shadow-sm",
+        className,
+      ].join(" ")}
     >
-      {children}
+      {/* Global glow background */}
+      <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+
+      {/* Content */}
+      <div className="relative">
+        {children}
+      </div>
     </div>
   );
 }
@@ -423,7 +433,7 @@ export default function AboutMePage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.05 }}
-          className="lg:col-span-1"
+          className="lg:col-span-1 space-y-6"
         >
           <Card>
             <div className="p-4 pb-3 flex items-center justify-between">
@@ -497,13 +507,7 @@ export default function AboutMePage() {
               </div>
             </div>
           </Card>
-        </MotionSection>
-
-        <MotionDiv
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.12 }}
-        >
+          
           <Card className="p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -614,7 +618,7 @@ export default function AboutMePage() {
               </div>
             </div>
           </Card>
-        </MotionDiv>
+        </MotionSection>
       </main>
 
       <footer className="py-6 text-center text-sm text-[#334155] dark:text-[#94A3B8]">

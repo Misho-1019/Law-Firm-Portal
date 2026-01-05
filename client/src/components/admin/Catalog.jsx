@@ -15,7 +15,7 @@ export default function Catalog() {
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { appointments } = useAppointments()
+  const { appointments, isLoading } = useAppointments()
 
   let allAppointments = appointments.appointments || [];
 
@@ -108,73 +108,195 @@ export default function Catalog() {
         {/* Content container */}
         <div className="space-y-4">
           {/* Next appointment highlight */}
-          {nextAppt1 ? (
-            <MotionSection initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:.3}} className="lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
-              <div className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-start gap-3">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED]"><Clock className="h-5 w-5"/></div>
-                  <div>
-                    <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Next appointment</div>
-                    <div className="text-xl text-cyan-50 font-semibold">{pDate} - {time}</div>
-                    <div className="text-sm text-[#334155] dark:text-[#94A3B8]">{nextAppt1.service} · with {nextAppt1.firstName} {nextAppt1.lastName}</div>
-                    <div className="mt-2 flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]"><MapPin className="h-4 w-4"/>Law Office · 12 Vitosha Blvd</div>
-                      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]">
-                        {/* Call button */}
-                        <a
-                          href="tel:+359889116617"
-                          className="
-                            inline-flex items-center gap-2 rounded-2xl 
-                            border border-[#E5E7EB] dark:border-[#1F2937] 
-                            px-4 py-2 text-sm font-semibold
-                            text-[#2F80ED] dark:text-[#60A5FA]
-                            bg-white dark:bg-[#0F172A]
-                            hover:bg-[#F0F6FF] dark:hover:bg-[#1E293B] 
-                            transition-colors
-                          "
-                        >
-                          <svg
-                            xmlns='http://www.w3.org/2000/svg'
-                            className='h-4 w-4'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                            stroke='currentColor'
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              d='M3 5.25c0-.966.784-1.75 1.75-1.75h2.086c.696 0 1.31.403 1.58 1.026l.933 2.18a1.75 1.75 0 01-.402 1.93l-1.172 1.171a14.95 14.95 0 006.313 6.313l1.17-1.171a1.75 1.75 0 011.93-.402l2.181.933c.623.27 1.026.884 1.026 1.58V19.25c0 .966-.784 1.75-1.75 1.75H18.75c-8.284 0-15-6.716-15-15V5.25z'
-                            />
-                          </svg>
-                          Call us: +359 889 116 617
-                        </a>
-                      </div>
-                      <StatusPill status={nextAppt1.status} />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Link to={`/appointments/${nextAppt1._id}/upDate`} className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Reschedule</Link>
-                  <Link className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] text-cyan-50 px-4 py-2.5 hover:bg-[#000000] dark:hover:bg-[#ffffff] hover:text-black">Cancel</Link>
-                </div>
-              </div>
-              <div className="mx-5 mb-5 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
-            </MotionSection>
-          ) : (
+          {isLoading ? (
             <div className="flex items-center justify-center rounded-2xl border border-slate-200/40 bg-slate-100/40 p-12 text-sm text-[#334155] dark:border-slate-800/60 dark:bg-slate-900/40 dark:text-[#94A3B8]">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading appointments…
             </div>
+          ) : nextAppt1 ? (
+            <MotionSection
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="relative overflow-hidden lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827]
+                         border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+            >
+              {/* Soft glow background */}
+              <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+              <div className="relative p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl
+                                  bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20 shrink-0">
+                    <Clock className="h-5 w-5" />
+                  </div>
+          
+                  <div className="min-w-0">
+                    <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                      Next appointment
+                    </div>
+          
+                    <div className="text-xl font-semibold tracking-tight text-[#0B1220] dark:text-white">
+                      {pDate} — {time}
+                    </div>
+          
+                    <div className="mt-0.5 text-sm text-[#334155] dark:text-[#94A3B8] truncate">
+                      {nextAppt1.service} · with {nextAppt1.firstName} {nextAppt1.lastName}
+                    </div>
+          
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+                      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]">
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                            "Vasil Levski Blvd, Sofia Center, Bulgaria"
+                          )}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="
+                            text-sm font-semibold text-[#0B1220] dark:text-white
+                            hover:text-[#2F80ED] dark:hover:text-[#60A5FA]
+                            focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/20 rounded-lg px-1 -mx-1
+                            transition-colors
+                          "
+                          title="Open directions in Google Maps"
+                        >
+                          Vasil Levski Blvd, Sofia Center, Bulgaria
+                        </a>
+                      </div>
+          
+                      {/* Call CTA */}
+                      <a
+                        href="tel:+359889116617"
+                        className="inline-flex items-center gap-2 rounded-2xl
+                                   border border-[#E5E7EB] dark:border-[#1F2937]
+                                   bg-white/60 dark:bg-[#0F1117]/50
+                                   px-4 py-2 text-sm font-semibold
+                                   text-[#2F80ED] dark:text-[#60A5FA]
+                                   hover:bg-[#F5F7FA] dark:hover:bg-[#020617]
+                                   transition-colors"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Call us: +359 889 116 617
+                      </a>
+          
+                      <StatusPill status={nextAppt1.status} />
+                    </div>
+                  </div>
+                </div>
+          
+                <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                  <Link
+                    to={`/appointments/${nextAppt1._id}/update`}
+                    className="inline-flex items-center justify-center rounded-2xl
+                               border border-[#2F80ED] text-[#2F80ED]
+                               px-4 py-2.5 font-semibold
+                               hover:bg-[#2F80ED] hover:text-white transition-colors"
+                  >
+                    Reschedule
+                  </Link>
+          
+                  <Link
+                    to={`/appointments/${nextAppt1._id}/cancel`}
+                    className="inline-flex items-center justify-center rounded-2xl
+                               border border-[#E5E7EB] dark:border-[#1F2937]
+                               bg-white/60 dark:bg-[#0F1117]/50
+                               px-4 py-2.5 font-semibold
+                               text-[#334155] dark:text-[#94A3B8]
+                               hover:bg-[#F5F7FA] dark:hover:bg-[#020617]
+                               transition-colors"
+                  >
+                    Cancel
+                  </Link>
+                </div>
+              </div>
+          
+              <div className="mx-5 mb-5 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
+            </MotionSection>
+          ) : (
+            <MotionSection
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="relative overflow-hidden lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827]
+                         border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+            >
+              {/* Soft glow background */}
+              <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+              <div className="relative p-6 md:p-7 flex items-center justify-center">
+                <div className="w-full max-w-xl text-center">
+                  <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl
+                                  bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                    <Clock className="h-7 w-7" />
+                  </div>
+          
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-[#0B1220] dark:text-white">
+                      No upcoming appointment
+                    </h3>
+          
+                    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold
+                                     bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#2F80ED]" />
+                      Available
+                    </span>
+                  </div>
+          
+                  <p className="mt-2 text-sm md:text-base leading-relaxed text-[#334155] dark:text-[#94A3B8]">
+                    You’re all set for now. Book a time that works for you and we’ll confirm it shortly.
+                  </p>
+          
+                  <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <Link
+                      to="/create"
+                      className="inline-flex items-center justify-center rounded-2xl bg-[#2F80ED] text-white
+                                 px-5 py-2.5 font-semibold shadow-sm hover:opacity-95 transition"
+                    >
+                      Book an appointment
+                    </Link>
+          
+                    <Link
+                      to="/schedule"
+                      className="inline-flex items-center justify-center rounded-2xl
+                                 border border-[#E5E7EB] dark:border-[#1F2937]
+                                 bg-white/60 dark:bg-[#0F1117]/50
+                                 px-5 py-2.5 text-[#334155] dark:text-[#94A3B8]
+                                 hover:bg-[#F5F7FA] dark:hover:bg-[#020617] transition"
+                    >
+                      View schedule
+                    </Link>
+                  </div>
+                </div>
+              </div>
+          
+              <div className="mx-5 mb-5 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
+            </MotionSection>
           )}
           {/* Loading (example) */}
          
           {allAppointments.length > 0 ? (
             <ItemCatalog appointments={paginatedAppointments}/>
           ) : (
-            <h3 className="text-center text-lg font-medium mt-2 text-[#334155] dark:text-[#94A3B8]">
-            No appointments yet
-          </h3>
+            <div className="py-6 text-center">
+              <div className="inline-flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-[#0B1220] dark:text-white">
+                  No appointments yet
+                </h3>
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold
+                                 bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                  New
+                </span>
+              </div>
+            
+              <div className="mx-auto mt-2 h-[2px] w-24 rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
+            
+              <p className="mt-2 text-sm text-[#334155] dark:text-[#94A3B8]">
+                Once you book, your upcoming appointments will show here.
+              </p>
+            </div>
+
           )}
 
           {/* Pagination (static/disabled) */}

@@ -68,20 +68,22 @@ export default function Register() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-3xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-hidden"
+            className="relative w-full max-w-3xl overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
-            <div className="grid md:grid-cols-5">
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+            <div className="relative grid md:grid-cols-5">
+              {/* Main form */}
               <div className="md:col-span-3 p-6 md:p-8">
-                <h1 className="text-2xl font-semibold">
-                  Create your LexSchedule account
-                </h1>
+                <h1 className="text-2xl font-semibold">Create your LexSchedule account</h1>
                 <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Public sign-up is for{" "}
-                  <span className="font-medium">Clients</span>. Admins are
+                  Public sign-up is for <span className="font-medium">Clients</span>. Admins are
                   invited by the firm.
                 </p>
-
-                {/* UI-only form: no state, no validation, no handlers */}
+        
                 <form
                   className="mt-6 space-y-5"
                   onSubmit={handleSubmit(registerHandler)}
@@ -100,7 +102,7 @@ export default function Register() {
                     autoComplete="firstName"
                   />
                   {errors.firstName && <p className="text-red-600 text-sm">{errors.firstName.message}</p>}
-
+        
                   {/* Last Name */}
                   <Field
                     label="Last Name"
@@ -114,7 +116,7 @@ export default function Register() {
                     autoComplete="lastName"
                   />
                   {errors.lastName && <p className="text-red-600 text-sm">{errors.lastName.message}</p>}
-
+        
                   {/* Username */}
                   <Field
                     label="Username"
@@ -128,7 +130,7 @@ export default function Register() {
                     autoComplete="username"
                   />
                   {errors.username && <p className="text-red-600 text-sm">{errors.username.message}</p>}
-
+        
                   {/* Email */}
                   <Field
                     label="Email"
@@ -143,7 +145,7 @@ export default function Register() {
                     autoComplete="email"
                   />
                   {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
-
+        
                   {/* Password */}
                   <PasswordField
                     label="Password"
@@ -156,7 +158,7 @@ export default function Register() {
                     autoComplete="new-password"
                   />
                   {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
-
+        
                   {/* Confirm */}
                   <PasswordField
                     label="Confirm password"
@@ -168,7 +170,7 @@ export default function Register() {
                     autoComplete="new-password"
                   />
                   {errors.confirmPassword && <p className="text-red-600 text-sm">{errors.confirmPassword.message}</p>}
-
+        
                   {/* Phone (optional) */}
                   <Field
                     label="Phone (optional)"
@@ -182,37 +184,36 @@ export default function Register() {
                     autoComplete="tel"
                   />
                   {errors.phone && <p className="text-red-600 text-sm">{errors.phone.message}</p>}
-
-                  {/* CTA (button type=button to avoid form submit) */}
+        
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
                   >
                     Create account <ArrowRight className="h-4 w-4" />
-                    <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
+                    <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]" />
                   </button>
-
-                  {/* Legal + link */}
+        
                   <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
                     By continuing, you agree to our Terms and Privacy Policy.
                   </p>
                   <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
                     Already have an account?{" "}
-                    <Link
-                      className="text-[#2F80ED] hover:underline"
-                      to="/login"
-                    >
+                    <Link className="text-[#2F80ED] hover:underline" to="/login">
                       Sign in
                     </Link>
                     .
                   </p>
                 </form>
               </div>
-
+        
               {/* Side panel */}
-              <div className="md:col-span-2 hidden md:block bg-[#0E1726] text-white">
-                <div className="h-full p-6 flex flex-col justify-between">
+              <div className="md:col-span-2 hidden md:block relative overflow-hidden bg-[#0E1726] text-white">
+                {/* side panel glow */}
+                <div className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-[#2F80ED]/20 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+                <div className="relative h-full p-6 flex flex-col justify-between">
                   <div>
                     <h2 className="text-lg font-semibold relative pb-2">
                       Registration rules

@@ -17,13 +17,17 @@ export const useCreateAppointment = () => {
 
 export const useAppointments = () => {
     const [appointments, setAppointments] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
+        setIsLoading(true)
+
         request.get(baseUrl)
           .then(setAppointments)
+          .finally(() => setIsLoading(false))
     }, [])
 
-    return { appointments }
+    return { appointments, isLoading }
 }
 
 export const useMyAppointments = () => {

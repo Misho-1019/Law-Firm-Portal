@@ -53,12 +53,22 @@ function Card({ children, className = "", ...props }) {
   return (
     <div
       {...props}
-      className={
-        "rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm " +
-        className
-      }
+      className={[
+        "relative overflow-hidden",
+        "rounded-2xl bg-white dark:bg-[#111827]",
+        "border border-[#E5E7EB] dark:border-[#1F2937]",
+        "shadow-sm",
+        className,
+      ].join(" ")}
     >
-      {children}
+      {/* Global glow background */}
+      <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+
+      {/* Content */}
+      <div className="relative">
+        {children}
+      </div>
     </div>
   );
 }

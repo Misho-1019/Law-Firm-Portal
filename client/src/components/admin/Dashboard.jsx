@@ -112,57 +112,69 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
+            className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
           >
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                Slots today
-              </div>
-              <div className="mt-1 flex items-end gap-2">
-                <div className="text-2xl font-semibold">
-                  {allFreeSlots.length}
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+            <div className="relative flex justify-between items-center">
+              <div>
+                <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                  Slots today
                 </div>
-                <div className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                  available
+                <div className="mt-1 flex items-end gap-2">
+                  <div className="text-2xl font-semibold">{allFreeSlots.length}</div>
+                  <div className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                    available
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
-                Duration:
-              </span>
-              <select 
-                value={durationMin} 
-                onChange={(e) => setDurationMin(e.target.value)}
-                className="text-xs rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-2 py-1"
+          
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                  Duration:
+                </span>
+                <select
+                  value={durationMin}
+                  onChange={(e) => setDurationMin(e.target.value)}
+                  className="text-xs rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                             bg-white/60 dark:bg-[#0F1117]/50 px-2 py-1 outline-none
+                             focus:ring-4 focus:ring-[rgb(47,128,237)/0.25]"
                 >
-                <option value="15">15 min</option>
-                <option value="30">30 min</option>
-                <option value="45">45 min</option>
-                <option value="60">60 min</option>
-                <option value="90">90 min</option>
-                <option value="100">100 min</option>
-                <option value="120">120 min</option>
-                <option value="135">135 min</option>
-              </select>
+                  <option value="15">15 min</option>
+                  <option value="30">30 min</option>
+                  <option value="45">45 min</option>
+                  <option value="60">60 min</option>
+                  <option value="90">90 min</option>
+                  <option value="100">100 min</option>
+                  <option value="120">120 min</option>
+                  <option value="135">135 min</option>
+                </select>
+              </div>
             </div>
-          </div>
           </MotionDiv>
 
           <MotionDiv
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.05 }}
-            className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
+            className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
           >
-            <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
-              Upcoming
-            </div>
-            <div className="mt-1 flex items-end gap-2">
-              <div className="text-2xl font-semibold">{upcoming.length}</div>
-              <div className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                {upcoming.length > 1 ? "appointments" : "appointment"}
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+            <div className="relative">
+              <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Upcoming</div>
+          
+              <div className="mt-1 flex items-end gap-2">
+                <div className="text-2xl font-semibold">{upcoming.length}</div>
+                <div className="text-xs text-[#334155] dark:text-[#94A3B8]">
+                  {upcoming.length > 1 ? "appointments" : "appointment"}
+                </div>
               </div>
             </div>
           </MotionDiv>
@@ -171,17 +183,21 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
+            className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
           >
-            <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
-              Pending approvals
-            </div>
-            <div className="mt-1 flex items-end gap-2">
-              <div className="text-2xl font-semibold">
-                {pendingAppointments.length}
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+            <div className="relative">
+              <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                Pending approvals
               </div>
-              <div className="text-xs text-[#334155] dark:text-[#94A3B8]">
-                awaiting
+          
+              <div className="mt-1 flex items-end gap-2">
+                <div className="text-2xl font-semibold">{pendingAppointments.length}</div>
+                <div className="text-xs text-[#334155] dark:text-[#94A3B8]">awaiting</div>
               </div>
             </div>
           </MotionDiv>
@@ -191,11 +207,16 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="lg:col-span-2 rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+            className="relative overflow-hidden lg:col-span-2 rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
-            {/* {allAppointments.map(appointment => <Dates key={appointment._id} {...appointment} />)} */}
-            <Dates appointments={allAppointments} timeOff={timeOffItems} />
-            {/* Days grid */}
+            {/* Soft glow background */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+            <div className="relative">
+              <Dates appointments={allAppointments} timeOff={timeOffItems} />
+            </div>
           </MotionSection>
 
           {/* Upcoming list (right) */}
@@ -203,36 +224,63 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.05 }}
-            className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+            className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
-            <div className="p-4 pb-3 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Upcoming</h3>
-                <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                  Next appointments
-                </p>
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+            <div className="relative">
+              <div className="p-4 pb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Upcoming</h3>
+                  <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                    Next appointments
+                  </p>
+                </div>
+          
+                <Link
+                  to="/appointments"
+                  className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5
+                             border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors"
+                >
+                  View all
+                </Link>
               </div>
-              <Link
-                to="/appointments"
-                className="inline-flex items-center gap-1 rounded-xl text-[#2F80ED] hover:text-white px-3 py-1.5 border border-[#2F80ED] hover:bg-[#2F80ED] transition-colors"
-              >
-                View all
-              </Link>
+          
+              <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
+          
+              <ul className="p-4 space-y-3">
+                {upcoming.map((appointment) => (
+                  <UpcomingList key={appointment._id} {...appointment} />
+                ))}
+          
+                {upcoming.length > 0 ? (
+                  <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937]
+                                 bg-white/60 dark:bg-[#0F1117]/50 p-3 text-sm text-[#334155] dark:text-[#94A3B8]
+                                 flex items-center justify-between"
+                  >
+                    <span>No more items.</span>
+                  </li>
+                ) : (
+                  <li className="py-8">
+                    <div className="mx-auto w-full max-w-sm text-center">
+                      <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl
+                                      bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                        <CalendarIcon className="h-6 w-6" />
+                      </div>
+                      <h3 className="mt-3 text-base font-semibold text-[#0B1220] dark:text-white">
+                        No appointments yet
+                      </h3>
+                      <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
+                        Once you book, your upcoming appointments will show up here.
+                      </p>
+                    </div>
+                  </li>
+                )}
+              </ul>
             </div>
-            <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
-
-            <ul className="p-4 space-y-3">
-              {upcoming.map(appointment => <UpcomingList key={appointment._id} {...appointment}/>)}
-              {upcoming.length > 0 ? (
-                <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937] p-3 text-sm text-[#334155] dark:text-[#94A3B8] flex items-center justify-between">
-                  <span>No more items.</span>
-                </li>
-              ) : (
-                <h3 className="text-center text-lg font-medium mt-10 text-[#334155] dark:text-[#94A3B8]">
-                  You don't have any appointments yet
-                </h3>
-              )}
-            </ul>
           </MotionAside>
 
           {/* Activity feed / notices full width */}
@@ -240,35 +288,49 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
+            className="relative overflow-hidden lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm"
           >
-            <div className="p-4 pb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Recent activity</h3>
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+            <div className="relative">
+              <div className="p-4 pb-3 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Recent activity</h3>
+              </div>
+          
+              <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
+          
+              <ul className="p-4 space-y-3 text-sm">
+                <li className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                               bg-white/60 dark:bg-[#0F1117]/50 p-3">
+                  <CheckCircle2 className="h-4 w-4 text-[#166534] mt-0.5" />
+                  <div className="text-[#0B1220] dark:text-white">
+                    <span className="font-medium">Meeting confirmed</span>{" "}
+                    <span className="text-[#334155] dark:text-[#94A3B8]">— Elena Ivanova, tomorrow 16:00</span>
+                  </div>
+                </li>
+          
+                <li className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                               bg-white/60 dark:bg-[#0F1117]/50 p-3">
+                  <AlertCircle className="h-4 w-4 text-[#B45309] mt-0.5" />
+                  <div className="text-[#0B1220] dark:text-white">
+                    <span className="font-medium">Awaiting approval</span>{" "}
+                    <span className="text-[#334155] dark:text-[#94A3B8]">— Contract review for Maria Georgieva</span>
+                  </div>
+                </li>
+          
+                <li className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                               bg-white/60 dark:bg-[#0F1117]/50 p-3">
+                  <XCircle className="h-4 w-4 text-[#B91C1C] mt-0.5" />
+                  <div className="text-[#0B1220] dark:text-white">
+                    <span className="font-medium">Canceled</span>{" "}
+                    <span className="text-[#334155] dark:text-[#94A3B8]">— Trademark brief with Stoyan Kolev</span>
+                  </div>
+                </li>
+              </ul>
             </div>
-            <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
-            <ul className="p-4 space-y-3 text-sm">
-              <li className="flex items-start gap-3">
-                <CheckCircle2 className="h-4 w-4 text-[#166534] mt-0.5" />
-                <div>
-                  <span className="font-medium">Meeting confirmed</span> — Elena
-                  Ivanova, tomorrow 16:00
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <AlertCircle className="h-4 w-4 text-[#B45309] mt-0.5" />
-                <div>
-                  <span className="font-medium">Awaiting approval</span> —
-                  Contract review for Maria Georgieva
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <XCircle className="h-4 w-4 text-[#B91C1C] mt-0.5" />
-                <div>
-                  <span className="font-medium">Canceled</span> — Trademark
-                  brief with Stoyan Kolev
-                </div>
-              </li>
-            </ul>
           </MotionSection>
         </main>
 

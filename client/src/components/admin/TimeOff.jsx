@@ -11,7 +11,7 @@ import {
   NotepadText,
   Link,
 } from "lucide-react";
-import { Link as RRLink, useInRouterContext } from "react-router";
+import { Link as RRLink, useInRouterContext, useNavigate } from "react-router";
 import { buildTimeOffPayload, useCreateTimeOff } from "../../api/timeOffApi";
 import { showToast } from "../../utils/toastUtils";
 
@@ -59,13 +59,15 @@ function buildTimeSlots(startHour, endHour, stepMinutes) {
  * Palette matches create.jsx / book.jsx
  */
 export default function TimeOffPage() {
+  const { create } = useCreateTimeOff()
+  const navigate = useNavigate()
+
   const [mode, setMode] = useState("Full Day"); // "Full Day" | "Partial Day"
   const [startDate, setStartDate] = useState(isoToday());
   const [endDate, setEndDate] = useState(isoToday());
   const [reason, setReason] = useState("Vacation");
   const [notes, setNotes] = useState("");
   const [selectedSlots, setSelectedSlots] = useState([]); // e.g. ["09:00","09:30"]
-  const { create } = useCreateTimeOff()
 
   const isPartial = mode === "Partial Day";
   const isSingleDay = startDate === endDate;
@@ -115,6 +117,8 @@ export default function TimeOffPage() {
       showToast('Time off block created successfully.', 'success');
 
       resetForm();
+
+      navigate('/admin')
     } catch (error) {
       showToast('Error creating time off block.', 'error');
       console.error('Error creating time off:', error);
@@ -130,29 +134,33 @@ export default function TimeOffPage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-5xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-hidden"
+            className="relative w-full max-w-5xl overflow-hidden rounded-2xl
+                       bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937]
+                       shadow-sm"
           >
-            <div className="grid lg:grid-cols-5">
+            {/* Background glow (same design) */}
+            <div className="pointer-events-none absolute -top-28 -right-28 h-80 w-80 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+            <div className="relative grid lg:grid-cols-5">
               {/* Form side */}
               <div className="lg:col-span-3 p-6 md:p-8">
                 <div className="flex items-center justify-between gap-3">
                   <h1 className="text-2xl font-semibold">Block time off</h1>
                   <SafeLink
                     to="/appointments"
-                    className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-white/70 dark:bg-[#111827]/60 px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
                   >
                     <ArrowLeft className="h-4 w-4" /> Back
                   </SafeLink>
                 </div>
+          
                 <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
                   Mark days or 30-minute slots when new bookings are not allowed.
                 </p>
-
-                <form
-                  className="mt-6 space-y-5"
-                  onSubmit={handleSubmit}
-                  noValidate
-                >
+          
+                <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate>
                   {/* Mode */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Type</label>
@@ -173,7 +181,7 @@ export default function TimeOffPage() {
                       />
                     </div>
                   </div>
-
+          
                   {/* Date range */}
                   <div className="grid md:grid-cols-2 gap-4">
                     <Field
@@ -193,7 +201,7 @@ export default function TimeOffPage() {
                       onChange={setEndDate}
                     />
                   </div>
-
+          
                   {/* Time slots (only for Partial Day + same date) */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -205,13 +213,12 @@ export default function TimeOffPage() {
                         30-minute increments
                       </span>
                     </div>
-
+          
                     <div
-                      className={`rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-3 ${
-                        !isPartial || !isSingleDay
-                          ? "opacity-50"
-                          : ""
-                      }`}
+                      className={`rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                  bg-white/60 dark:bg-[#0F1117]/40 px-3 py-3 ${
+                                    !isPartial || !isSingleDay ? "opacity-50" : ""
+                                  }`}
                     >
                       {isPartial && !isSingleDay ? (
                         <p className="text-xs text-[#334155] dark:text-[#94A3B8]">
@@ -228,11 +235,12 @@ export default function TimeOffPage() {
                                 key={slot}
                                 type="button"
                                 onClick={() => toggleSlot(slot)}
-                                className={`text-xs rounded-2xl px-3 py-1.5 border transition-colors focus:outline-none focus:ring-2 focus:ring-[rgb(47,128,237)/0.4]
+                                className={`text-xs rounded-2xl px-3 py-1.5 border transition-colors
+                                            focus:outline-none focus:ring-2 focus:ring-[rgb(47,128,237)/0.4]
                                   ${
                                     active
                                       ? "bg-[#2F80ED] text-white border-[#2F80ED]"
-                                      : "bg-white dark:bg-[#111827] text-[#0B1220] dark:text-white border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg-white/5"
+                                      : "bg-white/70 dark:bg-[#111827]/60 text-[#0B1220] dark:text-white border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg-white/5"
                                   }`}
                               >
                                 {slot}
@@ -241,7 +249,7 @@ export default function TimeOffPage() {
                           })}
                         </div>
                       )}
-
+          
                       {isPartial && isSingleDay && (
                         <p className="mt-2 text-xs text-[#334155] dark:text-[#94A3B8]">
                           Click to toggle slots. In the backend, this would block these
@@ -250,11 +258,13 @@ export default function TimeOffPage() {
                       )}
                     </div>
                   </div>
-
+          
                   {/* Reason */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Reason</label>
-                    <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2 focus-within:ring-4 focus-within:ring-[rgb(47,128,237)/0.35]">
+                    <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                    bg-white/60 dark:bg-[#0F1117]/40 px-3 py-2
+                                    focus-within:ring-4 focus-within:ring-[rgb(47,128,237)/0.35]">
                       <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8]">
                         <NotepadText className="h-4 w-4" />
                         <select
@@ -271,7 +281,7 @@ export default function TimeOffPage() {
                       </div>
                     </div>
                   </div>
-
+          
                   {/* Notes */}
                   <Field
                     label="Notes (optional)"
@@ -281,7 +291,7 @@ export default function TimeOffPage() {
                     value={notes}
                     onChange={setNotes}
                   />
-
+          
                   {/* CTA */}
                   <div className="flex items-center justify-end gap-2">
                     <button
@@ -291,9 +301,10 @@ export default function TimeOffPage() {
                     >
                       <Save className="h-4 w-4" /> Save block
                     </button>
+          
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/70 dark:bg-[#111827]/60 px-4 py-2.5 font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
                       onClick={resetForm}
                     >
                       <XCircle className="h-4 w-4" /> Reset
@@ -301,66 +312,78 @@ export default function TimeOffPage() {
                   </div>
                 </form>
               </div>
-
+          
               {/* Side panel */}
-              <aside className="lg:col-span-2 bg-[#0E1726] text-white p-6 md:p-7">
-                <h2 className="text-lg font-semibold">Tips</h2>
-                <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent my-2" />
-                <ul className="space-y-2 text-sm text-white/80 list-disc pl-5">
-                  <li>Full Day blocks affect entire days between start and end dates.</li>
-                  <li>
-                    Partial Day with the same start/end date lets you block specific
-                    30-minute slots between 09:00 and 17:00.
-                  </li>
-                  <li>
-                    For multi-day ranges, it’s usually simpler to block full days in your
-                    backend logic.
-                  </li>
-                </ul>
-
-                {/* Demo preview of what will be blocked (UI-only) */}
-                <div className="mt-6 rounded-2xl border border-white/10 p-4">
-                  <h3 className="text-sm font-semibold">Preview</h3>
-                  <div className="mt-2 text-sm text-white/90 space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="h-4 w-4" /> {startDate} → {endDate}
-                    </div>
-
-                    {isPartial ? (
-                      isSingleDay ? (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            {selectedSlots.length > 0 ? (
-                              <span>{selectedSlots.join(", ")}</span>
-                            ) : (
-                              <span className="text-white/60">
-                                No slots selected yet
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
+              <aside className="lg:col-span-2 relative bg-[#0E1726] text-white p-6 md:p-7 overflow-hidden">
+                {/* Subtle glow in the dark panel */}
+                <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/18 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+                <div className="relative">
+                  <h2 className="text-lg font-semibold">Tips</h2>
+                  <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent my-2" />
+          
+                  <ul className="space-y-2 text-sm text-white/80 list-disc pl-5">
+                    <li>Full Day blocks affect entire days between start and end dates.</li>
+                    <li>
+                      Partial Day with the same start/end date lets you block specific
+                      30-minute slots between 09:00 and 17:00.
+                    </li>
+                    <li>
+                      For multi-day ranges, it’s usually simpler to block full days in your
+                      backend logic.
+                    </li>
+                  </ul>
+          
+                  {/* Demo preview (UI-only) */}
+                  <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/10 p-4">
+                    {/* mini glow */}
+                    <div className="pointer-events-none absolute -top-16 -right-16 h-52 w-52 rounded-full bg-[#2F80ED]/20 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-16 -left-16 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
+          
+                    <div className="relative">
+                      <h3 className="text-sm font-semibold">Preview</h3>
+                      <div className="mt-2 text-sm text-white/90 space-y-1.5">
                         <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          <span className="text-white/70 text-xs">
-                            Partial days across the range (no per-slot view when dates
-                            differ)
-                          </span>
+                          <CalendarIcon className="h-4 w-4" /> {startDate} → {endDate}
                         </div>
-                      )
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <BedDouble className="h-4 w-4" /> Full days
+          
+                        {isPartial ? (
+                          isSingleDay ? (
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                {selectedSlots.length > 0 ? (
+                                  <span>{selectedSlots.join(", ")}</span>
+                                ) : (
+                                  <span className="text-white/60">No slots selected yet</span>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              <span className="text-white/70 text-xs">
+                                Partial days across the range (no per-slot view when dates
+                                differ)
+                              </span>
+                            </div>
+                          )
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <BedDouble className="h-4 w-4" /> Full days
+                          </div>
+                        )}
+          
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4" /> {reason}
+                        </div>
+          
+                        {notes ? (
+                          <div className="mt-1 text-xs text-white/70">{notes}</div>
+                        ) : null}
                       </div>
-                    )}
-
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="h-4 w-4" /> {reason}
                     </div>
-                    {notes ? (
-                      <div className="mt-1 text-xs text-white/70">{notes}</div>
-                    ) : null}
                   </div>
                 </div>
               </aside>

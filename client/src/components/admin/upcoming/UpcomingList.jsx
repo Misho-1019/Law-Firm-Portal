@@ -60,33 +60,68 @@ export default function UpcomingList({
   return (
     <li
       key={_id}
-      className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3"
+      className="relative overflow-hidden rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                 bg-white/60 dark:bg-[#0F1117]/50 p-3 shadow-sm"
     >
-      <div className="flex items-center justify-between gap-20">
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
-          <span className="font-semibold">{`${day}, ${date} - ${time}`}</span>
+      {/* Soft glow background (subtle, same family) */}
+      <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-[#2F80ED]/12 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-emerald-400/8 blur-3xl" />
+    
+      <div className="relative space-y-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20 shrink-0">
+              <Clock className="h-4 w-4" />
+            </span>
+    
+            <span className="font-semibold truncate">
+              {`${day}, ${date} — ${time}`}
+            </span>
+          </div>
+    
+          <div className="shrink-0">
+            <StatusPill status={status} />
+          </div>
         </div>
-        <StatusPill status={status} />
-      </div>
-      <div className="flex items-center justify-between gap-20">
-        <div className="mt-2 text-sm gap-2">
-          <div className="font-medium">{`${firstName} ${lastName}`}</div>
-          <div className="text-[#334155] dark:text-[#94A3B8]">{notes}</div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            to={`/appointments/${_id}/details`}
-            className="rounded-xl border border-slate-200/40 px-3 py-2 text-xs font-medium text-[#334155] hover:bg-slate-200/30 dark:border-slate-800/60 dark:text-[#94A3B8] dark:hover:bg-slate-800/50"
-          >
-            View
-          </Link>
-          <Link
-            to={`/appointments/${_id}/update`}
-            className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
-          >
-            Edit
-          </Link>
+    
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-[#0B1220] dark:text-white truncate">
+              {`${firstName} ${lastName}`}
+            </div>
+            {notes ? (
+              <div className="mt-0.5 text-sm text-[#334155] dark:text-[#94A3B8] line-clamp-2">
+                {notes}
+              </div>
+            ) : (
+              <div className="mt-0.5 text-xs text-[#64748B] dark:text-[#9CA3AF]">
+                No notes provided.
+              </div>
+            )}
+          </div>
+    
+          <div className="flex items-center gap-2 justify-end shrink-0">
+            <Link
+              to={`/appointments/${_id}/details`}
+              className="inline-flex items-center justify-center rounded-xl
+                         border border-[#E5E7EB] dark:border-[#1F2937]
+                         bg-white/60 dark:bg-[#0F1117]/50 px-3 py-2 text-xs font-semibold
+                         text-[#334155] dark:text-[#94A3B8]
+                         hover:bg-[#F5F7FA] dark:hover:bg-[#020617] transition-colors"
+            >
+              View
+            </Link>
+    
+            <Link
+              to={`/appointments/${_id}/update`}
+              className="inline-flex items-center justify-center rounded-xl
+                         bg-[#0B1220] dark:bg-white px-3 py-2 text-xs font-semibold
+                         text-white dark:text-[#0B1220]
+                         hover:opacity-90 transition"
+            >
+              Edit
+            </Link>
+          </div>
         </div>
       </div>
     </li>

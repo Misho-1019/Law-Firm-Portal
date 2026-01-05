@@ -87,16 +87,20 @@ export default function Header({ initialActive = "Home" }) {
   };
 
   return (
-    <header className="bg-[#0E1726] text-white">
+    <header className="relative overflow-hidden bg-[#0E1726] text-white">
+      {/* Soft glow background (same style, tuned for dark header) */}
+      <div className="pointer-events-none absolute -top-28 -right-28 h-80 w-80 rounded-full bg-[#2F80ED]/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
+    
+      {/* Optional subtle texture line (very light) */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background:radial-gradient(circle_at_20%_10%,#ffffff_0%,transparent_35%),radial-gradient(circle_at_80%_0%,#2F80ED_0%,transparent_40%),radial-gradient(circle_at_20%_90%,#7C3AED_0%,transparent_45%)]" />
+    
       {/* Top bar */}
-      <div className="mx-auto max-w-7xl px-5 py-3 flex items-center">
-        {/* LEFT: brand, stuck to the left edge of the container */}
+      <div className="relative mx-auto max-w-7xl px-5 py-3 flex items-center">
+        {/* LEFT: brand */}
         <div className="flex items-center flex-1">
           {role === "Client" ? (
-            <Link
-              to="/"
-              className="flex items-center gap-2 font-semibold select-none"
-            >
+            <Link to="/" className="flex items-center gap-2 font-semibold select-none">
               <CalendarIcon className="h-5 w-5" />
               <span className="relative leading-tight">
                 <span className="bg-gradient-to-r from-[#2F80ED] via-[#06B6D4] to-[#7C3AED] bg-clip-text text-transparent font-semibold">
@@ -120,8 +124,8 @@ export default function Header({ initialActive = "Home" }) {
             </Link>
           )}
         </div>
-
-        {/* CENTER: nav, naturally separated by flex-1 space on both sides */}
+    
+        {/* CENTER: nav */}
         <nav className="hidden md:block">
           <ul className="flex items-center gap-6 text-sm">
             {items.map((it) => (
@@ -129,23 +133,22 @@ export default function Header({ initialActive = "Home" }) {
             ))}
           </ul>
         </nav>
-
-        {/* RIGHT: CTA + mobile toggle, stuck to right edge of container */}
+    
+        {/* RIGHT: CTA + mobile toggle */}
         <div className="flex items-center justify-end flex-1 gap-2">
-          {/* Desktop CTA */}
           <div className="hidden md:flex items-center">
             <Link
               to="/create"
               onClick={() => setActive("Create appointment")}
-              className="relative inline-flex items-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-1.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
+              className="relative inline-flex items-center gap-2 rounded-2xl bg-[#2F80ED] px-3 py-1.5 font-semibold text-white hover:bg-[#266DDE]
+                         focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
             >
               <Plus className="h-4 w-4" />
               Create appointment
               <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]" />
             </Link>
           </div>
-
-          {/* Mobile toggle */}
+    
           <button
             className="md:hidden inline-flex items-center justify-center rounded-xl p-2 hover:bg-white/10"
             onClick={() => setOpen((v) => !v)}
@@ -157,13 +160,13 @@ export default function Header({ initialActive = "Home" }) {
           </button>
         </div>
       </div>
-
+    
       {/* Divider */}
-      <div className="h-[2px] bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
-
+      <div className="relative h-[2px] bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
+    
       {/* Mobile menu */}
       {open && (
-        <nav className="md:hidden">
+        <nav className="relative md:hidden">
           <ul className="mx-auto max-w-7xl px-5 py-3 grid gap-2 text-sm">
             {items.map((it) => (
               <li key={it.label}>

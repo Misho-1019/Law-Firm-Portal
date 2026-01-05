@@ -165,101 +165,109 @@ export default function Home() {
             </div>
 
             {/* Card preview */}
-            <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5">
-              {isLoadingSlots ? (
-                <div className="animate-pulse space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
-                      <div className="mt-2 h-5 w-40 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
+            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
+              {/* Soft glow background (same style) */}
+              <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+            
+              {/* Content */}
+              <div className="relative p-5">
+                {isLoadingSlots ? (
+                  <div className="animate-pulse space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                        <div className="mt-2 h-5 w-40 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                      </div>
+                      <div className="h-7 w-16 rounded-xl bg-[#E5E7EB] dark:bg-[#1F2937]" />
                     </div>
-                    <div className="h-7 w-16 rounded-xl bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                    <div className="grid grid-cols-3 gap-3">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="h-14 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-[#F9FAFB] dark:bg-[#020617]"
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-14 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-[#F9FAFB] dark:bg-[#020617]"
-                      />
-                    ))}
+                ) : !nextSlots.date || allFreeSlots.length === 0 ? (
+                  <div>
+                    <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Next available</div>
+                    <div className="mt-1 text-xl font-semibold">
+                      No free slots in the next 7 days
+                    </div>
+                    <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
+                      Please check again later or contact the office directly.
+                    </p>
                   </div>
-                </div>
-              ) : !nextSlots.date || allFreeSlots.length === 0 ? (
-                <div>
-                  <div className="text-sm text-[#334155] dark:text-[#94A3B8]">Next available</div>
-                  <div className="mt-1 text-xl font-semibold">
-                    No free slots in the next 7 days
-                  </div>
-                  <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
-                    Please check again later or contact the office directly.
-                  </p>
-                </div>
-              ) : (
-                (() => {
-                  const first = new Date(allFreeSlots[0])                 
-                  const last = endTime(String(formatSofiaTime(first)), 120)
-
-                  const prefillDate = formatSofiaDate(first)
-                  const prefillTime = formatSofiaTime(first)
-
-                  return (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                            Next available
+                ) : (
+                  (() => {
+                    const first = new Date(allFreeSlots[0]);
+                    const last = endTime(String(formatSofiaTime(first)), 120);
+            
+                    const prefillDate = formatSofiaDate(first);
+                    const prefillTime = formatSofiaTime(first);
+            
+                    return (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                              Next available
+                            </div>
+                            <div className="text-xl font-semibold">
+                              {formatSofiaDayLabel(first)} {formatSofiaTime(first)}–{last}
+                            </div>
                           </div>
-                          <div className="text-xl font-semibold">
-                            {formatSofiaDayLabel(first)}{' '}
-                            {formatSofiaTime(first)}–{last}
-                          </div>
+                          <Link
+                            to="/create"
+                            className="rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] px-3 py-1 text-sm font-semibold ring-1 ring-[#2F80ED]/20"
+                          >
+                            Open
+                          </Link>
                         </div>
-                        <Link 
-                          to='/create' 
-                          className="rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] px-3 py-1 text-sm font-semibold"
+            
+                        <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+                          {allFreeSlots.slice(0, 3).map((iso, idx) => {
+                            const d = new Date(iso);
+            
+                            const prefillDate = formatSofiaDate(d);
+                            const prefillTime = formatSofiaTime(d);
+            
+                            return (
+                              <Link
+                                key={iso}
+                                to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(prefillTime)}&duration=${encodeURIComponent(
+                                  "120"
+                                )}`}
+                                className={`rounded-xl border px-3 py-2 transition-colors ${
+                                  idx === 0
+                                    ? "bg-[#2F80ED]/10 border-[#2F80ED]/40"
+                                    : "border-[#E5E7EB] dark:border-[#1F2937] hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]"
+                                }`}
+                              >
+                                <div className="font-semibold">{formatSofiaTime(d)}</div>
+                                <div className="text-[#334155] dark:text-[#94A3B8]">
+                                  Starts at {formatSofiaTime(d)}
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
+            
+                        <Link
+                          to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(prefillTime)}&duration=${encodeURIComponent(
+                            "120"
+                          )}`}
+                          className="mt-4 inline-flex items-center gap-2 rounded-2xl w-full border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
                         >
-                          Open
+                          Book this slot <ChevronRight className="h-4 w-4" />
                         </Link>
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
-                        {allFreeSlots.slice(0, 3).map((iso, idx) => {
-                          const d = new Date(iso);
-
-                          const prefillDate = formatSofiaDate(d);
-                          const prefillTime = formatSofiaTime(d);
-                          
-                          return (
-                            <Link
-                              key={iso}
-                              to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(prefillTime)}&duration=${encodeURIComponent('120')}`}
-                              className={`rounded-xl border px-3 py-2 ${
-                                idx === 0
-                                  ? "bg-[#2F80ED]/10 border-[#2F80ED]/40"
-                                  : "border-[#E5E7EB] dark:border-[#1F2937]"
-                              }`}
-                            >
-                              <div className="font-semibold">
-                                {formatSofiaTime(d)}
-                              </div>
-                              <div className="text-[#334155] dark:text-[#94A3B8]">
-                                Starts at {formatSofiaTime(d)}
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-
-                      <Link
-                        to={`/create?date=${encodeURIComponent(prefillDate)}&time=${encodeURIComponent(prefillTime)}&duration=${encodeURIComponent('120')}`}
-                        className="mt-4 inline-flex items-center gap-2 rounded-2xl w-full border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
-                      >
-                        Book this slot <ChevronRight className="h-4 w-4" />
-                      </Link>
-                    </>
-                  )
-                })()
-              )}
+                      </>
+                    );
+                  })()
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -292,44 +300,133 @@ export default function Home() {
         </section>
 
         {/* Trust strip */}
-        <section id="trust" className="mx-auto max-w-7xl px-5 py-10">
-          <div className="text-center text-sm text-[#334155] dark:text-[#94A3B8]">Trusted by teams who value clarity</div>
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 opacity-80">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="h-10 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-white/60 dark:bg-[#0F1117]/60" />
-            ))}
+        <section id="about-cta" className="mx-auto max-w-7xl px-5 py-10">
+          <div className="relative overflow-hidden rounded-3xl border border-[#E5E7EB] dark:border-[#1F2937] bg-white dark:bg-[#111827] shadow-sm">
+            {/* Soft glow */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+            <div className="relative p-6 sm:p-8 lg:p-10 grid gap-6 lg:grid-cols-12 lg:items-center">
+              {/* Left: copy */}
+              <div className="lg:col-span-8">
+                <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold
+                                bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#2F80ED]" />
+                  Meet your lawyer
+                </div>
+        
+                <h3 className="mt-3 text-2xl sm:text-3xl font-semibold tracking-tight text-[#0B1220] dark:text-white">
+                  The story behind the practice
+                </h3>
+        
+                <p className="mt-2 text-sm sm:text-base leading-relaxed text-[#334155] dark:text-[#94A3B8] max-w-2xl">
+                  Learn about Victor Todorov’s experience, values, and the approach that keeps every case clear,
+                  structured, and client-first.
+                </p>
+        
+                {/* Mini highlights */}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {[
+                    "Client-first communication",
+                    "Clear timelines & updates",
+                    "Practical legal strategy",
+                  ].map((t) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center rounded-full px-3 py-1 text-xs
+                                 border border-[#E5E7EB] dark:border-[#1F2937]
+                                 bg-white/60 dark:bg-[#0F1117]/60
+                                 text-[#334155] dark:text-[#94A3B8]"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+        
+              {/* Right: actions */}
+              <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end">
+                <Link
+                  to="/about"
+                  className="inline-flex items-center justify-center rounded-2xl bg-[#2F80ED] text-white
+                             px-5 py-2.5 font-semibold shadow-sm hover:opacity-95 transition"
+                >
+                  Read the full story
+                  <ChevronRight className="ml-1.5 h-4 w-4" />
+                </Link>
+        
+                <Link
+                  to="/create"
+                  className="inline-flex items-center justify-center rounded-2xl
+                             border border-[#E5E7EB] dark:border-[#1F2937]
+                             px-5 py-2.5 text-[#334155] dark:text-[#94A3B8]
+                             hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726] transition"
+                >
+                  Book an appointment
+                </Link>
+        
+                <div className="text-xs text-[#64748B] dark:text-[#94A3B8] lg:text-right">
+                  Prefer a quick start? Book first — learn more anytime.
+                </div>
+              </div>
+            </div>
+        
+            {/* Gradient divider */}
+            <div className="mx-6 sm:mx-8 lg:mx-10 mb-6 sm:mb-8 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
           </div>
         </section>
 
         {/* CTA */}
         <section className="mx-auto max-w-7xl px-5 py-12">
-          <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold">Ready to book?</h3>
-              <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                Create an appointment as a guest, or sign in for faster checkout.
-              </p>
-              <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
-                Prefer to talk with me?{" "}
-                <a
-                  href="tel:+359889116617"
-                  className="font-semibold text-[#2F80ED]"
+          <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+            {/* Content */}
+            <div className="relative p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold">Ready to book?</h3>
+                <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
+                  Create an appointment as a guest, or sign in for faster checkout.
+                </p>
+                <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
+                  Prefer to talk with me?{" "}
+                  <a
+                    href="tel:+359889116617"
+                    className="font-semibold text-[#2F80ED]"
+                  >
+                    +359 88 911 6617
+                  </a>
+                </p>
+              </div>
+        
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  to="/create"
+                  className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40"
                 >
-                  +359 88 911 6617
-                </a>
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link to='/create' className="relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2F80ED] px-4 py-2.5 font-semibold text-white hover:bg-[#266DDE] focus:outline-none focus:ring-4 focus:ring-[#2F80ED]/40">
-                Create appointment <ArrowRight className="h-4 w-4" />
-                <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
-              </Link>
-              {!email && (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Link to="/login" className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors">Sign in</Link>
-                  <Link to="/register" className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">Register</Link>
-                </div>
-              )}
+                  Create appointment <ArrowRight className="h-4 w-4" />
+                  <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
+                </Link>
+        
+                {!email && (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Link
+                      to="/login"
+                      className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="inline-flex items-center justify-center rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]"
+                    >
+                      Register
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -346,24 +443,47 @@ export default function Home() {
 /* ----------------------------------------------------------
    Tiny presentational components
 ---------------------------------------------------------- */
-function FeatureCard({ icon, title, children}){
+function FeatureCard({ icon, title, children }) {
   return (
-    <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5">
-      <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED]">{icon}</div>
-      <h3 className="mt-3 text-base font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">{children}</p>
+    <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
+      {/* Soft glow background (same style) */}
+      <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+
+      {/* Content */}
+      <div className="relative p-5">
+        <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+          {icon}
+        </div>
+        <h3 className="mt-3 text-base font-semibold">{title}</h3>
+        <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
+          {children}
+        </p>
+      </div>
     </div>
   );
 }
 
-function Step({ n, title, children}){
+function Step({ n, title, children }) {
   return (
-    <div className="rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5">
-      <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] grid place-items-center font-semibold">{n}</div>
-        <div className="font-semibold">{title}</div>
+    <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm">
+      {/* Soft glow background (same style) */}
+      <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+
+      {/* Content */}
+      <div className="relative p-5">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] grid place-items-center font-semibold ring-1 ring-[#2F80ED]/20">
+            {n}
+          </div>
+          <div className="font-semibold">{title}</div>
+        </div>
+
+        <p className="mt-2 text-sm text-[#334155] dark:text-[#94A3B8]">
+          {children}
+        </p>
       </div>
-      <p className="mt-2 text-sm text-[#334155] dark:text-[#94A3B8]">{children}</p>
     </div>
   );
 }

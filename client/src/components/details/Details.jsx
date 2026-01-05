@@ -140,22 +140,31 @@ export default function AppointmentDetails() {
                 </div>
 
                 <p className="mt-6 text-xs text-[#334155] dark:text-[#94A3B8]">
-                  This is a UI preview. Actual data should be loaded by ID and status enforced according to your policy.
+                  Actual data should be loaded by ID and status enforced according to your policy.
                 </p>
               </div>
 
               {/* Side panel */}
-              <aside className="lg:col-span-2 hidden lg:block bg-[#0E1726] text-white">
-                <div className="h-full p-6 flex flex-col justify-between">
+              <aside className="lg:col-span-2 hidden lg:block relative overflow-hidden bg-[#0E1726] text-white">
+                {/* Soft glow background (same style, tuned for dark panel) */}
+                <div className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-[#2F80ED]/20 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+              
+                {/* Optional subtle texture (very light) */}
+                <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background:radial-gradient(circle_at_25%_20%,#ffffff_0%,transparent_40%),radial-gradient(circle_at_85%_0%,#2F80ED_0%,transparent_45%),radial-gradient(circle_at_20%_90%,#7C3AED_0%,transparent_50%)]" />
+              
+                <div className="relative h-full p-6 flex flex-col justify-between">
                   <div>
                     <h2 className="text-lg font-semibold relative pb-2">Overview</h2>
                     <div className="h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
+              
                     <ul className="mt-4 space-y-2 text-sm text-white/80 list-disc pl-5">
                       <li>Times are shown in Europe/Sofia.</li>
                       <li>Duration range: 15-480 minutes.</li>
                       <li>Reminders go at T-24h and T-1h.</li>
                     </ul>
                   </div>
+              
                   <div className="space-y-2 text-xs text-white/70">
                     <p>Cancel restrictions may apply in the last 24h.</p>
                     <p>Rescheduling may require admin approval.</p>
@@ -193,21 +202,48 @@ function fmtDateTime(isoLocal) {
 
 function SummaryItem({ icon, label, value }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-3">
-      <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8] text-xs">
-        {icon}
-        <span className="uppercase tracking-wide">{label}</span>
+    <div
+      className="relative overflow-hidden rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                 bg-white/60 dark:bg-[#0F1117]/50 px-4 py-3 shadow-sm"
+    >
+      {/* Soft glow background (same style) */}
+      <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-emerald-400/10 blur-3xl" />
+
+      <div className="relative">
+        <div className="flex items-center gap-2 text-[#334155] dark:text-[#94A3B8] text-xs">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
+            {icon}
+          </span>
+          <span className="uppercase tracking-wide">{label}</span>
+        </div>
+
+        <div className="mt-1 text-sm font-semibold text-[#0B1220] dark:text-white">
+          {value}
+        </div>
       </div>
-      <div className="mt-1 text-sm font-semibold">{value}</div>
     </div>
   );
 }
 
 function InfoCard({ title, children }) {
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] p-4 sm:p-5">
-      <h3 className="text-sm font-semibold mb-3">{title}</h3>
-      <div className="grid gap-3">{children}</div>
+    <section
+      className="relative overflow-hidden rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937]
+                 bg-white/60 dark:bg-[#0F1117]/50 p-4 sm:p-5 shadow-sm"
+    >
+      {/* Soft glow background (same style) */}
+      <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+
+      <div className="relative">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">{title}</h3>
+          <span className="h-6 w-6 rounded-xl bg-[#2F80ED]/10 ring-1 ring-[#2F80ED]/20" />
+        </div>
+
+        <div className="grid gap-3">{children}</div>
+      </div>
     </section>
   );
 }

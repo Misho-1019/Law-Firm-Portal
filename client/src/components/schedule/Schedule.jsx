@@ -164,66 +164,74 @@ export default function SchedulePage() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full max-w-7xl rounded-2xl bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm overflow-hidden min-h-[480px]"
+            className="relative w-full max-w-7xl overflow-hidden rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm min-h-[480px]"
           >
-            {/* Toolbar */}
-            <div className="flex items-center justify-between gap-4 border-b border-[#E5E7EB] dark:border-[#1F2937] p-5">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setAnchor(addDays(anchor, -7))}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 text-sm border border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg-white/5"
-                >
-                  <ArrowLeft className="h-4 w-4" /> Prev
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAnchor(new Date())}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 text-sm border border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg:white/5"
-                >
-                  Today
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAnchor(addDays(anchor, 7))}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 text-sm border border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg-white/5"
-                >
-                  Next <ArrowRight className="h-4 w-4" />
-                </button>
+            {/* Soft glow background (same style) */}
+            <div className="pointer-events-none absolute -top-28 -right-28 h-80 w-80 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
+        
+            {/* Content */}
+            <div className="relative">
+              {/* Toolbar */}
+              <div className="flex items-center justify-between gap-4 border-b border-[#E5E7EB] dark:border-[#1F2937] p-5">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setAnchor(addDays(anchor, -7))}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 text-sm border border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg-white/5"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Prev
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAnchor(new Date())}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 text-sm border border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg-white/5"
+                  >
+                    Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAnchor(addDays(anchor, 7))}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-2.5 text-sm border border-[#E5E7EB] dark:border-[#1F2937] hover:bg-black/5 dark:hover:bg-white/5"
+                  >
+                    Next <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+        
+                <div className="text-sm sm:text-base text-[#334155] dark:text-[#94A3B8] flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5" />
+                  <span>
+                    {fmtDate(week.daysAtMidnight[0])} — {fmtDate(week.daysAtMidnight[6])}
+                  </span>
+                </div>
               </div>
-
-              <div className="text-sm sm:text-base text-[#334155] dark:text-[#94A3B8] flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
-                <span>
-                  {fmtDate(week.daysAtMidnight[0])} — {fmtDate(week.daysAtMidnight[6])}
-                </span>
+        
+              {/* Legend */}
+              <div className="flex flex-wrap items-center gap-5 px-5 py-4 text-sm text-[#334155] dark:text-[#94A3B8] border-b border-[#E5E7EB] dark:border-[#1F2937]">
+                <LegendSwatch className="bg-[#2F80ED]/15 border-[#2F80ED]" label="Booked" />
+                <LegendSwatch className="bg-[#EF4444]/15 border-[#EF4444]" label="Time off" />
+                <LegendSwatch className="bg-transparent border-dashed" label="Free" />
               </div>
-            </div>
-
-            {/* Legend */}
-            <div className="flex flex-wrap items-center gap-5 px-5 py-4 text-sm text-[#334155] dark:text-[#94A3B8] border-b border-[#E5E7EB] dark:border-[#1F2937]">
-              <LegendSwatch className="bg-[#2F80ED]/15 border-[#2F80ED]" label="Booked" />
-              <LegendSwatch className="bg-[#EF4444]/15 border-[#EF4444]" label="Time off" />
-              <LegendSwatch className="bg-transparent border-dashed" label="Free" />
-            </div>
-
-            {isLoading && (
-              <div className="px-5 py-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                Loading schedule…
+        
+              {isLoading && (
+                <div className="px-5 py-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                  Loading schedule…
+                </div>
+              )}
+        
+              {error && !isLoading && (
+                <div className="px-5 py-2 text-xs text-red-400">
+                  {error}
+                </div>
+              )}
+        
+              {/* Week grid */}
+              <div className="grid grid-cols-7 gap-px bg-[#E5E7EB] dark:bg-[#1F2937]">
+                {week.daysAtMidnight.map((d, idx) => (
+                  <DayColumn key={idx} date={d} items={data[isoDate(d)] || []} />
+                ))}
               </div>
-            )}
-
-            {error && !isLoading && (
-              <div className="px-5 py-2 text-xs text-red-400">
-                {error}
-              </div>
-            )}
-
-            {/* Week grid */}
-            <div className="grid grid-cols-7 gap-px bg-[#E5E7EB] dark:bg-[#1F2937]">
-              {week.daysAtMidnight.map((d, idx) => (
-                <DayColumn key={idx} date={d} items={data[isoDate(d)] || []} />
-              ))}
             </div>
           </MotionSection>
         </main>
