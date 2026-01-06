@@ -12,16 +12,35 @@ const MotionSection = motion.section
 export default function Catalog() {
   const timestamp = new Date()
 
-  const pageSize = 5;
+  const [pageSize, setPageSize] = useState(5)
   const [currentPage, setCurrentPage] = useState(1)
+
+  const [defaultStatus, setDefaultStatus] = useState('ALL')
+
+  const [sortKey, setSortKey] = useState('startsAt:asc')
 
   const { appointments, isLoading } = useAppointments()
 
   let allAppointments = appointments.appointments || [];
 
-  allAppointments = allAppointments.sort((a, b) => new Date(b.startsAt) - new Date(a.startsAt))  
+  const filteredAppointments = allAppointments.filter(x => defaultStatus === 'ALL' || x.status === defaultStatus)
 
-  const totalPages = Math.max(1, Math.ceil(allAppointments.length / pageSize))
+  const sortedAppointments = filteredAppointments.slice().sort((a, b) => {
+    switch (sortKey) {
+      case 'startsAt:asc':
+        return new Date(a.startsAt) - new Date(b.startsAt)
+      case 'startsAt:desc':
+        return new Date(b.startsAt) - new Date(a.startsAt)
+      case "createdAt:desc":
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      case "createdAt:asc":
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      default:
+        return 0;
+    }
+  })
+
+  const totalPages = Math.max(1, Math.ceil(sortedAppointments.length / pageSize))
 
   useEffect(() => {
     setCurrentPage(prev => Math.min(prev || 1, totalPages))
@@ -29,20 +48,18 @@ export default function Catalog() {
 
   const offset = (currentPage - 1) * pageSize;
 
-  const paginatedAppointments = allAppointments.slice(
+  const paginatedAppointments = sortedAppointments.slice(
     offset,
     offset + pageSize
   )
-
-  const upcoming = allAppointments.filter(x => {
-    const appt = new Date(x?.startsAt)
-    return appt > timestamp
-  })
   
-  const nextAppt1 = upcoming[upcoming.length - 1]
+  const nextAppt1 = (appointments.appointments || [])
+    .filter(a => a.status !== "CANCELLED")
+    .filter(a => new Date(a.startsAt) > timestamp)
+    .sort((a, b) => new Date(a.startsAt) - new Date(b.startsAt))[0];
+
   const pDate = prettyDate(String(nextAppt1?.startsAt))
   
-
   const { _day, _date, time } = getDateAndTime(String(new Date(nextAppt1?.startsAt)))
 
   return (
@@ -62,28 +79,29 @@ export default function Catalog() {
             <div className="hidden md:flex items-center gap-2">
               <ListFilter className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
               <select
-                disabled
+                value={defaultStatus}
+                onChange={(e) => setDefaultStatus(e.target.value)}
                 className="rounded-xl border border-slate-200/40 bg-slate-100/40 px-3 py-2 text-sm text-[#334155] opacity-60 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
-                defaultValue=""
               >
-                <option value="">All statuses</option>
-                <option>Pending</option>
-                <option>Confirmed</option>
-                <option>Completed</option>
-                <option>Cancelled</option>
+                <option value="ALL">All statuses</option>
+                <option value='PENDING'>Pending</option>
+                <option value='CONFIRMED'>Confirmed</option>
+                <option value='CANCELLED'>Cancelled</option>
               </select>
 
-              <input
-                disabled
+              {/* <input
                 placeholder="Filter by clientId"
                 className="w-56 rounded-xl border border-slate-200/40 bg-slate-100/40 px-3 py-2 text-sm text-[#334155] placeholder-slate-400 opacity-60 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
-              />
+              /> */}
             </div>
 
             <select
-              disabled
+              value={sortKey}
+              onChange={(e) => {
+                setSortKey(e.target.value)
+                setCurrentPage(1)
+              }}
               className="rounded-xl border border-slate-200/40 bg-slate-100/40 px-3 py-2 text-sm text-[#334155] opacity-60 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
-              defaultValue="startsAt:asc"
             >
               <option value="startsAt:asc">Start time ↑</option>
               <option value="startsAt:desc">Start time ↓</option>
@@ -92,15 +110,17 @@ export default function Catalog() {
             </select>
 
             <select
-              disabled
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value))
+                setCurrentPage(1)
+              }}
               className="rounded-xl border border-slate-200/40 bg-slate-100/40 px-3 py-2 text-sm text-[#334155] opacity-60 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
-              defaultValue={5}
             >
               <option value={5}>5 / page</option>
               <option value={10}>10 / page</option>
               <option value={20}>20 / page</option>
               <option value={50}>50 / page</option>
-              <option value={100}>100 / page</option>
             </select>
           </div>
         </div>
@@ -276,7 +296,7 @@ export default function Catalog() {
           )}
           {/* Loading (example) */}
          
-          {allAppointments.length > 0 ? (
+          {sortedAppointments.length > 0 ? (
             <ItemCatalog appointments={paginatedAppointments}/>
           ) : (
             <div className="py-6 text-center">
