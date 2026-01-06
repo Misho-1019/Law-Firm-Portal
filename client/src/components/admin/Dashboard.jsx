@@ -18,11 +18,27 @@ import UpcomingList from "./upcoming/UpcomingList";
 import { useAppointments } from "../../api/appointmentApi";
 import { useTimeOffs } from "../../api/timeOffApi";
 import { useGetSlots } from "../../api/availabilityApi";
+import { formatSofiaDate, formatSofiaWhen } from "../../utils/dates";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
 const MotionSection = motion.section;
 const MotionAside = motion.aside;
+
+function fullName(a) {
+  const first = (a?.firstName || '').trim();
+  const last = (a?.lastName || '').trim();
+
+  return [first, last].filter(Boolean).join(' ') || 'Client'
+}
+
+function ActivityIcon({ kind }) {
+  if (kind === "success") return <CheckCircle2 className="h-4 w-4 text-[#166534] mt-0.5" />;
+  if (kind === "warning") return <AlertCircle className="h-4 w-4 text-[#B45309] mt-0.5" />;
+  if (kind === "danger") return <XCircle className="h-4 w-4 text-[#B91C1C] mt-0.5" />;
+  if (kind === "info") return <Clock className="h-4 w-4 text-[#2F80ED] mt-0.5" />;
+  return <Clock className="h-4 w-4 text-[#64748B] mt-0.5" />;
+}
 
 export default function AdminDashboard() {
   const timestamp = new Date();
@@ -46,6 +62,103 @@ export default function AdminDashboard() {
   });
 
   const allFreeSlots = freeSlots.slots || [];
+
+  const recentActivity = (() => {
+    const events = []
+
+    for (const a of allAppointments) {
+      const happenedAt = a?.updatedAt
+        ? new Date(a.updatedAt)
+        : a?.createdAt
+        ? new Date(a.createdAt)
+        : null;
+
+      if (!happenedAt) continue;
+
+      const client = fullName(a)
+
+      const when = a?.startsAt ? formatSofiaWhen(a.startsAt) : '';
+      const service = a?.service ? `— ${a.service}` : '';
+      const mode = a?.mode ? `• ${a.mode}` : '';
+
+      const subtitle = [client, service, mode, when ? `— ${when}` : '']
+        .filter(Boolean)
+        .join(' ')
+      
+      const status = (a?.status || '').toUpperCase();
+
+      if (status === 'CONFIRMED') {
+        events.push({
+          id: `appt-confirmed-${a._id}`,
+          kind: 'success',
+          title: 'Meeting confirmed',
+          subtitle,
+          happenedAt,
+          to: a?._id ? `/appointments/${a._id}` : '/appointments',
+        })
+      } else if (status === 'PENDING') {
+        events.push({
+          id: `appt-pending-${a._id}`,
+          kind: "warning",
+          title: "Awaiting approval",
+          subtitle,
+          happenedAt,
+          to: a?._id ? `/appointments/${a._id}` : "/appointments",
+        })
+      } else if (status === "CANCELED" || status === "CANCELLED") {
+        events.push({
+          id: `appt-canceled-${a._id}`,
+          kind: "danger",
+          title: "Canceled",
+          subtitle,
+          happenedAt,
+          to: a?._id ? `/appointments/${a._id}` : "/appointments",
+        });
+      } else {
+        events.push({
+          id: `appt-updated-${a._id}`,
+          kind: "neutral",
+          title: "Appointment updated",
+          subtitle,
+          happenedAt,
+          to: a?._id ? `/appointments/${a._id}` : "/appointments",
+        })
+      }
+    }
+
+    for (const t of timeOffItems || []) {
+      const happenedAt = t?.updatedAt
+        ? new Date(t.updatedAt)
+        : t?.createdAt
+        ? new Date(t.createdAt)
+        : null;
+
+      if (!happenedAt) continue;
+
+      const range = t?.dateFrom && t?.dateTo && t.dateFrom !== t.dateTo
+        ? `${formatSofiaDate(t.dateFrom)} -> ${formatSofiaDate(t.dateTo)}`
+        : t?.dateFrom
+        ? formatSofiaDate(t.dateFrom)
+        : '';
+
+      const hours = t?.from?.trim() && t?.to?.trim() ? `• ${t.from}–${t.to}` : "";
+
+      const subtitle = [range, hours].filter(Boolean).join(' ')
+
+      events.push({
+        id: `timeoff-${t._id}`,
+        kind: "info",
+        title: t?.reason ? `Time off: ${t.reason}` : "Time off updated",
+        subtitle,
+        happenedAt,
+        to: t?.dateFrom ? `/timeoff/${t.dateFrom}` : "/timeoff",
+      })
+    }
+
+    events.sort((a, b) => b.happenedAt - a.happenedAt);
+
+    return events.slice(0, 5)
+  })();
 
   if (isLoading) {
     return (
@@ -303,32 +416,56 @@ export default function AdminDashboard() {
               <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
           
               <ul className="p-4 space-y-3 text-sm">
-                <li className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
-                               bg-white/60 dark:bg-[#0F1117]/50 p-3">
-                  <CheckCircle2 className="h-4 w-4 text-[#166534] mt-0.5" />
-                  <div className="text-[#0B1220] dark:text-white">
-                    <span className="font-medium">Meeting confirmed</span>{" "}
-                    <span className="text-[#334155] dark:text-[#94A3B8]">— Elena Ivanova, tomorrow 16:00</span>
-                  </div>
-                </li>
-          
-                <li className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
-                               bg-white/60 dark:bg-[#0F1117]/50 p-3">
-                  <AlertCircle className="h-4 w-4 text-[#B45309] mt-0.5" />
-                  <div className="text-[#0B1220] dark:text-white">
-                    <span className="font-medium">Awaiting approval</span>{" "}
-                    <span className="text-[#334155] dark:text-[#94A3B8]">— Contract review for Maria Georgieva</span>
-                  </div>
-                </li>
-          
-                <li className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
-                               bg-white/60 dark:bg-[#0F1117]/50 p-3">
-                  <XCircle className="h-4 w-4 text-[#B91C1C] mt-0.5" />
-                  <div className="text-[#0B1220] dark:text-white">
-                    <span className="font-medium">Canceled</span>{" "}
-                    <span className="text-[#334155] dark:text-[#94A3B8]">— Trademark brief with Stoyan Kolev</span>
-                  </div>
-                </li>
+                {recentActivity.length === 0 ? (
+                  <li className="py-8">
+                    <div className="mx-auto w-full max-w-sm text-center">
+                      <div
+                        className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl
+                                   bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20"
+                      >
+                        <Clock className="h-6 w-6" />
+                      </div>
+                      <h3 className="mt-3 text-base font-semibold text-[#0B1220] dark:text-white">
+                        No recent activity
+                      </h3>
+                      <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
+                        Approvals, cancellations, and time off changes will show up here.
+                      </p>
+                    </div>
+                  </li>
+                ) : (
+                  recentActivity.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937]
+                                 bg-white/60 dark:bg-[#0F1117]/50 p-3"
+                    >
+                      <ActivityIcon kind={item.kind} />
+              
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[#0B1220] dark:text-white">
+                          <span className="font-medium">{item.title}</span>{" "}
+                          <span className="text-[#334155] dark:text-[#94A3B8]">
+                            — {item.subtitle}
+                          </span>
+                        </div>
+              
+                        <div className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                          {formatSofiaWhen(item.happenedAt.toISOString())}
+                        </div>
+                      </div>
+              
+                      {item.to && (
+                        <Link
+                          to={item.to}
+                          className="inline-flex items-center gap-1 text-xs text-[#2F80ED] hover:underline"
+                        >
+                          Open <ChevronRight className="h-3 w-3" />
+                        </Link>
+                      )}
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
           </MotionSection>

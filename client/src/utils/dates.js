@@ -104,3 +104,9 @@ export function formatSofiaDayLabel(iso) {
         month: 'long',
     }).format(new Date(iso));
 }
+
+export function formatSofiaWhen(iso) {
+    if (!iso) return '_';
+
+    return `${formatSofiaDayLabel(iso)} ${formatSofiaTime(iso)}`
+}
