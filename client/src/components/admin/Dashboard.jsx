@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   Calendar as CalendarIcon,
   Plus,
-  UserPlus,
   Share2,
   Search,
   Clock,
@@ -12,6 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
   XCircle,
+  CalendarCheck,
 } from "lucide-react";
 import Dates from "./calendar/Dates";
 import UpcomingList from "./upcoming/UpcomingList";
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
           title: 'Meeting confirmed',
           subtitle,
           happenedAt,
-          to: a?._id ? `/appointments/${a._id}` : '/appointments',
+          to: a?._id ? `/appointments/${a._id}/details` : '/appointments',
         })
       } else if (status === 'PENDING') {
         events.push({
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
           title: "Awaiting approval",
           subtitle,
           happenedAt,
-          to: a?._id ? `/appointments/${a._id}` : "/appointments",
+          to: a?._id ? `/appointments/${a._id}/details` : "/appointments",
         })
       } else if (status === "CANCELED" || status === "CANCELLED") {
         events.push({
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
           title: "Canceled",
           subtitle,
           happenedAt,
-          to: a?._id ? `/appointments/${a._id}` : "/appointments",
+          to: a?._id ? `/appointments/${a._id}/details` : "/appointments",
         });
       } else {
         events.push({
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
           title: "Appointment updated",
           subtitle,
           happenedAt,
-          to: a?._id ? `/appointments/${a._id}` : "/appointments",
+          to: a?._id ? `/appointments/${a._id}/details` : "/appointments",
         })
       }
     }
@@ -209,11 +209,11 @@ export default function AdminDashboard() {
                 <Plus className="h-4 w-4" /> New appointment
                 <span className="pointer-events-none absolute inset-0 rounded-2xl p-[2px] opacity-0 transition-opacity hover:opacity-100 [background:conic-gradient(at_50%_50%,#2F80ED_0%,#06B6D4_35%,#7C3AED_70%,#2F80ED_100%)] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"></span>
               </Link>
-              <Link className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
-                <UserPlus className="h-4 w-4" /> Create client
+              <Link to='/timeoff' className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
+                <Clock className="h-4 w-4" /> Block Time Off
               </Link>
-              <Link className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
-                <Share2 className="h-4 w-4" /> Share availability
+              <Link to='/schedule' className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2.5 hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
+                <CalendarCheck className="h-4 w-4" /> Look at my schedule
               </Link>
             </div>
           </div>
