@@ -14,23 +14,32 @@ import { startReminderCron } from "./jobs/reminders.js";
 
 const app = express();
 
+app.set("trust proxy", 1)
+
 app.use(helmet());
 
-app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-}))
+const allowlist = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "")
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
 
-try {
-    const uri = process.env.MONGO_URI;
 
-    await mongoose.connect(uri)
-    console.log('Successfully connected to the database');
-    
-} catch (error) {
-    console.log('Could not connect to the database');
-    console.log(error.message);
-}
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow non-browser clients (Postman/curl) with no Origin header
+    if (!origin) return callback(null, true);
+
+    if (allowlist.includes(origin)) return callback(null, true);
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// Handle preflight requests explicitly
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -46,8 +55,28 @@ app.use(limiter)
 app.use(authMiddleware)
 app.use(router);
 
-const port = process.env.PORT || 3000;
+async function start() {
+  try {
+    const uri = process.env.MONGO_URI;
+    if (!uri) throw new Error("Missing MONGO_URI env var");
 
-app.listen(port, () => console.log(`Server is running on: http://localhost:${port}`))
+    await mongoose.connect(uri)
+    console.log('Successfully connected to the database');
+    
+  } catch (error) {
+      console.log('Could not connect to the database');
+      console.log(error.message);
 
-startReminderCron();
+      if (process.env.NODE_ENV === 'production') {
+        process.exit(1)
+      }
+  }
+
+  const port = process.env.PORT || 3000;
+
+  app.listen(port, () => console.log(`Server is running on: http://localhost:${port}`))
+  
+  startReminderCron();
+}
+
+start()

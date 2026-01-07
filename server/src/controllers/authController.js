@@ -6,6 +6,7 @@ import { validationResult } from "express-validator";
 import { buildPasswordChangedEmail, buildRegisterEmail } from "../lib/authEmails.js";
 import { sendEmail } from "../lib/mailer.js";
 import User from "../models/User.js";
+import { cookieOptions } from "../utils/cookies.js";
 
 const authController = Router();
 
@@ -26,7 +27,7 @@ authController.post('/register', isGuest, registerUserChecks, async (req, res) =
         const result = await authService.register(authData);
 
         // res.cookie('auth', result.token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
-        res.cookie('auth', result.token, { httpOnly: true }); // 2 hours
+        res.cookie('auth', result.token, cookieOptions); // 2 hours
 
         if (!EMAILS_DISABLED) {
             const { subject, html } = buildRegisterEmail({ username: result.username })
@@ -60,7 +61,7 @@ authController.post('/login', isGuest, loginUserChecks, async (req, res) => {
         const result = await authService.login(email, password, meta);
 
         // res.cookie('auth', result.token, { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax', maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
-        res.cookie('auth', result.token, { httpOnly: true }); // 2 hours
+        res.cookie('auth', result.token, cookieOptions); // 2 hours
 
         res.status(200).json(result);
     } catch (err) {
@@ -68,16 +69,19 @@ authController.post('/login', isGuest, loginUserChecks, async (req, res) => {
     }
 })
 
-authController.get('/logout', isAuth, (req, res) => {
-    try {
-        // res.clearCookie('auth', { httpOnly: true, secure: isProd, sameSite: isProd ? 'lax' : 'lax'  });
-        res.clearCookie('auth', { httpOnly: true  });
-        res.status(200).json({ message: 'Logged out successfully' });
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-})
+authController.get("/logout", (req, res) => {
+  try {
+    res.clearCookie("auth", cookieOptions);
+
+    // Extra safety: also overwrite cookie in case browser keeps it
+    res.cookie("auth", "", { ...cookieOptions, maxAge: 0 });
+
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 authController.put('/users/me/password', isAuth, async (req, res) => {
     const errors = validationResult(req);

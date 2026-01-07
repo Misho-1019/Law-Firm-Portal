@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { getJWTSecret } from "../utils/jwtSecret.js";
 
-const SECRET = process.env.SECRET_KEY || 'BASICSECRET';
+const SECRET = getJWTSecret();
 
 export const authMiddleware = async (req, res, next) => {
     const token = req.cookies['auth'];

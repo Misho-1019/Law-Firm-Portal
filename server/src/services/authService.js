@@ -3,8 +3,9 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js"
 import { buildLoginEmail } from "../lib/authEmails.js";
 import { sendEmail } from "../lib/mailer.js";
+import { getJWTSecret } from "../utils/jwtSecret.js";
 
-const SECRET = process.env.SECRET_KEY || 'BASICSECRET';
+const SECRET = getJWTSecret();
 
 export default {
     async register(authData) {
