@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import request from "../utils/request.js";
 import useAuth from "../hooks/useAuth.js";
+import { api } from "../config/api.js";
 
-const baseUrl = 'http://localhost:3000/availability'
+const baseUrl = api.availability;
 
 export const getSlots = async (date, durationMin) => {
     const params = new URLSearchParams();

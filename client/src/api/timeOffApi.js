@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import request from "../utils/request";
 import useAuth from "../hooks/useAuth";
+import { api } from "../config/api";
 
-const baseUrl = 'http://localhost:3000/admin'
+const baseUrl = api.admin;
 
 export function buildTimeOffPayload({ mode, startDate, endDate, selectedSlots, reason }) {
     const isSingleDay = startDate === endDate;

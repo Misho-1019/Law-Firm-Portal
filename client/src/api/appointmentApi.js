@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import request from "../utils/request";
+import { api } from "../config/api";
 
-const baseUrl = 'http://localhost:3000/appointments';
+const baseUrl = api.appointments;
 
 export const useCreateAppointment = () => {
     const { request } = useAuth()

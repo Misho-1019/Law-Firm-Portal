@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import request from "../utils/request";
+import { api } from "../config/api";
 
-const baseUrl = "http://localhost:3000/admin";
+const baseUrl = api.admin;
 
 export const useSchedule = () => {
     const [scheduleData, setScheduleData] = useState(null);
