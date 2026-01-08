@@ -76,7 +76,12 @@ async function start() {
 
   app.listen(port, () => console.log(`Server is running on: http://localhost:${port}`))
   
-  startReminderCron();
+  if (process.env.USE_INTERNAL_CRON === "true") {
+    startReminderCron();
+  } else {
+    console.log("[reminders] internal cron disabled (using Scheduler)");
+  }
+
 }
 
 start()

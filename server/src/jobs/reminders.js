@@ -79,6 +79,16 @@ async function processWindow(kind) {
   }
 }
 
+export async function runRemindersOnce() {
+  if (process.env.REMINDERS_DISABLED === "1") {
+    console.log("[reminders] disabled via env");
+    return;
+  }
+
+  await processWindow("24h");
+  await processWindow("1h");
+}
+
 export function startReminderCron() {
   if (process.env.REMINDERS_DISABLED === "1") {
     console.log("[reminders] disabled via env");
@@ -87,17 +97,17 @@ export function startReminderCron() {
 
   // 👇 anchor schedule to Sofia local time
   cron.schedule(
-    "* * * * *",
+    "*/5 * * * *", // every 5 minutes ✅ (matches what you chose)
     async () => {
       try {
-        await processWindow("24h");
-        await processWindow("1h");
+        await runRemindersOnce();
       } catch (e) {
         console.error("[reminders] tick error:", e);
       }
     },
     { timezone: SOFIA_TZ }
   );
+  
+  console.log(`[reminders] cron scheduled: every 5 minutes (zone: ${SOFIA_TZ})`);
 
-  console.log(`[reminders] cron scheduled: every minute (zone: ${SOFIA_TZ})`);
 }
