@@ -47,22 +47,24 @@ The project was built to simulate **production-level requirements**, making it s
 ## 🖥️ Screenshots (Recommended Order)
 
 ### 1️⃣ Admin Dashboard
-![Admin Dashboard](screenshots/01-dashboard.png)
+![Admin Dashboard](views/Screenshot%202026-01-10%20020927.png)
 
 ### 2️⃣ Appointments Management
-![Appointments](screenshots/02-appointments.png)
+![Appointments](views/Screenshot%202026-01-10%20021214.png)
 
 ### 3️⃣ Appointment Details
-![Appointment Details](screenshots/03-appointment-details.png)
+![Appointment Details](views/Screenshot%202026-01-10%20021315.png)
 
 ### 4️⃣ Availability & Share Link
-![Share Availability](screenshots/04-share-availability.png)
+![Share Availability](views/Screenshot%202026-01-10%20021415.png)
 
 ### 5️⃣ Time-Off Management
-![Time Off](screenshots/05-time-off.png)
+![Time Off](views/Screenshot%202026-01-10%20021604.png)
+![Time Off](views/Screenshot%202026-01-10%20021637.png)
 
 ### 6️⃣ Client Booking Flow
-![Client Booking](screenshots/06-client-booking.png)
+![Client Booking](views/Screenshot%202026-01-10%20021831.png)
+![Client Booking](views/Screenshot%202026-01-10%20021725.png)
 
 ---
 
