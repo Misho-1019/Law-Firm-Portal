@@ -68,6 +68,17 @@ The project was built to simulate **production-level requirements**, making it s
 
 ---
 
+## 🌐 Live Demo
+
+- **Frontend:** https://law-firm-portal.web.app  
+- **Backend API:** Deployed on Google Cloud Run
+
+> ⚠️ Note:  
+> This is a portfolio deployment.  
+> Some features (such as email delivery and background jobs) may be limited or disabled.
+
+---
+
 ## 🛠️ Tech Stack
 
 **Frontend**
@@ -81,6 +92,25 @@ The project was built to simulate **production-level requirements**, making it s
 - Express
 - MongoDB + Mongoose
 - JWT Authentication
+
+---
+
+## 🏗️ Architecture Overview
+
+The application follows a clear client–server architecture:
+- The frontend handles UI, state management, and user interactions.
+- The backend exposes a REST API responsible for authentication, scheduling logic, validation, and persistence.
+- Business logic (appointments, availability, time-off) is centralized on the server to ensure consistency and security.
+- Background jobs are used for reminders and scheduled tasks.
+
+---
+
+## 🔒 Security Considerations
+
+- JWT-based authentication using HTTP-only cookies
+- Role-based authorization enforced at middleware level
+- CORS allowlists for trusted client origins
+- Rate limiting and security headers enabled via middleware
 
 ---
 
