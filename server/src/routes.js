@@ -8,10 +8,10 @@ import jobRoutes from "./routes/jobRoutes.js";
 
 const router = Router();
 
-router.use('/auth', authController);
-router.use('/appointments', appointmentController)
-router.use('/availability', availabilityController)
-router.use('/admin', isAuth, adminScheduleController)
-router.use('/jobs', jobRoutes)
+router.use('/api/auth', authController);
+router.use('/api/appointments', appointmentController)
+router.use('/api/availability', availabilityController)
+router.use('/api/admin', isAuth, adminScheduleController)
+router.use('/api/jobs', jobRoutes)
 
 export default router;
