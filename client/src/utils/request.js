@@ -13,10 +13,16 @@ const request = async (method, url, data, options = {}) => {
         }
     }
 
+    const authData = JSON.parse(localStorage.getItem("auth") || "{}");
+    const token = authData?.token;
+    
     options = {
-        credentials: 'include',
-        ...options,
-    }
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    };
 
     const response = await fetch(url, options)
 
