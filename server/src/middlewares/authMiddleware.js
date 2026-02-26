@@ -5,11 +5,15 @@ import { getJWTSecret } from "../utils/jwtSecret.js";
 const SECRET = getJWTSecret();
 
 export const authMiddleware = async (req, res, next) => {
-    console.log("[authMiddleware]", req.method, req.originalUrl);
-    console.log("[authMiddleware] cookie header:", req.headers.cookie);
-    console.log("[authMiddleware] parsed cookies:", req.cookies);
+    const authHeader = req.headers.authorization || "";
+    const bearerToken = authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
+      
     
-    const token = req.cookies['auth'];
+    const cookieToken = req.cookies?.auth;
+
+    const token = bearerToken || cookieToken;
 
     if(!token) return next();
 
