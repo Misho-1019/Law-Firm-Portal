@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Skeleton from "../Skeleton";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -92,12 +93,10 @@ export default function ClientDashboard(){
             {/* Content */}
             <div className="relative">
               {isLoading ? (
-                <div className="p-6 md:p-7">
-                  <div className="animate-pulse space-y-3">
-                    <div className="h-5 w-40 rounded bg-white/10" />
-                    <div className="h-7 w-72 rounded bg-white/10" />
-                    <div className="h-4 w-56 rounded bg-white/10" />
-                  </div>
+                <div className="p-6 md:p-7 space-y-3">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-7 w-72" />
+                  <Skeleton className="h-4 w-56" />
                 </div>
               ) : upcomingAppt.length > 0 ? (
                 <div className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

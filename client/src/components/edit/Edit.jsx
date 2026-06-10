@@ -18,6 +18,7 @@ import { toUTCISO } from "../../utils/time";
 import useAuth from "../../hooks/useAuth";
 import { useAppointment, usePatchAppointment } from "../../api/appointmentApi";
 import { showToast } from "../../utils/toastUtils";
+import Skeleton from "../Skeleton";
 
 const MotionSection = motion.section;
 
@@ -88,7 +89,14 @@ export default function EditAppointmentPage() {
     }
   }
 
-  if (isLoading || !isAppointmentReady) return <div>Loading...</div>
+  if (isLoading || !isAppointmentReady) return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="mx-auto w-full max-w-4xl px-8 py-10 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-96 w-full rounded-2xl" />
+      </div>
+    </div>
+  )
 
   if (error) return <div>Error loading appointment.</div>
 

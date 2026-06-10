@@ -13,6 +13,7 @@ import { Link, Link as RRLink, useInRouterContext, useNavigate } from "react-rou
 import useAuth from "../../hooks/useAuth";
 import { formatSofiaDate } from "../../utils/dates";
 import { useCalendarWeek } from "../../api/scheduleApi";
+import Skeleton from "../Skeleton";
 
 const MotionSection = motion.section;
 
@@ -224,8 +225,10 @@ export default function SchedulePage() {
               </div>
         
               {isLoading && (
-                <div className="px-5 py-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                  Loading schedule…
+                <div className="px-5 py-4 space-y-3">
+                  {Array.from({ length: 4 }, (_, i) => (
+                    <Skeleton key={i} className="h-12 w-full rounded-xl" />
+                  ))}
                 </div>
               )}
         

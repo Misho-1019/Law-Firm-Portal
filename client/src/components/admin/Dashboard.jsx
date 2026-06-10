@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import Skeleton from "../Skeleton";
 import { motion } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -162,8 +163,10 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
-        Loading calendar…
+      <div className="space-y-4 p-6">
+        {Array.from({ length: 5 }, (_, i) => (
+          <Skeleton key={i} className="h-16 w-full rounded-xl" />
+        ))}
       </div>
     );
   }

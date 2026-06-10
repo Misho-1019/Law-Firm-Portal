@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import Skeleton from "../Skeleton";
 import {
   ArrowLeft,
   PencilLine,
@@ -38,11 +39,13 @@ export default function AppointmentDetails() {
   if (isLoading || !appointment) {
     return (
       <div className="dark">
-        <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
+        <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white">
           <main className="flex-1 flex items-center justify-center px-4 py-10">
-            <p className="text-sm text-[#334155] dark:text-[#94A3B8]">
-              Loading appointment…
-            </p>
+            <div className="w-full max-w-5xl rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] p-8 space-y-4">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-72" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+            </div>
           </main>
         </div>
       </div>

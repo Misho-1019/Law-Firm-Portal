@@ -3,6 +3,7 @@ import { Calendar as CalendarIcon, Clock, Plus, Trash2, ArrowLeft, Save, RotateC
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router";
 import { useSchedule, useUpdateSchedule } from "../../api/scheduleApi";
+import Skeleton from "../Skeleton";
 import { showToast } from "../../utils/toastUtils";
 
 const MotionSection = motion.section;
@@ -159,8 +160,15 @@ export default function ScheduleEditor() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <p className="text-[#94A3B8]">Loading schedule...</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="mx-auto w-full max-w-7xl px-8 py-10 space-y-6">
+          <Skeleton className="h-8 w-64" />
+          <div className="rounded-2xl bg-[#020617] border border-[#1F2937] p-6 space-y-4">
+            {Array.from({ length: 7 }, (_, i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

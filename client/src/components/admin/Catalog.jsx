@@ -6,6 +6,7 @@ import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { useAppointments } from "../../api/appointmentApi";
+import Skeleton from "../Skeleton";
 
 const MotionSection = motion.section
 
@@ -129,9 +130,10 @@ export default function Catalog() {
         <div className="space-y-4">
           {/* Next appointment highlight */}
           {isLoading ? (
-            <div className="flex items-center justify-center rounded-2xl border border-slate-200/40 bg-slate-100/40 p-12 text-sm text-[#334155] dark:border-slate-800/60 dark:bg-slate-900/40 dark:text-[#94A3B8]">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Loading appointments…
+            <div className="rounded-2xl border border-slate-200/40 bg-slate-100/40 p-8 space-y-4 dark:border-slate-800/60 dark:bg-slate-900/40">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-48" />
             </div>
           ) : nextAppt1 ? (
             <MotionSection

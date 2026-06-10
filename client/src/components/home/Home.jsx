@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import Skeleton from "../Skeleton";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -173,20 +174,17 @@ export default function Home() {
               {/* Content */}
               <div className="relative p-5">
                 {isLoadingSlots ? (
-                  <div className="animate-pulse space-y-3">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
-                        <div className="mt-2 h-5 w-40 rounded bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="mt-2 h-5 w-40" />
                       </div>
-                      <div className="h-7 w-16 rounded-xl bg-[#E5E7EB] dark:bg-[#1F2937]" />
+                      <Skeleton className="h-7 w-16 rounded-xl" />
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                       {[1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="h-14 rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-[#F9FAFB] dark:bg-[#020617]"
-                        />
+                        <Skeleton key={i} className="h-14 rounded-xl" />
                       ))}
                     </div>
                   </div>

@@ -13,6 +13,8 @@ import useAuth from "../../hooks/useAuth";
 import { useDeleteTimeOff, useTimeOffs, useUpdateTimeOff } from "../../api/timeOffApi";
 import { showToast } from "../../utils/toastUtils";
 
+import Skeleton from "../Skeleton";
+
 export default function TimeOffDetailsPage() {
   const { date } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
@@ -63,8 +65,12 @@ export default function TimeOffDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 text-sm text-[#334155] dark:text-[#94A3B8]">
-        Loading calendar…
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="mx-auto w-full max-w-3xl px-8 py-10 space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
+        </div>
       </div>
     );
   }
