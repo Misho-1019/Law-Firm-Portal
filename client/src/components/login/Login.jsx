@@ -104,7 +104,7 @@ export default function Login() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#334155] dark:text-[#94A3B8]">
                     Forgot your password?{" "}
-                    <Link to="/forgot" className="text-[#2F80ED] hover:underline">
+                    <Link to="/forgot-password" className="text-[#2F80ED] hover:underline">
                       Reset
                     </Link>
                   </span>

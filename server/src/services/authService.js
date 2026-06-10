@@ -31,7 +31,7 @@ export default {
             tokenVersion: user.tokenVersion,
         }
 
-        const token = jwt.sign(payload, SECRET, { expiresIn: '2h' })
+        const token = jwt.sign(payload, SECRET, { expiresIn: '7d' })
 
         return {
             token,
@@ -104,7 +104,7 @@ export default {
             tokenVersion: user.tokenVersion,
         }
 
-        const token = jwt.sign(payload, SECRET, { expiresIn: '2h' })
+        const token = jwt.sign(payload, SECRET, { expiresIn: '7d' })
 
         return {
             token,

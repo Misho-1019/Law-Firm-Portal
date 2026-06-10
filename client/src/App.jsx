@@ -24,6 +24,8 @@ import SchedulePage from "./components/schedule/Schedule";
 import DayDetailsPage from "./components/day/DayDetails";
 import ProfilePage from "./components/profil/Profil";
 import AboutMePage from "./components/about/AboutMe";
+import ForgotPassword from "./components/forgot/ForgotPassword";
+import ResetPassword from "./components/forgot/ResetPassword";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
@@ -60,6 +62,8 @@ function App() {
           <Route element={<GuestGuard />}>
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
           </Route>
         </Routes>
         <ToastContainer />

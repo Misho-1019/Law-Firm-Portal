@@ -61,7 +61,15 @@ const userSchema = new Schema({
     lastLoginAlertAt: { 
         type: Date, 
         default: null 
-    }, // when we last emailed an alert
+    },
+    resetToken: {
+        type: String,
+        default: null,
+    },
+    resetTokenExpires: {
+        type: Date,
+        default: null,
+    },
 }, 
 {
     timestamps: { createdAt: 'createdAt'},

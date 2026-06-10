@@ -51,6 +51,13 @@ const limiter = rateLimit({
     message: 'Too many requests from this IP, please try again later.'
 })
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: 'Too many auth attempts from this IP, please try again later.'
+})
+
+app.use("/api/auth", authLimiter)
 app.use(limiter)
 app.use(authMiddleware)
 
