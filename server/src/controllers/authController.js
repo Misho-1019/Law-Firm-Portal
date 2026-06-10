@@ -141,7 +141,9 @@ authController.post("/forgot-password", isGuest, async (req, res) => {
         user.resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
         await user.save();
 
-        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        const clientUrl = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "")
+          .split(",")[0]
+          .trim();
         const resetLink = `${clientUrl}/reset-password/${token}`;
 
         if (!EMAILS_DISABLED) {
