@@ -7,16 +7,19 @@ const baseUrl = api.admin;
 export const useSchedule = () => {
     const [scheduleData, setScheduleData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         setIsLoading(true);
+        setError(null);
 
         request.get(`${baseUrl}/schedule`)
           .then((data) => setScheduleData(data))
+          .catch(setError)
           .finally(() => setIsLoading(false));
     }, [])
 
-    return { scheduleData, isLoading };
+    return { scheduleData, isLoading, error };
 }
 
 export const useCalendarWeek = (from, to) => {

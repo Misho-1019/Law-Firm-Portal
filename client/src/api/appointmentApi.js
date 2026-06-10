@@ -19,33 +19,40 @@ export const useCreateAppointment = () => {
 export const useAppointments = () => {
     const [appointments, setAppointments] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
         setIsLoading(true)
+        setError(null)
 
         request.get(baseUrl)
           .then(setAppointments)
+          .catch(setError)
           .finally(() => setIsLoading(false))
     }, [])
 
-    return { appointments, isLoading }
+    return { appointments, isLoading, error }
 }
 
 export const useMyAppointments = () => {
     const [appointments, setAppointments] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
         setIsLoading(true)
+        setError(null)
 
         request.get(`${baseUrl}/mine`)
           .then(setAppointments)
+          .catch(setError)
           .finally(() => setIsLoading(false))
     }, [])
 
     return {
         myAppointments: appointments,
-        isLoading
+        isLoading,
+        error
     }
 }
 

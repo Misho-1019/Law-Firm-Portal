@@ -31,11 +31,14 @@ export const useLogin = () => {
 export const useRegister = () => {
     const { userLoginHandler } = useContext(UserContext)
 
-    const register = (firstName, lastName, username, email, password, phone) =>
-        request.post(`${baseUrl}/register`, { firstName, lastName, username, email, password, phone })
+    const register = async (firstName, lastName, username, email, password, phone) => {
+        const result = await request.post(`${baseUrl}/register`, { firstName, lastName, username, email, password, phone })
 
-    if (register?.token) {
-      userLoginHandler(register)
+        if (result?.token) {
+            userLoginHandler(result)
+        }
+
+        return result
     }
 
     return { register }

@@ -28,11 +28,20 @@ const request = async (method, url, data, options = {}) => {
 
     const responseContentType = response.headers.get('Content-Type')
 
-    if (!responseContentType) return;
+    if (!responseContentType) {
+        if (!response.ok) {
+            throw { message: `Request failed with status ${response.status}` };
+        }
+        return null;
+    }
 
     if (!response.ok) {
-        const error = await response.json();
-
+        let error;
+        try {
+            error = await response.json();
+        } catch {
+            error = { message: `Request failed with status ${response.status}` };
+        }
         throw error;
     }
 

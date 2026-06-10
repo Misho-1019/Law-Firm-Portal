@@ -48,10 +48,14 @@ export function buildTimeOffPayload({ mode, startDate, endDate, selectedSlots, r
 export const useTimeOffs = () => {
     const [timeOffs, setTimeOffs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
+        setError(null);
+
         request.get(`${baseUrl}/timeOff`)
           .then(data => setTimeOffs(data.items || []))
+          .catch(setError)
           .finally(() => setIsLoading(false))
     }, [])
 
@@ -59,6 +63,7 @@ export const useTimeOffs = () => {
         timeOffs,
         setTimeOffs,
         isLoading,
+        error,
     }
 }
 
