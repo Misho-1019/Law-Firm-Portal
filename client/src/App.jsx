@@ -1,7 +1,5 @@
-import { Route, Routes, useLocation } from "react-router";
+import { Route, Routes } from "react-router";
 import "./App.css";
-import { AnimatePresence } from "framer-motion";
-import PageShell from "./components/PageShell";
 import AdminDashboard from "./components/admin/Dashboard";
 import ClientDashboard from "./components/clients/ClientDashboard";
 import Header from "./components/header/Header";
@@ -31,48 +29,47 @@ import ResetPassword from "./components/forgot/ResetPassword";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
-  const location = useLocation();
   return (
     <ErrorBoundary>
     <UserProvider>
       <div>
         <Header />
 
-        <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+        <div className="page-content bg-slate-50 dark:bg-slate-950">
+        <Routes>
 
-          <Route path="/" element={<PageShell><Home /></PageShell>} />
-          <Route path="/about" element={<PageShell><AboutMePage /></PageShell>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<AboutMePage />} />
           <Route element={<AuthGuard />}>
-            <Route path="/logout" element={<PageShell><Logout /></PageShell>} />
-            <Route path="/appointments" element={<PageShell><Catalog /></PageShell>} />
-            <Route path="/create" element={<PageShell><CreateAppointmentPage /></PageShell>} />
-            <Route path="/appointments/:appointmentId/details" element={<PageShell><AppointmentDetails /></PageShell>} />
-            <Route path="/appointments/:appointmentId/update" element={<PageShell><EditAppointment /></PageShell>} />
-            <Route path="/timeoff/:date" element={<PageShell><TimeOffDetailsPage /></PageShell>} />
-            <Route path="/schedule" element={<PageShell><SchedulePage /></PageShell>} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/appointments" element={<Catalog />} />
+            <Route path="/create" element={<CreateAppointmentPage />} />
+            <Route path="/appointments/:appointmentId/details" element={<AppointmentDetails />} />
+            <Route path="/appointments/:appointmentId/update" element={<EditAppointment />} />
+            <Route path="/timeoff/:date" element={<TimeOffDetailsPage />} />
+            <Route path="/schedule" element={<SchedulePage />} />
             <Route element={<AdminGuard />}>
-              <Route path="/schedule/edit" element={<PageShell><ScheduleEditor /></PageShell>} />
+              <Route path="/schedule/edit" element={<ScheduleEditor />} />
             </Route>
-            <Route path="/day/:date" element={<PageShell><DayDetailsPage /></PageShell>} />
-            <Route path="/profile" element={<PageShell><ProfilePage /></PageShell>} />
+            <Route path="/day/:date" element={<DayDetailsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
           <Route element={<AdminGuard />}>
-            <Route path="/admin" element={<PageShell><AdminDashboard /></PageShell>} />
-            <Route path="/timeoff" element={<PageShell><TimeOffPage /></PageShell>} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/timeoff" element={<TimeOffPage />} />
           </Route>
           <Route element={<ClientGuard />}>
-            <Route path="/client" element={<PageShell><ClientDashboard /></PageShell>} />
+            <Route path="/client" element={<ClientDashboard />} />
           </Route>
           <Route element={<GuestGuard />}>
-            <Route path="/register" element={<PageShell><Register /></PageShell>} />
-            <Route path="/login" element={<PageShell><Login /></PageShell>} />
-            <Route path="/forgot-password" element={<PageShell><ForgotPassword /></PageShell>} />
-            <Route path="/reset-password/:token" element={<PageShell><ResetPassword /></PageShell>} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
           </Route>
 
         </Routes>
-        </AnimatePresence>
+        </div>
 
         <ToastContainer />
       </div>

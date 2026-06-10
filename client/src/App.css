@@ -5,6 +5,10 @@
 html, body, #root { height: 100%; }
 body { overflow-x: hidden; }
 
+.page-content {
+  min-height: calc(100vh - 56px);
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
