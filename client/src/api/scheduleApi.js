@@ -22,6 +22,27 @@ export const useSchedule = () => {
     return { scheduleData, isLoading, error };
 }
 
+export const useUpdateSchedule = () => {
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState(null);
+
+    const update = async (scheduleData) => {
+        setIsSaving(true);
+        setSaveError(null);
+        try {
+            const result = await request.put(`${baseUrl}/schedule`, scheduleData);
+            return result;
+        } catch (err) {
+            setSaveError(err);
+            throw err;
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return { update, isSaving, saveError };
+}
+
 export const useCalendarWeek = (from, to) => {
   const [weekData, setWeekData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

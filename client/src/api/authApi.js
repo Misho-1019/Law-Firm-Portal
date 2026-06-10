@@ -46,13 +46,16 @@ export const useRegister = () => {
 
 export const useLogout = () => {
     const { userLogoutHandler } = useContext(UserContext)
+    const abortRef = useRef(new AbortController())
 
     useEffect(() => {
-        request.get(`${baseUrl}/logout`)
+        request.get(`${baseUrl}/logout`, { signal: abortRef.current.signal })
             .finally(() => {
                 userLogoutHandler();
                 localStorage.removeItem('auth');
             })
+
+        return () => abortRef.current.abort();
     }, [userLogoutHandler])
 
     return {

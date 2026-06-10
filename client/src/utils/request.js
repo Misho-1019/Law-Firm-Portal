@@ -1,15 +1,19 @@
 const request = async (method, url, data, options = {}) => {
 
-    if (method !== 'GET') { options.method = method }
+    if (method !== 'GET' && method !== 'HEAD') { options.method = method }
 
     if (data) {
-        options = {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
-            body: JSON.stringify(data),
+        if (method === 'GET' || method === 'HEAD') {
+            options = { ...data, ...options };
+        } else {
+            options = {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers,
+                },
+                body: JSON.stringify(data),
+            }
         }
     }
 
@@ -18,6 +22,7 @@ const request = async (method, url, data, options = {}) => {
     
     options = {
       ...options,
+      signal: options.signal || AbortSignal.timeout(10000),
       headers: {
         ...(options.headers || {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),

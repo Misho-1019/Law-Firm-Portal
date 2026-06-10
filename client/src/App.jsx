@@ -24,9 +24,11 @@ import SchedulePage from "./components/schedule/Schedule";
 import DayDetailsPage from "./components/day/DayDetails";
 import ProfilePage from "./components/profil/Profil";
 import AboutMePage from "./components/about/AboutMe";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
+    <ErrorBoundary>
     <UserProvider>
       <div>
         <Header />
@@ -42,13 +44,15 @@ function App() {
             <Route path="/appointments/:appointmentId/update" element={<EditAppointment />} />
             <Route path="/timeoff/:date" element={<TimeOffDetailsPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
+            <Route element={<AdminGuard />}>
+              <Route path="/schedule/edit" element={<ScheduleEditor />} />
+            </Route>
             <Route path="/day/:date" element={<DayDetailsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/timeoff" element={<TimeOffPage />} />
-            {/* <Route path="/scheduleditor" element={<ScheduleEditor />} /> */}
           </Route>
           <Route element={<ClientGuard />}>
             <Route path="/client" element={<ClientDashboard />} />
@@ -61,6 +65,7 @@ function App() {
         <ToastContainer />
       </div>
     </UserProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -66,14 +66,14 @@ export const useAppointment = (appointmentId) => {
         setError(null);
 
         request.get(`${baseUrl}/${appointmentId}`)
-          .then(data => 
-            setAppointment(data),
-            setIsLoading(false)
-          )
-          .catch(err => 
-            setError(err),
-            setIsLoading(false)
-          )
+          .then(data => {
+            setAppointment(data);
+            setIsLoading(false);
+          })
+          .catch(err => {
+            setError(err);
+            setIsLoading(false);
+          })
     }, [appointmentId])
 
     return {

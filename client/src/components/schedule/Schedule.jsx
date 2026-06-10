@@ -85,6 +85,15 @@ export default function SchedulePage() {
               >
                 <Plus className="h-5 w-5" /> New
               </SafeLink>
+              {role === 'Admin' && (
+                <SafeLink
+                  to="/schedule/edit"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-white dark:bg-[#111827] px-4 py-3 text-sm sm:text-base font-semibold text-[#0B1220] dark:text-white border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
+                  title="Edit working schedule"
+                >
+                  <Clock className="h-5 w-5" /> Edit Schedule
+                </SafeLink>
+              )}
               { role === 'Admin' ? (
                 <SafeLink
                   to="/admin"

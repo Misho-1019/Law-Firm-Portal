@@ -53,9 +53,40 @@ const limiter = rateLimit({
 
 app.use(limiter)
 app.use(authMiddleware)
+
+app.get("/health", async (_req, res) => {
+  const dbState = mongoose.connection.readyState;
+  // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
+  const dbOk = dbState === 1;
+  return res.status(dbOk ? 200 : 503).json({
+    status: dbOk ? "ok" : "degraded",
+    db: ["disconnected","connected","connecting","disconnecting"][dbState] || "unknown",
+  });
+});
+
 app.use(router);
 
+function validateEnv() {
+  const required = ["MONGO_URI", "SECRET_KEY"];
+  const missing = required.filter((k) => !process.env[k]);
+  if (missing.length) {
+    console.error(`[startup] Missing required env vars: ${missing.join(", ")}`);
+    if (process.env.NODE_ENV === "production") process.exit(1);
+  }
+}
+
 async function start() {
+  validateEnv();
+
+  mongoose.connection.on("disconnected", () => {
+    console.warn("[db] MongoDB disconnected — will attempt reconnect");
+  });
+  mongoose.connection.on("error", (err) => {
+    console.error("[db] MongoDB connection error:", err.message);
+  });
+  mongoose.connection.on("reconnected", () => {
+    console.log("[db] MongoDB reconnected");
+  });
   try {
     const uri = process.env.MONGO_URI;
     if (!uri) throw new Error("Missing MONGO_URI env var");
