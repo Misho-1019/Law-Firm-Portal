@@ -93,7 +93,7 @@ async function emailCreated(apptDoc) {
   const clientEmail = appt.creator?.email || null;
   const clientName = appt.creator?.username || "there";
   const when = toSofiaISO(appt.startsAt);
-  const { day, date, time } = getDateAndTime(String(new Date(when)))
+  const { day, date, time } = getDateAndTime(when)
 
   const subjectClient = `✅ Appointment created — Day: ${day} — Date: ${date} — Time: ${time}`;
   const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was created successfully.</p>${buildApptSummary(
@@ -129,7 +129,7 @@ async function emailUpdated(prev, next) {
     new Date(prev.startsAt).getTime() !== new Date(appt.startsAt).getTime();
   const statusChanged = prev?.status !== appt.status;
   const when = toSofiaISO(appt.startsAt);
-  const { date, time } = getDateAndTimeDefaults(String(when))
+  const { date, time } = getDateAndTimeDefaults(when)
 
   let subjectClient = `Appointment updated — ${date}`;
   if (statusChanged)

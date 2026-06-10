@@ -1,21 +1,20 @@
-export function getDateAndTimeDefaults(startsAtIso) {
-    const date = startsAtIso.slice(0, 10)
-    const time = startsAtIso.slice(11, 16)
+import { DateTime } from "luxon";
 
+export function getDateAndTimeDefaults(startsAtIso) {
+    const dt = DateTime.fromISO(startsAtIso, { setZone: true })
+    if (!dt.isValid) return { date: '_', time: '_' }
     return {
-        date,
-        time,
+        date: dt.toISODate(),
+        time: dt.toFormat("HH:mm"),
     }
 }
 
 export function getDateAndTime(startsAtIso) {
-  const day = startsAtIso.slice(0, 3)
-  const date = startsAtIso.slice(4, 10)
-  const time = startsAtIso.slice(16, 21)
-
-  return {
-    day,
-    date,
-    time,
-  }
+    const dt = DateTime.fromISO(startsAtIso, { setZone: true })
+    if (!dt.isValid) return { day: '_', date: '_', time: '_' }
+    return {
+        day: dt.toFormat("EEE"),
+        date: dt.toISODate(),
+        time: dt.toFormat("HH:mm"),
+    }
 }

@@ -33,7 +33,7 @@ async function processWindow(kind) {
     try {
       const startsAtUtc = new Date(appt.startsAt);
       const localWhen = toSofiaISO(startsAtUtc); // e.g. "2025-11-05T11:40:00"
-      const { day, date, time} = getDateAndTime(String(new Date(localWhen)))
+      const { day, date, time} = getDateAndTime(localWhen)
 
       const clientEmail = appt.creator?.email || null;
       const adminEmail = process.env.ADMIN_EMAIL || null;

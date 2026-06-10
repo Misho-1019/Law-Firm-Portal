@@ -8,28 +8,29 @@ const GMAIL_APP_PASS = (process.env.GMAIL_APP_PASS || "").replace(/\s+/g, "");
 const IS_PROD = process.env.NODE_ENV === "production";
 const EMAILS_DISABLED = process.env.EMAILS_DISABLED === '1'
 
-if (!EMAILS_DISABLED && (!GMAIL_USER || !GMAIL_APP_PASS)) {
-  throw new Error(`[mailer] Missing GMAIL_USER or GMAIL_APP_PASS`);
+let _transporter = null;
+function getTransporter() {
+  if (_transporter) return _transporter;
+  if (!GMAIL_USER || !GMAIL_APP_PASS) return null;
+  _transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: { user: GMAIL_USER, pass: GMAIL_APP_PASS },
+    ...(IS_PROD ? {} : { tls: { rejectUnauthorized: false } }),
+  });
+  return _transporter;
 }
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // SMTPS
-  auth: { user: GMAIL_USER, pass: GMAIL_APP_PASS },
-  ...(IS_PROD ? {} : { tls: { rejectUnauthorized: false } }), // DEV ONLY
-});
-
-// Optional but useful:
-transporter.verify((err) => {
-  if (err) console.error("[mailer] verify failed:", err.message);
-  else console.log("[mailer] verify OK");
-});
-
-/** sendEmail({ to, subject, html?, text? }) */
 export async function sendEmail({ to, subject, html, text }) {
   if (process.env.EMAILS_DISABLED === '1') {
     return { skipped: true, reason: 'EMAILS_DISABLED' }
+  }
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn("[mailer] Skipping — missing GMAIL credentials");
+    return { skipped: true, reason: "missing credentials" };
   }
 
   const recipients = Array.isArray(to) ? to.filter(Boolean) : [to].filter(Boolean);
