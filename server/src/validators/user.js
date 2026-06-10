@@ -24,10 +24,24 @@ const requiredPassword = (field, label) =>
         .isLength({ min: 6 }).withMessage(`${label} must be at least 6 characters long!`)
         .bail()
 
+const requiredString = (field, label) =>
+    body(field)
+        .isString().withMessage(`${label} must be a string!`)
+        .bail()
+        .trim()
+        .notEmpty().withMessage(`${label} is required!`);
+
 export const registerUserChecks = [
+    requiredString('firstName', 'First name'),
+    requiredString('lastName', 'Last name'),
     requiredUsername('username', 'Username'),
     requiredEmail('email', 'Email'),
     requiredPassword('password', 'Password'),
+    body('phone')
+        .optional({ nullable: true })
+        .isString().withMessage('Phone must be a string!')
+        .bail()
+        .trim(),
 ]
 
 export const loginUserChecks = [

@@ -94,12 +94,24 @@ appointmentController.get("/:appointmentId", isAuth, idParamCheck, async (req, r
     }
 
     const appointmentId = req.params.appointmentId;
+    const userId = req.user?._id;
+    const userRole = req.user?.role;
+
     try {
       const appointment = await appointmentService.getOne(appointmentId);
       if (!appointment) {
         return res.status(404).json({ message: "Appointment not found!" });
       }
-      // Model's toJSON transform will format dates to Sofia on res.json()
+
+      const isOwner =
+        appointment.creator?.toString() === userId ||
+        appointment.creator === userId;
+      const isAdminUser = userRole === "Admin";
+
+      if (!isOwner && !isAdminUser) {
+        return res.status(403).json({ message: "You are not authorized to view this appointment!" });
+      }
+
       return res.status(200).json(appointment);
     } catch (error) {
       return res.status(404).json({ message: error.message });

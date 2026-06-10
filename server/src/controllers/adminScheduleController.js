@@ -3,11 +3,10 @@ import { Router } from "express";
 import { body, validationResult } from "express-validator";
 import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
-import { isAdmin, isAuth } from "../middlewares/authMiddleware.js";
+import { isAdmin } from "../middlewares/authMiddleware.js";
 import { getCalendarWeek, update } from "../services/availabilityService.js";
 
 const adminScheduleController = Router();
-adminScheduleController.use(isAuth)
 
 /**
  * GET /admin/schedule
