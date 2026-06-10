@@ -44,12 +44,12 @@ export default function EditAppointmentPage() {
   appointment && Object.keys(appointment).length > 0;
 
   const dateAndTime = appointment?.startsAt
-    ? getDateAndTimeDefaults(String(appointment.startsAt))
+    ? getDateAndTimeDefaults(appointment.startsAt)
     : { date: '', time: '' };
   
   useEffect(() => {
     if (appointment?.startsAt) {
-      const { date, time } = getDateAndTimeDefaults(String(appointment?.startsAt));
+      const { date, time } = getDateAndTimeDefaults(appointment?.startsAt);
       setSelectedTime(time);
     }
   }, [appointment?.startsAt])

@@ -8,7 +8,7 @@ export default function ItemDashboard({
     service,
     mode,
 }) {
-  const {day, date, time } = getDateAndTime(String(new Date(startsAt)));
+  const {day, date, time } = getDateAndTime(startsAt);
 
   return (
     <div>

@@ -59,7 +59,7 @@ export default function ClientDashboard(){
 
   const pDate = prettyDate(String(nextAppt1.startsAt))
   
-  const {_day, _date, time} = getDateAndTime(String(new Date(nextAppt1.startsAt)));
+  const {_day, _date, time} = getDateAndTime(nextAppt1.startsAt);
 
   const updates = [
     { id:'u1', kind:'info', text:'Please bring your contract draft (PDF).' },

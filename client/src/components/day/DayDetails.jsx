@@ -275,7 +275,7 @@ export default function DayDetailsPage() {
                           ) : (
                             todayAppts.map((appointment) => {
                               const { time } = getDateAndTime(
-                                String(new Date(appointment.startsAt))
+                                appointment.startsAt
                               );
               
                               const end = endTime(String(time), Number(appointment.durationMin));
@@ -311,7 +311,7 @@ export default function DayDetailsPage() {
                           ) : (
                             myApptsToday.map((appointment) => {
                               const { time } = getDateAndTime(
-                                String(new Date(appointment.startsAt))
+                                appointment.startsAt
                               );
               
                               const end = endTime(String(time), Number(appointment.durationMin));
@@ -403,7 +403,7 @@ export default function DayDetailsPage() {
                   {role === "Admin" && (
                     <ul className="p-4 space-y-3 text-sm">
                       {todayAppts.map((appt) => {
-                        const { time } = getDateAndTime(String(new Date(appt.startsAt)));
+                        const { time } = getDateAndTime(appt.startsAt);
                         const end = endTime(time, Number(appt.durationMin));
               
                         return (
@@ -451,7 +451,7 @@ export default function DayDetailsPage() {
                   {role === "Client" && (
                     <ul className="p-4 space-y-3 text-sm">
                       {myApptsToday.map((appt) => {
-                        const { time } = getDateAndTime(String(new Date(appt.startsAt)));
+                        const { time } = getDateAndTime(appt.startsAt);
                         const end = endTime(time, Number(appt.durationMin));
               
                         return (
@@ -531,7 +531,7 @@ export default function DayDetailsPage() {
                       <p className="text-xs text-[#9CA3AF]">No free start times for this day.</p>
                     ) : (
                       allFreeSlots.map((t, i) => {
-                        const { time } = getDateAndTime(String(new Date(t)));
+                        const { time } = getDateAndTime(t);
                         const prefillDate = t.slice(0, 10);
               
                         return (

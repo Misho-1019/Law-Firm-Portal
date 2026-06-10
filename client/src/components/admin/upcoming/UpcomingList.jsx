@@ -55,7 +55,7 @@ export default function UpcomingList({
   lastName,
   notes,
 }) {
-  const { day, date, time } = getDateAndTime(String(new Date(startsAt)));
+  const { day, date, time } = getDateAndTime(startsAt);
 
   return (
     <li

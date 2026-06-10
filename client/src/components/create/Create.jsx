@@ -60,9 +60,7 @@ export default function CreateAppointmentPage() {
       const slots = res.slots || [];
 
       const times = slots.map((iso) => {
-        const d = new Date(iso);
-
-        const { day, date, time } = getDateAndTime(String(d))
+        const { day, date, time } = getDateAndTime(iso)
 
         return time;
       })
@@ -120,7 +118,7 @@ export default function CreateAppointmentPage() {
       delete appointmentData.date;
       delete appointmentData.time;
   
-      await create(appointmentData, id)
+      await create(appointmentData)
 
       showToast('Appointment created successfully!', 'success')
       

@@ -14,6 +14,12 @@ export default {
         if (userCount > 0) {
             throw new Error('Email already exists!')
         }
+
+        const usernameCount = await User.countDocuments({ username: authData.username })
+
+        if (usernameCount > 0) {
+            throw new Error('Username already taken!')
+        }
         
         const user = await User.create(authData)
 
@@ -118,10 +124,6 @@ export default {
 
         if (newPassword.length < 6) {
             throw new Error('New password must be at least 6 characters.')
-        }
-
-        if (!/^\w+$/.test(newPassword)) {
-            throw new Error('New password may contain only letters, numbers, and _.')
         }
 
         const user = await User.findById(userId)

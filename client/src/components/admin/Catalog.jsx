@@ -60,7 +60,7 @@ export default function Catalog() {
 
   const pDate = prettyDate(String(nextAppt1?.startsAt))
   
-  const { _day, _date, time } = getDateAndTime(String(new Date(nextAppt1?.startsAt)))
+  const { _day, _date, time } = getDateAndTime(nextAppt1?.startsAt)
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">

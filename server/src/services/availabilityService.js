@@ -64,7 +64,7 @@ function defaultIntervals(dateISO) {
   // 6 = Saturday, 7 = Sunday in luxon
   if (date.weekday >= 6) return [];
 
-  return [hhmmIntervalOn(dateISO, "09:00", "17:00")];
+  return [hhmmIntervalOn(dateISO, WORK_START, WORK_END)];
 }
 
 /**

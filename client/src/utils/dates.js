@@ -28,9 +28,24 @@ export function formatSofiaTime(iso) {
 
 import { DateTime } from "luxon";
 
+function tryParseDateTime(value) {
+    if (!value) return null;
+
+    if (value instanceof Date) {
+        const dt = DateTime.fromJSDate(value, { zone: "utc" }).setZone(SOFIA_TZ);
+        return dt.isValid ? dt : null;
+    }
+
+    const dtIso = DateTime.fromISO(value, { zone: "utc" }).setZone(SOFIA_TZ);
+    if (dtIso.isValid) return dtIso;
+
+    const dtJs = DateTime.fromJSDate(new Date(value), { zone: "utc" }).setZone(SOFIA_TZ);
+    return dtJs.isValid ? dtJs : null;
+}
+
 export function getDateAndTimeDefaults(startsAtIso) {
-    const dt = DateTime.fromISO(startsAtIso, { setZone: true })
-    if (!dt.isValid) return { date: '_', time: '_' }
+    const dt = tryParseDateTime(startsAtIso)
+    if (!dt) return { date: '_', time: '_' }
     return {
         date: dt.toISODate(),
         time: dt.toFormat("HH:mm"),
@@ -38,8 +53,8 @@ export function getDateAndTimeDefaults(startsAtIso) {
 }
 
 export function getDateAndTime(startsAtIso) {
-    const dt = DateTime.fromISO(startsAtIso, { setZone: true })
-    if (!dt.isValid) return { day: '_', date: '_', time: '_' }
+    const dt = tryParseDateTime(startsAtIso)
+    if (!dt) return { day: '_', date: '_', time: '_' }
     return {
         day: dt.toFormat("EEE"),
         date: dt.toISODate(),

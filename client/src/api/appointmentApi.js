@@ -8,8 +8,8 @@ const baseUrl = api.appointments;
 export const useCreateAppointment = () => {
     const { request } = useAuth()
 
-    const create = (appointmentData, creatorId) =>
-        request.post(`${baseUrl}/create`, appointmentData, creatorId)
+    const create = (appointmentData) =>
+        request.post(`${baseUrl}/create`, appointmentData)
 
     return {
         create,
@@ -87,7 +87,7 @@ export const usePatchAppointment = () => {
     const { request } = useAuth();
 
     const patch = (appointmentData, appointmentId) =>
-        request.patch(`${baseUrl}/${appointmentId}`, { ...appointmentData, _id: appointmentId })
+        request.patch(`${baseUrl}/${appointmentId}`, appointmentData)
 
     return {
         patch,
