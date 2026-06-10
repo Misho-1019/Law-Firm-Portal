@@ -14,5 +14,9 @@ export default function Logout() {
 
     return isLoggedOut 
         ? <Navigate to='/' />
-        : null
+        : (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+              <p className="text-sm text-[#94A3B8]">Logging out...</p>
+            </div>
+          )
 }

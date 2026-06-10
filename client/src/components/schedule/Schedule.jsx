@@ -239,9 +239,11 @@ export default function SchedulePage() {
               )}
         
               {/* Week grid */}
-              <div className="grid grid-cols-7 gap-px bg-[#E5E7EB] dark:bg-[#1F2937]">
+              <div className="grid grid-cols-7 gap-px bg-[#E5E7EB] dark:bg-[#1F2937] overflow-x-auto snap-x snap-mandatory sm:overflow-visible">
                 {week.daysAtMidnight.map((d, idx) => (
-                  <DayColumn key={idx} date={d} items={data[isoDate(d)] || []} />
+                  <div key={idx} className="min-w-[120px] snap-start sm:min-w-0">
+                    <DayColumn date={d} items={data[isoDate(d)] || []} />
+                  </div>
                 ))}
               </div>
             </div>

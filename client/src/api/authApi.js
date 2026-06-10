@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import request from "../utils/request";
 import { UserContext } from "../context/UserContext";
 import { api } from "../config/api";
@@ -46,21 +46,23 @@ export const useRegister = () => {
 
 export const useLogout = () => {
     const { userLogoutHandler } = useContext(UserContext)
-    const abortRef = useRef(new AbortController())
+    const [isLoggedOut, setIsLoggedOut] = useState(false)
+    const doneRef = useRef(false)
 
     useEffect(() => {
-        request.get(`${baseUrl}/logout`, { signal: abortRef.current.signal })
+        if (doneRef.current) return;
+        doneRef.current = true;
+
+        request.get(`${baseUrl}/logout`)
+            .catch(() => {})
             .finally(() => {
                 userLogoutHandler();
                 localStorage.removeItem('auth');
+                setIsLoggedOut(true);
             })
-
-        return () => abortRef.current.abort();
     }, [userLogoutHandler])
 
-    return {
-        isLoggedOut: true,
-    }
+    return { isLoggedOut }
 }
 
 export const useChangePassword = () => {

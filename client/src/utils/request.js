@@ -29,7 +29,13 @@ const request = async (method, url, data, options = {}) => {
       },
     };
 
-    const response = await fetch(url, options)
+    let response;
+    try {
+        response = await fetch(url, options);
+    } catch (err) {
+        if (err.name === "AbortError") return null;
+        throw err;
+    }
 
     const responseContentType = response.headers.get('Content-Type')
 
