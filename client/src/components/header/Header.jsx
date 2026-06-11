@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { useSettings } from "../../context/SettingsContext";
 import { motion } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -26,6 +27,7 @@ export default function Header({ initialActive = "Home" }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(initialActive);
   const { email, role } = useContext(UserContext);
+  const { firmName } = useSettings();
 
   const guestItems = [
     { label: "Register", href: "/register", icon: UserPlus },
@@ -110,7 +112,7 @@ export default function Header({ initialActive = "Home" }) {
               <CalendarIcon className="h-5 w-5" />
               <span className="relative leading-tight">
                 <span className="bg-gradient-to-r from-[#2F80ED] via-[#06B6D4] to-[#7C3AED] bg-clip-text text-transparent font-semibold">
-                  LexSchedule
+                  {firmName}
                 </span>
                 <span className="pointer-events-none absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
               </span>
@@ -123,7 +125,7 @@ export default function Header({ initialActive = "Home" }) {
               <CalendarIcon className="h-5 w-5" />
               <span className="relative leading-tight">
                 <span className="bg-gradient-to-r from-[#2F80ED] via-[#06B6D4] to-[#7C3AED] bg-clip-text text-transparent font-semibold">
-                  LexSchedule
+                  {firmName}
                 </span>
                 <span className="pointer-events-none absolute left-0 right-0 -bottom-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED] to-transparent" />
               </span>

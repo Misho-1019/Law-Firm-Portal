@@ -31,7 +31,7 @@ export async function sendEmail({ to, subject, html, text }) {
 
   const transporter = getTransporter();
   if (!transporter) {
-    logger.warn("mailer skipping — missing credentials");
+    logger.warn("mailer skipping - missing credentials");
     return { skipped: true, reason: "missing credentials" };
   }
 
@@ -39,7 +39,7 @@ export async function sendEmail({ to, subject, html, text }) {
   if (!recipients.length) return { skipped: true, reason: "missing recipient" };
 
   const mail = {
-    from: `"Law Office" <${GMAIL_USER}>`,
+    from: `"${config.FIRM_NAME}" <${GMAIL_USER}>`,
     to: recipients.join(", "),
     subject,
     html: html || (text ? `<pre>${text}</pre>` : undefined),

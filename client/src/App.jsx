@@ -8,6 +8,8 @@ import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Logout from "./components/logout/Logout";
 import { UserProvider } from "./providers/UserProvider";
+import { SettingsProvider } from "./providers/SettingsProvider";
+import { useSettings } from "./context/SettingsContext";
 import AuthGuard from "./components/guards/AuthGuard";
 import { ToastContainer } from "react-toastify";
 import Catalog from "./components/admin/Catalog";
@@ -28,9 +30,19 @@ import ForgotPassword from "./components/forgot/ForgotPassword";
 import ResetPassword from "./components/forgot/ResetPassword";
 import ErrorBoundary from "./components/ErrorBoundary";
 
+function BrandFooter() {
+  const { firmName } = useSettings();
+  return (
+    <footer className="py-7 text-center text-sm text-[#334155] dark:text-[#94A3B8]">
+      &copy; {new Date().getFullYear()} {firmName}. All rights reserved.
+    </footer>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
+    <SettingsProvider>
     <UserProvider>
       <div>
         <Header />
@@ -71,9 +83,11 @@ function App() {
         </Routes>
         </div>
 
+        <BrandFooter />
         <ToastContainer />
       </div>
     </UserProvider>
+    </SettingsProvider>
     </ErrorBoundary>
   );
 }

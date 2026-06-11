@@ -1,6 +1,6 @@
 export function buildRegisterEmail({ username }) {
     return {
-        subject: "✅ Welcome to Law Office Scheduler",
+        subject: "Welcome to LexSchedule",
         html: `
           <p>Hi ${username || "there"},</p>
           <p>Your account was created successfully.</p>

@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 const isProd = process.env.NODE_ENV === "production";
 
 const config = {
@@ -21,6 +24,7 @@ const config = {
   GMAIL_APP_PASS: (process.env.GMAIL_APP_PASS || "").replace(/\s+/g, ""),
   EMAILS_DISABLED: process.env.EMAILS_DISABLED === "1",
   ADMIN_EMAIL: process.env.ADMIN_EMAIL || null,
+  FIRM_NAME: process.env.FIRM_NAME || "LexSchedule",
 
   // Reminders
   REMINDERS_DISABLED: process.env.REMINDERS_DISABLED === "1",

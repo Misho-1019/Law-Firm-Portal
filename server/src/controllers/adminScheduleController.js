@@ -3,6 +3,7 @@ import { Router } from "express";
 import { body, validationResult } from "express-validator";
 import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
+import Settings from "../models/Settings.js";
 import { isAdmin } from "../middlewares/authMiddleware.js";
 import { getCalendarWeek, update } from "../services/availabilityService.js";
 
@@ -150,6 +151,25 @@ adminScheduleController.put("/timeOff/:id",  isAdmin, [
 adminScheduleController.delete("/timeOff/:id",  isAdmin, async (req, res) => {
   await TimeOff.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
+});
+
+adminScheduleController.get("/settings", async (_req, res) => {
+  const settings = await Settings.findOne().lean() || { firmName: "LexSchedule" };
+  res.json(settings);
+});
+
+adminScheduleController.put("/settings", isAdmin, [
+  body("firmName").optional().isString().trim().notEmpty(),
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const settings = await Settings.findOneAndUpdate(
+    {},
+    { $set: req.body },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  res.json(settings);
 });
 
 export default adminScheduleController;
