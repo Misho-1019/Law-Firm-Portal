@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ export async function sendEmail({ to, subject, html, text }) {
 
   const transporter = getTransporter();
   if (!transporter) {
-    console.warn("[mailer] Skipping — missing GMAIL credentials");
+    logger.warn("mailer skipping — missing credentials");
     return { skipped: true, reason: "missing credentials" };
   }
 
@@ -45,6 +46,6 @@ export async function sendEmail({ to, subject, html, text }) {
   };
 
   const info = await transporter.sendMail(mail);
-  console.log("[mailer] SENT", { messageId: info.messageId, to: recipients, subject });
+  logger.info("mail sent", { to: recipients, subject });
   return { id: info.messageId };
 }

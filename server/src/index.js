@@ -11,6 +11,7 @@ import rateLimit from "express-rate-limit";
 import router from "./routes.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { startReminderCron } from "./jobs/reminders.js";
+import logger from "./utils/logger.js";
 
 const app = express();
 
@@ -77,7 +78,7 @@ function validateEnv() {
   const required = ["MONGO_URI", "SECRET_KEY"];
   const missing = required.filter((k) => !process.env[k]);
   if (missing.length) {
-    console.error(`[startup] Missing required env vars: ${missing.join(", ")}`);
+    logger.error("missing env vars", { missing });
     if (process.env.NODE_ENV === "production") process.exit(1);
   }
 }
@@ -86,24 +87,23 @@ async function start() {
   validateEnv();
 
   mongoose.connection.on("disconnected", () => {
-    console.warn("[db] MongoDB disconnected — will attempt reconnect");
+    logger.warn("mongodb disconnected", { event: "disconnected" });
   });
   mongoose.connection.on("error", (err) => {
-    console.error("[db] MongoDB connection error:", err.message);
+    logger.error("mongodb error", { event: "error", message: err.message });
   });
   mongoose.connection.on("reconnected", () => {
-    console.log("[db] MongoDB reconnected");
+    logger.info("mongodb reconnected", { event: "reconnected" });
   });
   try {
     const uri = process.env.MONGO_URI;
     if (!uri) throw new Error("Missing MONGO_URI env var");
 
     await mongoose.connect(uri)
-    console.log('Successfully connected to the database');
+    logger.info("connected to database");
     
   } catch (error) {
-      console.log('Could not connect to the database');
-      console.log(error.message);
+      logger.error("database connection failed", { message: error.message });
 
       if (process.env.NODE_ENV === 'production') {
         process.exit(1)
@@ -112,12 +112,13 @@ async function start() {
 
   const port = process.env.PORT || 3000;
 
-  app.listen(port, () => console.log(`Server is running on: http://localhost:${port}`))
+  app.listen(port, () => logger.info("server started", { port }))
   
   if (process.env.USE_INTERNAL_CRON === "true") {
     startReminderCron();
+    logger.info("internal cron enabled");
   } else {
-    console.log("[reminders] internal cron disabled (using Scheduler)");
+    logger.info("internal cron disabled (using Scheduler)");
   }
 
 }

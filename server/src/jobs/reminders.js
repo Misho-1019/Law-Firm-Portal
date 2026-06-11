@@ -7,6 +7,7 @@ import Appointment from "../models/Appointment.js";
 import { sendEmail } from "../lib/mailer.js";
 import { toSofiaISO, SOFIA_TZ } from "../lib/time.js"; // 👈 use Sofia formatter + zone
 import { getDateAndTime } from "../lib/dates.js";
+import logger from "../utils/logger.js";
 
 const BATCH_LIMIT = Number(process.env.REMINDER_BATCH_LIMIT || 100);
 
@@ -75,7 +76,7 @@ async function flushWindow(kind) {
 
     if (!due.length) break;
 
-    console.log(`[reminders] ${kind} batch ${processed + 1}-${processed + due.length} due`);
+    logger.info(`reminders ${kind} batch`, { from: processed + 1, to: processed + due.length });
 
     const results = await Promise.allSettled(
       due.map((appt) => sendOneReminder(appt, kind))
@@ -83,20 +84,20 @@ async function flushWindow(kind) {
 
     const failed = results.filter((r) => r.status === "rejected").length;
     if (failed) {
-      console.error(`[reminders] ${kind} ${failed}/${due.length} failed in this batch`);
+      logger.error(`reminders ${kind} failures`, { failed, total: due.length });
     }
 
     processed += due.length;
   }
 
   if (processed > 0) {
-    console.log(`[reminders] ${kind} done — ${processed} total processed`);
+    logger.info(`reminders ${kind} done`, { processed });
   }
 }
 
 export async function runRemindersOnce() {
   if (process.env.REMINDERS_DISABLED === "1") {
-    console.log("[reminders] disabled via env");
+    logger.info("reminders disabled via env");
     return;
   }
 
@@ -106,7 +107,7 @@ export async function runRemindersOnce() {
 
 export function startReminderCron() {
   if (process.env.REMINDERS_DISABLED === "1") {
-    console.log("[reminders] disabled via env");
+    logger.info("reminders disabled via env");
     return;
   }
 
@@ -117,12 +118,12 @@ export function startReminderCron() {
       try {
         await runRemindersOnce();
       } catch (e) {
-        console.error("[reminders] tick error:", e);
+        logger.error("reminders tick error", { message: e.message });
       }
     },
     { timezone: SOFIA_TZ }
   );
   
-  console.log(`[reminders] cron scheduled: every 5 minutes (zone: ${SOFIA_TZ})`);
+  logger.info("reminders cron scheduled", { zone: SOFIA_TZ, interval: "5min" });
 
 }

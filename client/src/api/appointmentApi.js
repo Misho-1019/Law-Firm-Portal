@@ -16,7 +16,7 @@ export const useCreateAppointment = () => {
     }
 }
 
-export const useAppointments = () => {
+export const useAppointments = (search = "") => {
     const [appointments, setAppointments] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -25,11 +25,14 @@ export const useAppointments = () => {
         setIsLoading(true)
         setError(null)
 
-        request.get(baseUrl)
+        const params = new URLSearchParams()
+        if (search) params.set("search", search)
+        const qs = params.toString()
+        request.get(`${baseUrl}${qs ? `?${qs}` : ""}`)
           .then(setAppointments)
           .catch(setError)
           .finally(() => setIsLoading(false))
-    }, [])
+    }, [search])
 
     return { appointments, isLoading, error }
 }

@@ -161,11 +161,18 @@ async function emailUpdated(prev, next) {
 }
 
 export default {
-  async getAll({ status, from, to, fromLocal, toLocal, timezone, clientId, limit = 20, skip = 0, sort = "startsAt:asc" } = {}) {
+  async getAll({ status, from, to, fromLocal, toLocal, timezone, clientId, search, limit = 20, skip = 0, sort = "startsAt:asc" } = {}) {
     const query = {};
 
     if (status) query.status = status;
     if (clientId) query.creator = clientId;
+    if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.$or = [
+        { firstName: { $regex: escaped, $options: "i" } },
+        { lastName: { $regex: escaped, $options: "i" } },
+      ];
+    }
 
     // Sofia-aware filters
     const { from: fromUtc, to: toUtc } = normalizeRange({

@@ -1,6 +1,6 @@
 /* UI-only, palette-matched (no functionality) */
-import { Calendar as CalendarIcon, ListFilter, Loader2, Clock, MapPin, Phone, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Calendar as CalendarIcon, ListFilter, Loader2, Clock, MapPin, Phone, CheckCircle2, AlertCircle, XCircle, Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import ItemCatalog from "./item/ItemCatalog";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { motion } from "framer-motion";
@@ -15,12 +15,19 @@ export default function Catalog() {
 
   const [pageSize, setPageSize] = useState(5)
   const [currentPage, setCurrentPage] = useState(1)
-
   const [defaultStatus, setDefaultStatus] = useState('ALL')
-
   const [sortKey, setSortKey] = useState('startsAt:asc')
+  const [search, setSearch] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const debounceRef = useRef(null)
 
-  const { appointments, isLoading } = useAppointments()
+  const { appointments, isLoading } = useAppointments(search)
+
+  function handleSearchChange(value) {
+    setSearchInput(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => setSearch(value.trim()), 300)
+  }
 
   let allAppointments = appointments.appointments || [];
 
@@ -94,6 +101,21 @@ export default function Catalog() {
                 placeholder="Filter by clientId"
                 className="w-56 rounded-xl border border-slate-200/40 bg-slate-100/40 px-3 py-2 text-sm text-[#334155] placeholder-slate-400 opacity-60 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
               /> */}
+              <div className="relative w-48">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#94A3B8]" />
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Search clients..."
+                  className="w-full rounded-xl border border-slate-200/40 bg-slate-100/40 pl-8 pr-8 py-2 text-sm text-[#334155] placeholder-slate-400 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
+                />
+                {searchInput && (
+                  <button onClick={() => { setSearchInput(""); setSearch(""); }} className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <X className="h-3.5 w-3.5 text-[#94A3B8] hover:text-[#E5E7EB]" />
+                  </button>
+                )}
+              </div>
             </div>
 
             <select

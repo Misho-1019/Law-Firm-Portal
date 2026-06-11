@@ -194,13 +194,30 @@ export default function CreateAppointmentPage() {
                   </div>
         
                   {/* Service */}
-                  <Field
-                    label="Service"
-                    id="service"
-                    name="service"
-                    placeholder="Initial consultation, Contract review, ..."
-                    icon={<FileText className="h-4 w-4" />}
-                  />
+                  <div className="space-y-1.5">
+                    <label htmlFor="service" className="text-sm font-medium">Service</label>
+                    <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#334155] dark:text-[#94A3B8]"><FileText className="h-4 w-4" /></span>
+                        <select
+                          id="service"
+                          name="service"
+                          defaultValue=""
+                          className="w-full bg-transparent outline-none text-[#334155] dark:text-[#94A3B8]"
+                        >
+                          <option value="" disabled>Select a service...</option>
+                          <option value="Consultation">Consultation</option>
+                          <option value="Contract Review">Contract Review</option>
+                          <option value="Court Hearing">Court Hearing</option>
+                          <option value="Notary">Notary</option>
+                          <option value="Legal Opinion">Legal Opinion</option>
+                          <option value="Document Drafting">Document Drafting</option>
+                          <option value="Mediation">Mediation</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
         
                   {/* Mode */}
                   <div className="space-y-1.5">

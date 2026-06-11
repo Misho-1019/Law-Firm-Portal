@@ -28,6 +28,7 @@ appointmentController.get("/", isAuth, isAdmin, async (req, res) => {
       skip,
       sort,
       clientId,
+      search,
     } = req.query;
 
     const result = await appointmentService.getAll({
@@ -38,6 +39,7 @@ appointmentController.get("/", isAuth, isAdmin, async (req, res) => {
       toLocal,
       timezone,
       clientId,
+      search,
       limit,
       skip,
       sort,
