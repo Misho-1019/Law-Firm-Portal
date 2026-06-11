@@ -1,14 +1,11 @@
-export function getJWTSecret() {
-    const isProd = process.env.NODE_ENV === "production";
-    const secret = process.env.SECRET_KEY;
+import config from "../config.js";
 
-    if (!secret) {
-        if (isProd) {
+export function getJWTSecret() {
+    if (!config.SECRET_KEY) {
+        if (config.isProd) {
             throw new Error("Missing SECRET_KEY env var (required in production).")
         }
-
         return 'BASICSECRET'
     }
-
-    return secret
+    return config.SECRET_KEY
 }

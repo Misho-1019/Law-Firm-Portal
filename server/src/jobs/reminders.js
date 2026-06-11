@@ -7,9 +7,10 @@ import Appointment from "../models/Appointment.js";
 import { sendEmail } from "../lib/mailer.js";
 import { toSofiaISO, SOFIA_TZ } from "../lib/time.js"; // 👈 use Sofia formatter + zone
 import { getDateAndTime } from "../lib/dates.js";
+import config from "../config.js";
 import logger from "../utils/logger.js";
 
-const BATCH_LIMIT = Number(process.env.REMINDER_BATCH_LIMIT || 100);
+const BATCH_LIMIT = config.REMINDER_BATCH_LIMIT;
 
 async function sendOneReminder(appt, kind) {
   const startsAtUtc = new Date(appt.startsAt);
@@ -35,7 +36,7 @@ async function sendOneReminder(appt, kind) {
     await sendEmail({ to: clientEmail, subject: subjectClient, html });
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL || null;
+  const adminEmail = config.ADMIN_EMAIL;
   if (adminEmail) {
     const subjectAdmin =
       kind === "24h"
@@ -96,7 +97,7 @@ async function flushWindow(kind) {
 }
 
 export async function runRemindersOnce() {
-  if (process.env.REMINDERS_DISABLED === "1") {
+  if (config.REMINDERS_DISABLED) {
     logger.info("reminders disabled via env");
     return;
   }
@@ -106,7 +107,7 @@ export async function runRemindersOnce() {
 }
 
 export function startReminderCron() {
-  if (process.env.REMINDERS_DISABLED === "1") {
+  if (config.REMINDERS_DISABLED) {
     logger.info("reminders disabled via env");
     return;
   }

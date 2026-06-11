@@ -12,6 +12,7 @@ import router from "./routes.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { startReminderCron } from "./jobs/reminders.js";
 import logger from "./utils/logger.js";
+import config from "./config.js";
 
 const app = express();
 
@@ -19,10 +20,7 @@ app.set("trust proxy", 1)
 
 app.use(helmet());
 
-const allowlist = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "")
-  .split(",")
-  .map(s => s.trim())
-  .filter(Boolean);
+const allowlist = config.CLIENT_URLS;
 
 
 const corsOptions = {
@@ -74,18 +72,7 @@ app.get("/health", async (_req, res) => {
 
 app.use(router);
 
-function validateEnv() {
-  const required = ["MONGO_URI", "SECRET_KEY"];
-  const missing = required.filter((k) => !process.env[k]);
-  if (missing.length) {
-    logger.error("missing env vars", { missing });
-    if (process.env.NODE_ENV === "production") process.exit(1);
-  }
-}
-
 async function start() {
-  validateEnv();
-
   mongoose.connection.on("disconnected", () => {
     logger.warn("mongodb disconnected", { event: "disconnected" });
   });
@@ -96,25 +83,20 @@ async function start() {
     logger.info("mongodb reconnected", { event: "reconnected" });
   });
   try {
-    const uri = process.env.MONGO_URI;
-    if (!uri) throw new Error("Missing MONGO_URI env var");
-
-    await mongoose.connect(uri)
+    await mongoose.connect(config.MONGO_URI)
     logger.info("connected to database");
     
   } catch (error) {
       logger.error("database connection failed", { message: error.message });
 
-      if (process.env.NODE_ENV === 'production') {
+      if (config.isProd) {
         process.exit(1)
       }
   }
 
-  const port = process.env.PORT || 3000;
-
-  app.listen(port, () => logger.info("server started", { port }))
+  app.listen(config.PORT, () => logger.info("server started", { port: config.PORT }))
   
-  if (process.env.USE_INTERNAL_CRON === "true") {
+  if (config.USE_INTERNAL_CRON) {
     startReminderCron();
     logger.info("internal cron enabled");
   } else {

@@ -7,13 +7,12 @@ import { buildPasswordChangedEmail, buildPasswordResetEmail, buildRegisterEmail 
 import { sendEmail } from "../lib/mailer.js";
 import User from "../models/User.js";
 import { cookieOptions } from "../utils/cookies.js";
+import config from "../config.js";
 import crypto from "crypto";
 
 const authController = Router();
 
-const isProd = process.env.NODE_ENV === 'production';
-
-const EMAILS_DISABLED = process.env.EMAILS_DISABLED === '1';
+const EMAILS_DISABLED = config.EMAILS_DISABLED;
 
 authController.post('/register', isGuest, registerUserChecks, async (req, res) => {
     const errors = validationResult(req);
@@ -141,9 +140,7 @@ authController.post("/forgot-password", isGuest, async (req, res) => {
         user.resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
         await user.save();
 
-        const clientUrl = (process.env.CLIENT_URLS || process.env.CLIENT_URL || "")
-          .split(",")[0]
-          .trim();
+        const clientUrl = config.CLIENT_URLS[0] || "http://localhost:5173";
         const resetLink = `${clientUrl}/reset-password/${token}`;
 
         if (!EMAILS_DISABLED) {

@@ -1,13 +1,14 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import config from "../config.js";
 import logger from "../utils/logger.js";
 
 dotenv.config();
 
-const GMAIL_USER = (process.env.GMAIL_USER || "").trim();
-const GMAIL_APP_PASS = (process.env.GMAIL_APP_PASS || "").replace(/\s+/g, "");
-const IS_PROD = process.env.NODE_ENV === "production";
-const EMAILS_DISABLED = process.env.EMAILS_DISABLED === '1'
+const GMAIL_USER = config.GMAIL_USER;
+const GMAIL_APP_PASS = config.GMAIL_APP_PASS;
+const IS_PROD = config.isProd;
+const EMAILS_DISABLED = config.EMAILS_DISABLED;
 
 let _transporter = null;
 function getTransporter() {
@@ -24,7 +25,7 @@ function getTransporter() {
 }
 
 export async function sendEmail({ to, subject, html, text }) {
-  if (process.env.EMAILS_DISABLED === '1') {
+  if (config.EMAILS_DISABLED) {
     return { skipped: true, reason: 'EMAILS_DISABLED' }
   }
 

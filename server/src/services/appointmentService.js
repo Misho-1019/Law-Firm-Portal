@@ -9,9 +9,10 @@ import {
 } from "../lib/time.js";
 import { sendEmail } from "../lib/mailer.js";
 import { getDateAndTime, getDateAndTimeDefaults } from "../lib/dates.js";
+import config from "../config.js";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || null;
-const EMAILS_DISABLED = process.env.EMAILS_DISABLED === "1"; // optional toggle
+const ADMIN_EMAIL = config.ADMIN_EMAIL;
+const EMAILS_DISABLED = config.EMAILS_DISABLED;
 
 const day_ms = 24 * 60 * 60 * 1000;
 

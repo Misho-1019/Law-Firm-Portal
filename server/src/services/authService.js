@@ -4,6 +4,7 @@ import User from "../models/User.js"
 import { buildLoginEmail } from "../lib/authEmails.js";
 import { sendEmail } from "../lib/mailer.js";
 import { getJWTSecret } from "../utils/jwtSecret.js";
+import config from "../config.js";
 
 const SECRET = getJWTSecret();
 
@@ -57,7 +58,7 @@ export default {
             throw new Error('Invalid email or password!')
         }
 
-        const EMAILS_DISABLED = process.env.EMAILS_DISABLED === "1";
+        const EMAILS_DISABLED = config.EMAILS_DISABLED;
         
         // meta = { ip, ua, timeISO }
         const ipNow = (meta?.ip || "").trim();
