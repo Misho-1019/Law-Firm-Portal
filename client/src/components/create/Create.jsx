@@ -16,6 +16,7 @@ import { getDateAndTime } from "../../utils/dates";
 import { useCreateAppointment } from "../../api/appointmentApi";
 import { getSlots } from "../../api/availabilityApi";
 import { showToast } from "../../utils/toastUtils";
+import request from "../../utils/request";
 
 const MotionSection = motion.section;
 
@@ -41,22 +42,24 @@ export default function CreateAppointmentPage() {
   const [duration, setDuration] = useState('120')
   const [availableTimes, setAvailableTimes] = useState([])
   const [slotsLoading, setSlotsLoading] = useState(false)
+  const [lawyerId, setLawyerId] = useState("")
+  const [lawyers, setLawyers] = useState([])
 
-  const loadSlotsForDate = async (nextDate, currentDuration) => {
+  const loadSlotsForDate = async (nextDate, currentDuration, currentLawyerId) => {
     if (!nextDate) {
       setAvailableTimes([])
-
       return;
     }
 
     const effDuration = normalizeDuration(currentDuration);
+    const lid = currentLawyerId !== undefined ? currentLawyerId : lawyerId;
     
     setSlotsLoading(true)
     setAvailableTimes([])
     setSelectedTime('')
 
     try {
-      const res = await getSlots(nextDate, effDuration);
+      const res = await getSlots(nextDate, effDuration, lawyerId);
       const slots = res.slots || [];
 
       const times = slots.map((iso) => {
@@ -94,6 +97,12 @@ export default function CreateAppointmentPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    request.get("/admin/lawyers")
+      .then(setLawyers)
+      .catch(() => {})
+  }, [])
+
   const formAction = async (formData) => {
     try {
       const date = formData.get("date");
@@ -114,6 +123,8 @@ export default function CreateAppointmentPage() {
         startsAt,
         durationMin,
       };
+
+      if (lawyerId) appointmentData.lawyerId = lawyerId;
   
       delete appointmentData.date;
       delete appointmentData.time;
@@ -193,6 +204,28 @@ export default function CreateAppointmentPage() {
                     />
                   </div>
         
+                  {/* Lawyer selection */}
+                  {lawyers.length > 0 && (
+                    <div className="space-y-1.5">
+                      <label htmlFor="lawyerId" className="text-sm font-medium">Lawyer</label>
+                      <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-2">
+                        <select
+                          id="lawyerId"
+                          value={lawyerId}
+                          onChange={(e) => { setLawyerId(e.target.value); loadSlotsForDate(date, duration, e.target.value); }}
+                          className="w-full bg-transparent outline-none text-[#334155] dark:text-[#94A3B8]"
+                        >
+                          <option value="">Any available lawyer</option>
+                          {lawyers.map((l) => (
+                            <option key={l._id} value={l._id}>
+                              {l.firstName} {l.lastName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Service */}
                   <div className="space-y-1.5">
                     <label htmlFor="service" className="text-sm font-medium">Service</label>

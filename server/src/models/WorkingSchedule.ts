@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface IDayInterval {
   from: string;
@@ -11,6 +11,7 @@ export interface IScheduleDay {
 }
 
 export interface IWorkingSchedule extends Document {
+  lawyerId: Types.ObjectId;
   tz: string;
   days: IScheduleDay[];
 }
@@ -21,6 +22,7 @@ const daySchema = new Schema<IScheduleDay>({
 }, { _id: false });
 
 const scheduleSchema = new Schema<IWorkingSchedule>({
+  lawyerId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
   tz: { type: String, default: "Europe/Sofia" },
   days: [daySchema],
 }, { timestamps: true });

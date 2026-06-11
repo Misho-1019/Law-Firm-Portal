@@ -5,11 +5,12 @@ import { api } from "../config/api.js";
 
 const baseUrl = api.availability;
 
-export const getSlots = async (date, durationMin) => {
+export const getSlots = async (date, durationMin, lawyerId) => {
     const params = new URLSearchParams();
     params.set("date", date);
 
     if (durationMin) params.set("durationMin", durationMin);
+    if (lawyerId) params.set("lawyerId", lawyerId);
 
     return request.get(`${baseUrl}/slots?${params.toString()}`);
 };

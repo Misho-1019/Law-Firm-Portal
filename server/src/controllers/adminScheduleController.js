@@ -4,6 +4,7 @@ import { body, validationResult } from "express-validator";
 import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
 import Settings from "../models/Settings.js";
+import User from "../models/User.js";
 import { isAdmin } from "../middlewares/authMiddleware.js";
 import { getCalendarWeek, update } from "../services/availabilityService.js";
 
@@ -156,6 +157,13 @@ adminScheduleController.delete("/timeOff/:id",  isAdmin, async (req, res) => {
 adminScheduleController.get("/settings", async (_req, res) => {
   const settings = await Settings.findOne().lean() || { firmName: "LexSchedule" };
   res.json(settings);
+});
+
+adminScheduleController.get("/lawyers", isAdmin, async (_req, res) => {
+  const lawyers = await User.find({ role: "Admin" })
+    .select("firstName lastName username email phone")
+    .lean();
+  res.json(lawyers);
 });
 
 adminScheduleController.put("/settings", isAdmin, [

@@ -117,8 +117,10 @@ function clampToWorkingWindow(fromStr, toStr) {
  * - If WorkingSchedule configured for that weekday → use it.
  * - Otherwise fallback to default 09:00–17:00 (weekdays only).
  */
-async function getAllowedIntervals(dateISO) {
-  const schedule = await WorkingSchedule.findOne().lean();
+async function getAllowedIntervals(dateISO, lawyerId) {
+  const query = {};
+  if (lawyerId) query.lawyerId = lawyerId;
+  const schedule = await WorkingSchedule.findOne(query).lean();
 
   let allowed = intervalsForDay(dateISO, schedule);
 
@@ -132,21 +134,23 @@ async function getAllowedIntervals(dateISO) {
 /**
  * Get all appointments for a day as intervals.
  */
-async function getDayAppointments(dateISO) {
+async function getDayAppointments(dateISO, lawyerId) {
   const dayStartLocal = DateTime.fromISO(dateISO, { zone: TZ }).startOf("day");
   const dayStartUTC = dayStartLocal.toUTC();
   const dayEndUTC = dayStartLocal.endOf("day").toUTC();
 
-  // Widen start a bit to catch long appointments
   const widenStart = dayStartUTC.minus({ hours: 4 });
 
-  const docs = await Appointment.find({
+  const query = {
     status: { $nin: ["CANCELLED"] },
     startsAt: {
       $gte: widenStart.toJSDate(),
       $lt: dayEndUTC.toJSDate(),
     },
-  })
+  };
+  if (lawyerId) query.lawyerId = lawyerId;
+
+  const docs = await Appointment.find(query)
     .select("startsAt durationMin")
     .lean();
 
@@ -171,11 +175,13 @@ async function getDayAppointments(dateISO) {
  * - full-day (no from/to)
  * - optional partial day (from/to in HH:MM)
  */
-async function getTimeOffIntervalsForDate(dateISO) {
-  const docs = await TimeOff.find({
+async function getTimeOffIntervalsForDate(dateISO, lawyerId) {
+  const query = {
     dateFrom: { $lte: dateISO },
     dateTo: { $gte: dateISO },
-  }).lean();
+  };
+  if (lawyerId) query.lawyerId = lawyerId;
+  const docs = await TimeOff.find(query).lean();
 
   const date = DateTime.fromISO(dateISO, { zone: TZ });
 
@@ -204,16 +210,17 @@ async function getTimeOffIntervalsForDate(dateISO) {
 export async function getBookableSlotsForDate({
   dateISO,
   durationMin = DEFAULT_DURATION_MIN,
+  lawyerId,
 }) {
-  const allowed = await getAllowedIntervals(dateISO);
+  const allowed = await getAllowedIntervals(dateISO, lawyerId);
 
   if (!allowed.length) return [];
 
   const { intervalsUTC: appointmentIntervalsUTC } = await getDayAppointments(
-    dateISO
+    dateISO, lawyerId
   );
 
-  const timeOffIntervals = await getTimeOffIntervalsForDate(dateISO);
+  const timeOffIntervals = await getTimeOffIntervalsForDate(dateISO, lawyerId);
 
   const slots = [];
 

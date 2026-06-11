@@ -35,10 +35,10 @@ availabilityController.get('/slots', [
         return res.status(400).json({ errors: errors.array() })
     }
     
-    const { date } = req.query;
+    const { date, lawyerId } = req.query;
     const durationMin = req.query.durationMin || undefined;
 
-    const slots = await getBookableSlotsForDate({ dateISO: date, durationMin })
+    const slots = await getBookableSlotsForDate({ dateISO: date, durationMin, lawyerId })
 
     res.json({ slots })
 })

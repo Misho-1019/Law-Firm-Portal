@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { useAppointments } from "../../api/appointmentApi";
 import Skeleton from "../Skeleton";
+import request from "../../utils/request";
 
 const MotionSection = motion.section
 
@@ -20,8 +21,16 @@ export default function Catalog() {
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
   const debounceRef = useRef(null)
+  const [lawyerFilter, setLawyerFilter] = useState("")
+  const [lawyers, setLawyers] = useState([])
 
   const { appointments, isLoading } = useAppointments(search)
+
+  useEffect(() => {
+    request.get("/admin/lawyers")
+      .then(setLawyers)
+      .catch(() => {})
+  }, [])
 
   function handleSearchChange(value) {
     setSearchInput(value)
@@ -31,7 +40,11 @@ export default function Catalog() {
 
   let allAppointments = appointments.appointments || [];
 
-  const filteredAppointments = allAppointments.filter(x => defaultStatus === 'ALL' || x.status === defaultStatus)
+  const filteredAppointments = allAppointments.filter(x => {
+    if (defaultStatus !== 'ALL' && x.status !== defaultStatus) return false;
+    if (lawyerFilter && x.lawyerId !== lawyerFilter) return false;
+    return true;
+  })
 
   const sortedAppointments = filteredAppointments.slice().sort((a, b) => {
     switch (sortKey) {
@@ -96,6 +109,19 @@ export default function Catalog() {
                 <option value='CONFIRMED'>Confirmed</option>
                 <option value='CANCELLED'>Cancelled</option>
               </select>
+
+              {lawyers.length > 0 && (
+                <select
+                  value={lawyerFilter}
+                  onChange={(e) => setLawyerFilter(e.target.value)}
+                  className="rounded-xl border border-slate-200/40 bg-slate-100/40 px-3 py-2 text-sm text-[#334155] dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
+                >
+                  <option value="">All lawyers</option>
+                  {lawyers.map((l) => (
+                    <option key={l._id} value={l._id}>{l.firstName} {l.lastName}</option>
+                  ))}
+                </select>
+              )}
 
               {/* <input
                 placeholder="Filter by clientId"

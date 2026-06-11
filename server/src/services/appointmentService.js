@@ -162,11 +162,12 @@ async function emailUpdated(prev, next) {
 }
 
 export default {
-  async getAll({ status, from, to, fromLocal, toLocal, timezone, clientId, search, limit = 20, skip = 0, sort = "startsAt:asc" } = {}) {
+  async getAll({ status, from, to, fromLocal, toLocal, timezone, clientId, search, lawyerId, limit = 20, skip = 0, sort = "startsAt:asc" } = {}) {
     const query = {};
 
     if (status) query.status = status;
     if (clientId) query.creator = clientId;
+    if (lawyerId) query.lawyerId = lawyerId;
     if (search) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query.$or = [

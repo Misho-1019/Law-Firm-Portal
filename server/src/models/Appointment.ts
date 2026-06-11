@@ -3,6 +3,7 @@ import { toSofiaISO } from "../lib/time.js";
 
 export interface IAppointment extends Document {
   creator: Types.ObjectId;
+  lawyerId?: Types.ObjectId;
   firstName: string;
   lastName: string;
   role: "Admin" | "Client";
@@ -24,6 +25,7 @@ export interface IAppointment extends Document {
 
 const appointmentSchema = new Schema<IAppointment>({
   creator: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+  lawyerId: { type: Schema.Types.ObjectId, ref: "User", index: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   role: { type: String, enum: ["Admin", "Client"], default: "Client" },
