@@ -1,33 +1,47 @@
+import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router";
 import "./App.css";
-import AdminDashboard from "./components/admin/Dashboard";
-import ClientDashboard from "./components/clients/ClientDashboard";
 import Header from "./components/header/Header";
-import Home from "./components/home/Home";
-import Login from "./components/login/Login";
-import Register from "./components/register/Register";
-import Logout from "./components/logout/Logout";
 import { UserProvider } from "./providers/UserProvider";
 import { SettingsProvider } from "./providers/SettingsProvider";
 import AuthGuard from "./components/guards/AuthGuard";
-import { ToastContainer } from "react-toastify";
-import Catalog from "./components/admin/Catalog";
-import AppointmentDetails from "./components/details/Details";
-import CreateAppointmentPage from "./components/create/Create";
-import EditAppointment from "./components/edit/Edit";
 import GuestGuard from "./components/guards/GuestGuard";
 import AdminGuard from "./components/guards/AdminGuard";
 import ClientGuard from "./components/guards/ClientGuard";
-import TimeOffPage from "./components/admin/TimeOff";
-import TimeOffDetailsPage from "./components/admin/TimeOffDetails";
-import ScheduleEditor from "./components/admin/ScheduleEditor";
-import SchedulePage from "./components/schedule/Schedule";
-import DayDetailsPage from "./components/day/DayDetails";
-import ProfilePage from "./components/profil/Profil";
-import AboutMePage from "./components/about/AboutMe";
-import ForgotPassword from "./components/forgot/ForgotPassword";
-import ResetPassword from "./components/forgot/ResetPassword";
+import { ToastContainer } from "react-toastify";
 import ErrorBoundary from "./components/ErrorBoundary";
+import Skeleton from "./components/Skeleton";
+
+const Home = lazy(() => import("./components/home/Home"));
+const AboutMePage = lazy(() => import("./components/about/AboutMe"));
+const Login = lazy(() => import("./components/login/Login"));
+const Register = lazy(() => import("./components/register/Register"));
+const Logout = lazy(() => import("./components/logout/Logout"));
+const Catalog = lazy(() => import("./components/admin/Catalog"));
+const AppointmentDetails = lazy(() => import("./components/details/Details"));
+const CreateAppointmentPage = lazy(() => import("./components/create/Create"));
+const EditAppointment = lazy(() => import("./components/edit/Edit"));
+const TimeOffPage = lazy(() => import("./components/admin/TimeOff"));
+const TimeOffDetailsPage = lazy(() => import("./components/admin/TimeOffDetails"));
+const ScheduleEditor = lazy(() => import("./components/admin/ScheduleEditor"));
+const SchedulePage = lazy(() => import("./components/schedule/Schedule"));
+const DayDetailsPage = lazy(() => import("./components/day/DayDetails"));
+const ProfilePage = lazy(() => import("./components/profil/Profil"));
+const AdminDashboard = lazy(() => import("./components/admin/Dashboard"));
+const ClientDashboard = lazy(() => import("./components/clients/ClientDashboard"));
+const ForgotPassword = lazy(() => import("./components/forgot/ForgotPassword"));
+const ResetPassword = lazy(() => import("./components/forgot/ResetPassword"));
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="space-y-4 w-full max-w-md px-8">
+        <Skeleton className="h-8 w-48 mx-auto" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -38,6 +52,7 @@ function App() {
         <Header />
 
         <div className="page-content bg-slate-50 dark:bg-slate-950">
+        <Suspense fallback={<LoadingFallback />}>
         <Routes>
 
           <Route path="/" element={<Home />} />
@@ -71,6 +86,7 @@ function App() {
           </Route>
 
         </Routes>
+        </Suspense>
         </div>
 
         <ToastContainer />

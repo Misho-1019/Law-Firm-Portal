@@ -272,16 +272,32 @@ export async function getBookableSlotsForDate({
 export async function getCalendarForMonth({
   month,
   durationMin = DEFAULT_DURATION_MIN,
+  lawyerId,
 }) {
   const start = DateTime.fromISO(`${month}-01`, { zone: TZ }).startOf("month");
   const end = start.endOf("month");
 
   const days = [];
 
-  const timeOffList = await TimeOff.find({
-    dateFrom: { $lte: end.toISODate() },
-    dateTo: { $gte: start.toISODate() },
-  }).lean();
+  // Batch: one query per collection for the entire month
+  const [schedule, timeOffList, apptDocs] = await Promise.all([
+    WorkingSchedule.findOne(lawyerId ? { lawyerId } : {}).lean(),
+    TimeOff.find({
+      dateFrom: { $lte: end.toISODate() },
+      dateTo: { $gte: start.toISODate() },
+      ...(lawyerId ? { lawyerId } : {}),
+    }).lean(),
+    Appointment.find({
+      status: { $nin: ["CANCELLED"] },
+      startsAt: {
+        $gte: start.startOf("day").toUTC().minus({ hours: 4 }).toJSDate(),
+        $lt: end.endOf("day").toUTC().toJSDate(),
+      },
+      ...(lawyerId ? { lawyerId } : {}),
+    })
+      .select("startsAt durationMin")
+      .lean(),
+  ]);
 
   for (let cur = start; cur <= end; cur = cur.plus({ days: 1 })) {
     const dateISO = cur.toISODate();
@@ -293,7 +309,46 @@ export async function getCalendarForMonth({
     const hasTimeOff = matches.length > 0;
     const isFullDayOff = matches.some((x) => !x.from && !x.to);
 
-    const slots = await getBookableSlotsForDate({ dateISO, durationMin });
+    // Compute slots in-memory using pre-loaded data
+    let allowed = intervalsForDay(dateISO, schedule);
+    if (!allowed.length) allowed = defaultIntervals(dateISO);
+
+    const dayAppts = apptDocs.filter((a) => {
+      const aDate = DateTime.fromJSDate(a.startsAt).setZone(TZ).toISODate();
+      return aDate === dateISO;
+    }).map((a) => {
+      const start = DateTime.fromJSDate(a.startsAt);
+      const dur = Number(a.durationMin) > 0 ? Number(a.durationMin) : DEFAULT_DURATION_MIN;
+      return { start, end: start.plus({ minutes: dur }) };
+    });
+
+    const timeOffIntervals = matches.map((doc) => {
+      if (doc.from && doc.to) {
+        const interval = hhmmIntervalOn(dateISO, doc.from, doc.to);
+        return interval.isValid ? { start: interval.start, end: interval.end } : null;
+      } else {
+        const d = DateTime.fromISO(dateISO, { zone: TZ });
+        return { start: d.startOf("day"), end: d.endOf("day") };
+      }
+    }).filter(Boolean);
+
+    const slots = [];
+    for (const interval of allowed) {
+      for (
+        let time = interval.start;
+        time.plus({ minutes: durationMin }) <= interval.end;
+        time = time.plus({ minutes: SLOT_STEP_MIN })
+      ) {
+        const startUTC = time.toUTC();
+        const endUTC = time.plus({ minutes: durationMin }).toUTC();
+
+        if (dayAppts.some(({ start, end }) => overlaps(startUTC, endUTC, start, end))) continue;
+        if (timeOffIntervals.some(({ start, end }) => overlaps(startUTC, endUTC, start, end))) continue;
+        if (!respectsMinGap(startUTC, endUTC, dayAppts, MIN_GAP_MIN)) continue;
+
+        slots.push(startUTC.toISO());
+      }
+    }
 
     days.push({
       date: dateISO,

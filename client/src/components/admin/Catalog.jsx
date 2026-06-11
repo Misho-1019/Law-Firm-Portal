@@ -24,7 +24,7 @@ export default function Catalog() {
   const [lawyerFilter, setLawyerFilter] = useState("")
   const [lawyers, setLawyers] = useState([])
 
-  const { appointments, isLoading } = useAppointments(search)
+  const { appointments, total, isLoading } = useAppointments(search, currentPage, pageSize)
 
   useEffect(() => {
     request.get("/admin/lawyers")
@@ -32,13 +32,15 @@ export default function Catalog() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => { setCurrentPage(1) }, [search, lawyerFilter, defaultStatus])
+
   function handleSearchChange(value) {
     setSearchInput(value)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => setSearch(value.trim()), 300)
   }
 
-  let allAppointments = appointments.appointments || [];
+  let allAppointments = appointments || [];
 
   const filteredAppointments = allAppointments.filter(x => {
     if (defaultStatus !== 'ALL' && x.status !== defaultStatus) return false;
@@ -61,20 +63,9 @@ export default function Catalog() {
     }
   })
 
-  const totalPages = Math.max(1, Math.ceil(sortedAppointments.length / pageSize))
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
-  useEffect(() => {
-    setCurrentPage(prev => Math.min(prev || 1, totalPages))
-  }, [totalPages])
-
-  const offset = (currentPage - 1) * pageSize;
-
-  const paginatedAppointments = sortedAppointments.slice(
-    offset,
-    offset + pageSize
-  )
-  
-  const nextAppt1 = (appointments.appointments || [])
+  const nextAppt1 = allAppointments
     .filter(a => a.status !== "CANCELLED")
     .filter(a => new Date(a.startsAt) > timestamp)
     .sort((a, b) => new Date(a.startsAt) - new Date(b.startsAt))[0];
@@ -347,7 +338,7 @@ export default function Catalog() {
           {/* Loading (example) */}
          
           {sortedAppointments.length > 0 ? (
-            <ItemCatalog appointments={paginatedAppointments}/>
+            <ItemCatalog appointments={sortedAppointments}/>
           ) : (
             <div className="py-6 text-center">
               <div className="inline-flex items-center gap-2">
@@ -359,14 +350,13 @@ export default function Catalog() {
                   New
                 </span>
               </div>
-            
+
               <div className="mx-auto mt-2 h-[2px] w-24 rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent" />
-            
+
               <p className="mt-2 text-sm text-[#334155] dark:text-[#94A3B8]">
                 Once you book, your upcoming appointments will show here.
               </p>
             </div>
-
           )}
 
           {/* Pagination (static/disabled) */}
