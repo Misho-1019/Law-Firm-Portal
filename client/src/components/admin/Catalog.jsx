@@ -128,7 +128,7 @@ export default function Catalog() {
                   className="w-full rounded-xl border border-slate-200/40 bg-slate-100/40 pl-8 pr-8 py-2 text-sm text-[#334155] placeholder-slate-400 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"
                 />
                 {searchInput && (
-                  <button onClick={() => { setSearchInput(""); setSearch(""); }} className="absolute right-2 top-1/2 -translate-y-1/2">
+                  <button onClick={() => { setSearchInput(""); setSearch(""); }} className="absolute right-2 top-1/2 -translate-y-1/2" aria-label="Clear search">
                     <X className="h-3.5 w-3.5 text-[#94A3B8] hover:text-[#E5E7EB]" />
                   </button>
                 )}

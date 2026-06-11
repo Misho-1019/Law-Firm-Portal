@@ -43,7 +43,7 @@ function ActivityIcon({ kind }) {
 
 export default function AdminDashboard() {
   const timestamp = new Date();
-  const { appointments } = useAppointments()
+  const { appointments, isLoading: apptsLoading } = useAppointments("", 1, 100)
   const { timeOffs: timeOffItems, isLoading} = useTimeOffs()
 
   const [durationMin, setDurationMin] = useState('120');
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
 
   const { freeSlots } = useGetSlots(dateParam, Number(durationMin))
 
-  const allAppointments = appointments.appointments || [];
+  const allAppointments = appointments || [];
 
   const pendingAppointments = allAppointments.filter(
     (x) => x.status === "PENDING"
@@ -221,6 +221,33 @@ export default function AdminDashboard() {
             </div>
           </div>
         </section>
+
+        {!apptsLoading && allAppointments.length === 0 && (
+          <div className="mx-auto max-w-7xl px-5 pt-4">
+            <div className="rounded-2xl bg-gradient-to-r from-[#2F80ED]/10 to-[#7C3AED]/10 border border-[#2F80ED]/20 p-5">
+              <div className="flex items-start gap-4">
+                <span className="text-2xl">&#128075;</span>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#0B1220] dark:text-white">Welcome to LexSchedule</h2>
+                  <p className="mt-1 text-sm text-[#334155] dark:text-[#94A3B8]">
+                    Get started in 3 simple steps:
+                  </p>
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Link to="/schedule/edit" className="rounded-xl border border-[#2F80ED]/20 bg-white/60 dark:bg-[#0F1117]/50 px-4 py-3 text-sm hover:bg-[#F0F6FF] dark:hover:bg-[#020617] transition">
+                      <span className="font-semibold text-[#2F80ED]">1.</span> Set your working hours
+                    </Link>
+                    <Link to="/create" className="rounded-xl border border-[#2F80ED]/20 bg-white/60 dark:bg-[#0F1117]/50 px-4 py-3 text-sm hover:bg-[#F0F6FF] dark:hover:bg-[#020617] transition">
+                      <span className="font-semibold text-[#2F80ED]">2.</span> Create your first appointment
+                    </Link>
+                    <span className="rounded-xl border border-[#2F80ED]/20 bg-white/60 dark:bg-[#0F1117]/50 px-4 py-3 text-sm">
+                      <span className="font-semibold text-[#2F80ED]">3.</span> Share your booking link with clients
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* KPI cards */}
         <main className="mx-auto max-w-7xl px-5 py-8 grid gap-6 lg:grid-cols-3">

@@ -26,7 +26,7 @@ export default function DayDetailsPage() {
   const { date: dateParam } = useParams(); // expected "YYYY-MM-DD"
   const navigate = useNavigate();
   const { role } = useAuth()
-  const { appointments } = useAppointments()
+  const { appointments } = useAppointments("", 1, 500)
   const { myAppointments } = useMyAppointments()
   const { timeOffs: timeOff } = useTimeOffs()
 
@@ -36,37 +36,11 @@ export default function DayDetailsPage() {
 
   const titleDate = prettyDate(String(dateParam));
 
-  // UI-only placeholders for now
   const isToday =
     dateParam &&
     new Date().toISOString().slice(0, 10) === dateParam;
 
-  const allAppointments = appointments.appointments || [];
-
-  const allFreeSlots = freeSlots.slots || [];
-
-  const goPrevDay = () => {
-    if (!dateParam) return;
-    const d = new Date(dateParam);
-    d.setDate(d.getDate() - 1);
-    const next = d.toISOString().slice(0, 10);
-    navigate(`/day/${next}`);
-  };
-
-  const goNextDay = () => {
-    if (!dateParam) return;
-    const d = new Date(dateParam);
-    d.setDate(d.getDate() + 1);
-    const next = d.toISOString().slice(0, 10);
-    navigate(`/day/${next}`);
-  };
-
-  const todayAppts = allAppointments.filter(x => {
-    const d = new Date(x?.startsAt)
-    const isoDay = d.toISOString().slice(0, 10)
-    return isoDay === dateParam;
-  })
-
+  const allAppointments = appointments || [];
   const clientAppts = myAppointments.appointments || []
   
   const myApptsToday = clientAppts.filter(x => {

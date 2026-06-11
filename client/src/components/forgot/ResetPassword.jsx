@@ -60,7 +60,7 @@ export default function ResetPassword() {
                   minLength={6}
                   className="w-full bg-transparent text-sm outline-none pr-8"
                 />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 text-[#94A3B8]">
+                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 text-[#94A3B8]" aria-label={showPw ? "Hide password" : "Show password"}>
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
