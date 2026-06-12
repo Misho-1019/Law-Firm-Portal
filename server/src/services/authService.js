@@ -42,6 +42,7 @@ export default {
             username: user.username,
             email: user.email,
             role: user.role,
+            emailNotifications: user.emailNotifications,
             phone: user.phone
         }
     },
@@ -115,6 +116,7 @@ export default {
             username: user.username,
             email: user.email,
             role: user.role,
+            emailNotifications: user.emailNotifications,
             phone: user.phone
         } 
     },

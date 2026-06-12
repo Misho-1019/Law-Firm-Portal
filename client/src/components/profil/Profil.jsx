@@ -1,5 +1,8 @@
 /* eslint-disable no-unused-vars */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import request from "../../utils/request";
+import { api } from "../../config/api";
+import { showToast } from "../../utils/toastUtils";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -154,6 +157,12 @@ export default function ProfilePage() {
   const { role, email, firstName, lastName, phone } = useAuth();
 
   const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [emailNotifs, setEmailNotifs] = useState(true)
+
+  useEffect(() => {
+    const auth = JSON.parse(localStorage.getItem("auth") || "{}");
+    if (auth.emailNotifications !== undefined) setEmailNotifs(auth.emailNotifications);
+  }, [])
 
   const data = useMemo(
     () => ({
@@ -355,6 +364,32 @@ export default function ProfilePage() {
               <div className="p-5 flex flex-wrap gap-2">
                 <Badge tone="blue">Timezone: Europe/Sofia</Badge>
                 <Badge tone="blue">Week starts: Monday</Badge>
+              </div>
+              <GradientDivider />
+              <div className="p-4 flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-semibold">Email notifications</div>
+                  <div className="text-xs text-[#334155] dark:text-[#94A3B8]">Receive appointment reminders and updates by email</div>
+                </div>
+                <button
+                  onClick={async () => {
+                    const newVal = !emailNotifs;
+                    try {
+                      await request.put(`${api.auth}/users/me/notifications`, { emailNotifications: newVal });
+                      setEmailNotifs(newVal);
+                      const auth = JSON.parse(localStorage.getItem("auth") || "{}");
+                      auth.emailNotifications = newVal;
+                      localStorage.setItem("auth", JSON.stringify(auth));
+                      showToast(newVal ? "Notifications enabled." : "Notifications disabled.", "success");
+                    } catch { showToast("Failed to update.", "error"); }
+                  }}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${emailNotifs ? "bg-[#2F80ED]" : "bg-slate-300 dark:bg-slate-700"}`}
+                  role="switch"
+                  aria-checked={emailNotifs}
+                  aria-label="Toggle email notifications"
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${emailNotifs ? "translate-x-5" : ""}`} />
+                </button>
               </div>
             </Card>
 

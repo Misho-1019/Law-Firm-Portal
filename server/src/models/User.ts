@@ -16,6 +16,7 @@ export interface IUser extends Document {
   lastLoginAlertAt: Date | null;
   resetToken: string | null;
   resetTokenExpires: Date | null;
+  emailNotifications: boolean;
   comparePassword(plainPassword: string): Promise<boolean>;
 }
 
@@ -41,6 +42,7 @@ const userSchema = new Schema<IUser>({
   lastLoginAlertAt: { type: Date, default: null },
   resetToken: { type: String, default: null },
   resetTokenExpires: { type: Date, default: null },
+  emailNotifications: { type: Boolean, default: true },
 }, {
   timestamps: { createdAt: "createdAt" },
   versionKey: false,

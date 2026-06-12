@@ -185,4 +185,14 @@ authController.post("/reset-password", isGuest, async (req, res) => {
     }
 });
 
+authController.put("/users/me/notifications", isAuth, async (req, res) => {
+  const { emailNotifications } = req.body || {};
+  if (typeof emailNotifications !== "boolean") {
+    return res.status(400).json({ message: "emailNotifications must be a boolean." });
+  }
+
+  await User.findByIdAndUpdate(req.user._id, { emailNotifications });
+  return res.json({ ok: true, emailNotifications });
+});
+
 export default authController;

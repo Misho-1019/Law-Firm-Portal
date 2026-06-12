@@ -19,6 +19,9 @@ import { Link } from "react-router";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
 import ItemDashboard from "./item/ItemDashboard";
 import { useMyAppointments } from "../../api/appointmentApi";
+import { usePatchAppointment } from "../../api/appointmentApi";
+import { showToast } from "../../utils/toastUtils";
+import Modal from "../Modal";
 
 const MotionSection = motion.section;
 const MotionAside = motion.aside;
@@ -34,33 +37,27 @@ export default function ClientDashboard(){
   const [currentPage, setCurrentPage] = useState(1)
 
   const allAppointments = myAppointments.appointments || []
+  const [cancelTarget, setCancelTarget] = useState(null)
+  const [cancelReason, setCancelReason] = useState("")
+  const [showHistory, setShowHistory] = useState(false)
+  const { patch } = usePatchAppointment()
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(allAppointments.length / pageSize)
-  )
+  const upcomingAppts = allAppointments.filter((a) => new Date(a.startsAt) > timestamp && a.status !== "CANCELLED")
+  const pastAppts = allAppointments.filter((a) => new Date(a.startsAt) <= timestamp || a.status === "CANCELLED")
+
+  const displayList = showHistory ? pastAppts : upcomingAppts;
+  const totalPages = Math.max(1, Math.ceil(displayList.length / pageSize))
 
   useEffect(() => {
     setCurrentPage(prev => Math.min(prev || 1, totalPages))
   }, [totalPages])
 
   const offset = (currentPage - 1) * pageSize;
+  const paginatedAppointments = displayList.slice(offset, offset + pageSize)
 
-  const paginatedAppointments = allAppointments.slice(
-    offset,
-    offset + pageSize
-  )
-
-  const upcomingAppt = allAppointments.filter((x) => {
-    const appt = new Date(x?.startsAt)
-    return appt > timestamp;
-  })
-    
-  const nextAppt1 = upcomingAppt[0] || [];
-
-  const pDate = prettyDate(String(nextAppt1.startsAt))
-  
-  const {_day, _date, time} = getDateAndTime(nextAppt1.startsAt);
+  const nextAppt = upcomingAppts[0] || null;
+  const pDate = prettyDate(String(nextAppt?.startsAt))
+  const {_day, _date, time} = getDateAndTime(nextAppt?.startsAt);
 
   const updates = [
     { id:'u1', kind:'info', text:'Please bring your contract draft (PDF).' },
@@ -73,6 +70,7 @@ export default function ClientDashboard(){
   ];
 
   return (
+    <>
     <div className='dark'>
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
         
@@ -98,7 +96,7 @@ export default function ClientDashboard(){
                   <Skeleton className="h-7 w-72" />
                   <Skeleton className="h-4 w-56" />
                 </div>
-              ) : upcomingAppt.length > 0 ? (
+              ) : upcomingAppts.length > 0 ? (
                 <div className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-start gap-3">
                     <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F80ED]/10 text-[#2F80ED] ring-1 ring-[#2F80ED]/20">
@@ -113,7 +111,7 @@ export default function ClientDashboard(){
                         {pDate} - {time}
                       </div>
                       <div className="text-sm text-[#334155] dark:text-[#94A3B8]">
-                        {nextAppt1.service} · with Victor Todorov
+                        {nextAppt.service} · with Victor Todorov
                       </div>
           
                       <div className="mt-2 flex flex-wrap gap-4 text-sm">
@@ -127,14 +125,14 @@ export default function ClientDashboard(){
                           <a href="tel:+359889116617">+359 88 911 6617</a>
                         </div>
           
-                        <StatusPill status={nextAppt1.status} />
+                        <StatusPill status={nextAppt.status} />
                       </div>
                     </div>
                   </div>
           
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Link
-                      to={`/appointments/${nextAppt1._id}/update`}
+                      to={`/appointments/${nextAppt._id}/update`}
                       className="inline-flex items-center justify-center rounded-2xl border border-[#2F80ED] text-[#2F80ED] px-4 py-2.5 hover:bg-[#2F80ED] hover:text-white transition-colors"
                     >
                       Reschedule
@@ -216,7 +214,10 @@ export default function ClientDashboard(){
               <div className="p-4 pb-3 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold">My appointments</h2>
-                  <p className="text-sm text-[#334155] dark:text-[#94A3B8]">Upcoming</p>
+                  <div className="flex items-center gap-1 mt-2">
+                    <button onClick={() => { setShowHistory(false); setCurrentPage(1); }} className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${!showHistory ? "bg-[#2F80ED] text-white" : "text-[#94A3B8] hover:text-[#0B1220] dark:hover:text-white"}`}>Upcoming</button>
+                    <button onClick={() => { setShowHistory(true); setCurrentPage(1); }} className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${showHistory ? "bg-[#2F80ED] text-white" : "text-[#94A3B8] hover:text-[#0B1220] dark:hover:text-white"}`}>History</button>
+                  </div>
                 </div>
           
                 <Link
@@ -240,7 +241,7 @@ export default function ClientDashboard(){
                   </li>
                 ) : (
                   paginatedAppointments.map((appointment) => (
-                    <ItemDashboard key={appointment._id} {...appointment} />
+                    <ItemDashboard key={appointment._id} {...appointment} onCancel={() => { setCancelTarget(appointment); setCancelReason(""); }} />
                   ))
                 )}
               </ul>
@@ -352,6 +353,41 @@ export default function ClientDashboard(){
         </footer>
       </div>
     </div>
+
+    <Modal open={!!cancelTarget} onClose={() => setCancelTarget(null)} title="Cancel appointment">
+      <p className="text-sm text-[#334155] dark:text-[#94A3B8] mb-3">
+        Why are you cancelling the appointment for{" "}
+        <strong className="text-[#0B1220] dark:text-white">{cancelTarget?.firstName} {cancelTarget?.lastName}</strong>?
+      </p>
+      <textarea
+        value={cancelReason}
+        onChange={(e) => setCancelReason(e.target.value)}
+        placeholder="Reason (required)..."
+        rows={3}
+        className="w-full rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] bg-transparent px-3 py-2 text-sm outline-none resize-none mb-3"
+      />
+      <div className="flex justify-end gap-3">
+        <button onClick={() => setCancelTarget(null)} className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2 text-sm text-[#334155] dark:text-[#94A3B8] hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]">
+          Keep appointment
+        </button>
+        <button
+          onClick={async () => {
+            if (!cancelReason.trim()) { showToast("Please provide a reason.", "warning"); return; }
+            try {
+              await patch({ status: "CANCELLED", notes: cancelTarget.notes ? `${cancelTarget.notes}\nCancel reason: ${cancelReason.trim()}` : `Cancel reason: ${cancelReason.trim()}` }, cancelTarget._id);
+              setCancelTarget(null);
+              showToast("Appointment cancelled.", "success");
+              window.location.reload();
+            } catch { showToast("Failed to cancel.", "error"); }
+          }}
+          disabled={!cancelReason.trim()}
+          className="rounded-xl bg-[#ed2f2f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d11a1a] disabled:opacity-50"
+        >
+          Cancel appointment
+        </button>
+      </div>
+    </Modal>
+    </>
   );
 }
 

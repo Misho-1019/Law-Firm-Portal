@@ -7,6 +7,7 @@ export default function ItemDashboard({
     status,
     service,
     mode,
+    onCancel,
 }) {
   const {day, date, time } = getDateAndTime(startsAt);
 
@@ -39,6 +40,11 @@ export default function ItemDashboard({
             >
               Reschedule
             </Link>
+            {onCancel && (status === "PENDING" || status === "CONFIRMED") && (
+              <button onClick={() => onCancel({ _id, startsAt, status, service, mode })} className="rounded-xl border border-red-200 text-red-500 px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                Cancel
+              </button>
+            )}
             <Link to={`/appointments/${_id}/details`} className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-3 py-1.5 hover:bg-[#F5F7FA] hover:text-black">
               Details
             </Link>
