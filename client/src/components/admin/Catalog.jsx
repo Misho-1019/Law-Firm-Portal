@@ -5,9 +5,12 @@ import ItemCatalog from "./item/ItemCatalog";
 import { getDateAndTime, prettyDate } from "../../utils/dates";
 import { motion } from "framer-motion";
 import { Link } from "react-router";
-import { useAppointments } from "../../api/appointmentApi";
+import { useAppointments, usePatchAppointment } from "../../api/appointmentApi";
 import Skeleton from "../Skeleton";
+import Modal from "../Modal";
+import { showToast } from "../../utils/toastUtils";
 import request from "../../utils/request";
+import { api } from "../../config/api";
 
 const MotionSection = motion.section
 
@@ -25,6 +28,18 @@ export default function Catalog() {
   const [lawyers, setLawyers] = useState([])
 
   const { appointments, total, isLoading } = useAppointments(search, currentPage, pageSize, sortKey)
+  const [nextAppt, setNextAppt] = useState(null)
+  const [cancelTarget, setCancelTarget] = useState(null)
+  const { patch } = usePatchAppointment()
+
+  useEffect(() => {
+    const now = new Date().toISOString();
+    const params = new URLSearchParams({ sort: "startsAt:asc", limit: "1", fromLocal: now.slice(0, 10) + "T00:00:00" })
+    if (search) params.set("search", search)
+    request.get(`${api.appointments}?${params.toString()}`)
+      .then(data => setNextAppt(data.appointments?.[0] || null))
+      .catch(() => setNextAppt(null))
+  }, [search])
 
   useEffect(() => {
     request.get("/admin/lawyers")
@@ -65,14 +80,9 @@ export default function Catalog() {
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
-  const nextAppt1 = allAppointments
-    .filter(a => a.status !== "CANCELLED")
-    .filter(a => new Date(a.startsAt) > timestamp)
-    .sort((a, b) => new Date(a.startsAt) - new Date(b.startsAt))[0];
+  const pDate = prettyDate(String(nextAppt?.startsAt))
 
-  const pDate = prettyDate(String(nextAppt1?.startsAt))
-  
-  const { _day, _date, time } = getDateAndTime(nextAppt1?.startsAt)
+  const { _day, _date, time } = getDateAndTime(nextAppt?.startsAt)
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -175,7 +185,7 @@ export default function Catalog() {
               <Skeleton className="h-8 w-64" />
               <Skeleton className="h-4 w-48" />
             </div>
-          ) : nextAppt1 ? (
+          ) : nextAppt ? (
             <MotionSection
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -204,7 +214,7 @@ export default function Catalog() {
                     </div>
           
                     <div className="mt-0.5 text-sm text-[#334155] dark:text-[#94A3B8] truncate">
-                      {nextAppt1.service} · with {nextAppt1.firstName} {nextAppt1.lastName}
+                      {nextAppt.service} · with {nextAppt.firstName} {nextAppt.lastName}
                     </div>
           
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
@@ -242,14 +252,14 @@ export default function Catalog() {
                         Call us: +359 889 116 617
                       </a>
           
-                      <StatusPill status={nextAppt1.status} />
+                      <StatusPill status={nextAppt.status} />
                     </div>
                   </div>
                 </div>
           
                 <div className="flex flex-col sm:flex-row gap-3 shrink-0">
                   <Link
-                    to={`/appointments/${nextAppt1._id}/update`}
+                    to={`/appointments/${nextAppt._id}/update`}
                     className="inline-flex items-center justify-center rounded-2xl
                                border border-[#2F80ED] text-[#2F80ED]
                                px-4 py-2.5 font-semibold
@@ -258,8 +268,8 @@ export default function Catalog() {
                     Reschedule
                   </Link>
           
-                  <Link
-                    to={`/appointments/${nextAppt1._id}/cancel`}
+                  <button
+                    onClick={() => setCancelTarget(nextAppt)}
                     className="inline-flex items-center justify-center rounded-2xl
                                border border-[#E5E7EB] dark:border-[#1F2937]
                                bg-white/60 dark:bg-[#0F1117]/50
@@ -269,7 +279,7 @@ export default function Catalog() {
                                transition-colors"
                   >
                     Cancel
-                  </Link>
+                  </button>
                 </div>
               </div>
           
@@ -382,6 +392,36 @@ export default function Catalog() {
           </div>
         </div>
       </div>
+
+      <Modal open={!!cancelTarget} onClose={() => setCancelTarget(null)} title="Cancel appointment">
+        <p className="text-sm text-[#334155] dark:text-[#94A3B8] mb-4">
+          Are you sure you want to cancel the appointment for{" "}
+          <strong className="text-[#0B1220] dark:text-white">{cancelTarget?.firstName} {cancelTarget?.lastName}</strong>?
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => setCancelTarget(null)}
+            className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2 text-sm text-[#334155] dark:text-[#94A3B8] hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]"
+          >
+            Keep appointment
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                await patch({ status: "CANCELLED" }, cancelTarget._id);
+                setCancelTarget(null);
+                showToast("Appointment cancelled.", "success");
+                window.location.reload();
+              } catch {
+                showToast("Failed to cancel appointment.", "error");
+              }
+            }}
+            className="rounded-xl bg-[#ed2f2f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d11a1a]"
+          >
+            Yes, cancel
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
