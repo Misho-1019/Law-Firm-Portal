@@ -72,11 +72,13 @@ app.use(authMiddleware)
 
 app.get("/health", async (_req, res) => {
   const dbState = mongoose.connection.readyState;
-  // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
   const dbOk = dbState === 1;
-  return res.status(dbOk ? 200 : 503).json({
-    status: dbOk ? "ok" : "degraded",
+  const emailOk = !!(config.GMAIL_USER && config.GMAIL_APP_PASS) || config.EMAILS_DISABLED;
+  const ok = dbOk;
+  return res.status(ok ? 200 : 503).json({
+    status: ok ? "ok" : "degraded",
     db: ["disconnected","connected","connecting","disconnecting"][dbState] || "unknown",
+    email: emailOk ? "configured" : "missing",
   });
 });
 

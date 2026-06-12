@@ -53,7 +53,7 @@ export default function DayDetailsPage() {
   };
 
   const allAppointments = appointments || [];
-  const clientAppts = myAppointments.appointments || []
+  const clientAppts = myAppointments || []
   
   const myApptsToday = clientAppts.filter(x => {
     const d = new Date(x?.startsAt)

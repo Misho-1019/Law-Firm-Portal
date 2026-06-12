@@ -283,10 +283,16 @@ export default {
     const reminders = buildSofiaReminders(whenUtc);
 
     try {
+      const duplicateCheck = await Appointment.findOne({
+        creator: creatorId,
+        startsAt: whenUtc,
+        status: { $nin: ["CANCELLED", "DECLINED"] },
+      }).lean();
+
       const result = await Appointment.create({
         ...appointmentData,
-        startsAt: whenUtc, // store UTC instant
-        reminders, // DST-safe, computed in Sofia zone
+        startsAt: whenUtc,
+        reminders,
         creator: creatorId,
       });
 
@@ -294,10 +300,10 @@ export default {
         console.error("[email] create failed:", e?.message || e)
       );
 
-      return result;
+      return { newAppointment: result, duplicateWarning: !!duplicateCheck };
     } catch (error) {
       if (error && error.code === 11000) {
-        const err = new Error("Time slot is no longer available!");
+        const err = new Error("This time slot has already been booked. Please select a different time.");
         err.status = 409;
         throw err;
       }
@@ -366,7 +372,7 @@ export default {
       return doc;
     } catch (error) {
       if (error && error.code === 11000) {
-        const err = new Error("Time slot is no longer available!");
+        const err = new Error("This time slot has already been booked. Please select a different time.");
         err.status = 409;
         throw err;
       }
@@ -401,6 +407,16 @@ export default {
       throw err;
     }
 
+    if (status === "CANCELLED" && !isAdmin) {
+      const now = new Date();
+      const hoursUntil = (appointment.startsAt.getTime() - now.getTime()) / (1000 * 60 * 60);
+      if (hoursUntil < 24) {
+        const err = new Error("Appointments cannot be cancelled within 24 hours of the start time.");
+        err.status = 400;
+        throw err;
+      }
+    }
+
     try {
       const prev = appointment.toObject();
       const updatedAppointment = await Appointment.findByIdAndUpdate(
@@ -416,7 +432,7 @@ export default {
       return updatedAppointment;
     } catch (error) {
       if (error && error.code === 11000) {
-        const err = new Error("Time slot is no longer available!");
+        const err = new Error("This time slot has already been booked. Please select a different time.");
         err.status = 409;
         throw err;
       }

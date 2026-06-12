@@ -1,4 +1,4 @@
-# ⚖️ Lawyer Schedule 2025  
+# ⚖️ LexSchedule
 ### Full-Stack Appointment & Availability Management System
 
 A production-oriented full-stack web application designed to manage **appointments, availability, time-off, and client bookings** for law firms.
@@ -282,8 +282,12 @@ cd server && npm install && npm run dev    # Express API on port 3000 (tsx)
 cd client && npm install && npm run dev    # Vite dev server on port 5173
 ```
 
+---
+
+## 🧪 Testing
+
 ```bash
-cd server && npm test                       # Run 9 unit tests (vitest)
+cd server && npm test    # Run 9 unit tests for availability slot computation
 ```
 
 ---

@@ -36,7 +36,7 @@ export default function ClientDashboard(){
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1)
 
-  const allAppointments = myAppointments.appointments || []
+  const allAppointments = myAppointments || []
   const [cancelTarget, setCancelTarget] = useState(null)
   const [cancelReason, setCancelReason] = useState("")
   const [showHistory, setShowHistory] = useState(false)

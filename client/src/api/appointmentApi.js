@@ -54,16 +54,12 @@ export const useMyAppointments = () => {
         setError(null)
 
         request.get(`${baseUrl}/mine`)
-          .then(setAppointments)
+          .then((data) => setAppointments(data.appointments || []))
           .catch(setError)
           .finally(() => setIsLoading(false))
     }, [])
 
-    return {
-        myAppointments: appointments,
-        isLoading,
-        error
-    }
+    return { myAppointments: appointments, isLoading, error }
 }
 
 export const useAppointment = (appointmentId) => {

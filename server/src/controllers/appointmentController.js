@@ -151,8 +151,8 @@ appointmentController.post("/create", isAuth, createAppointmentChecks, async (re
       return res.status(409).json({ message: "Selected start time is no longer available." });
     }
 
-    const newAppointment = await appointmentService.create(appointmentData, creatorId);
-    return res.status(201).json({ newAppointment });
+    const result = await appointmentService.create(appointmentData, creatorId);
+    return res.status(201).json(result);
   } catch (error) {
     const status = error.status || 400;
     return res.status(status).json({ message: error.message });
