@@ -40,6 +40,18 @@ export default function DayDetailsPage() {
     dateParam &&
     new Date().toISOString().slice(0, 10) === dateParam;
 
+  const goPrevDay = () => {
+    const d = new Date(dateParam + "T12:00:00");
+    d.setDate(d.getDate() - 1);
+    navigate(`/day/${d.toISOString().slice(0, 10)}`);
+  };
+
+  const goNextDay = () => {
+    const d = new Date(dateParam + "T12:00:00");
+    d.setDate(d.getDate() + 1);
+    navigate(`/day/${d.toISOString().slice(0, 10)}`);
+  };
+
   const allAppointments = appointments || [];
   const clientAppts = myAppointments.appointments || []
   
@@ -501,10 +513,10 @@ export default function DayDetailsPage() {
                   <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/70 to-transparent" />
               
                   <div className="p-4 flex flex-wrap gap-2">
-                    {allFreeSlots.length === 0 ? (
+                    {(freeSlots.slots || []).length === 0 ? (
                       <p className="text-xs text-[#9CA3AF]">No free start times for this day.</p>
                     ) : (
-                      allFreeSlots.map((t, i) => {
+                      (freeSlots.slots || []).map((t, i) => {
                         const { time } = getDateAndTime(t);
                         const prefillDate = t.slice(0, 10);
               

@@ -19,6 +19,7 @@ export interface AppConfig {
   COOKIE_SECURE: boolean;
   COOKIE_SAMESITE: string;
   CRON_SECRET: string;
+  SENTRY_DSN: string;
 }
 
 const isProd = process.env.NODE_ENV === "production";
@@ -48,6 +49,7 @@ const config: AppConfig = {
   COOKIE_SAMESITE:
     (process.env.COOKIE_SAMESITE || "lax").toLowerCase(),
   CRON_SECRET: process.env.CRON_SECRET || "",
+  SENTRY_DSN: process.env.SENTRY_DSN || "",
 };
 
 const missing: string[] = [];

@@ -13,8 +13,18 @@ import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { startReminderCron } from "./jobs/reminders.js";
 import logger from "./utils/logger.js";
 import config from "./config.js";
+import * as Sentry from "@sentry/node";
 
 const app = express();
+
+if (config.SENTRY_DSN) {
+  Sentry.init({
+    dsn: config.SENTRY_DSN,
+    environment: config.NODE_ENV,
+    integrations: [Sentry.expressIntegration()],
+  });
+  logger.info("sentry initialized", { env: config.NODE_ENV });
+}
 
 app.set("trust proxy", 1)
 
@@ -71,6 +81,10 @@ app.get("/health", async (_req, res) => {
 });
 
 app.use(router);
+
+if (config.SENTRY_DSN) {
+  Sentry.setupExpressErrorHandler(app);
+}
 
 async function start() {
   mongoose.connection.on("disconnected", () => {
