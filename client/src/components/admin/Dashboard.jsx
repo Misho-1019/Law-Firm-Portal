@@ -70,8 +70,10 @@ export default function AdminDashboard() {
   );
 
   const upcoming = allAppointments.filter((a) => {
-    const appt = new Date(a?.startsAt);
-    return appt > timestamp;
+    const startsAt = new Date(a?.startsAt);
+    const durationMs = (Number(a?.durationMin) || 120) * 60 * 1000;
+    const endsAt = new Date(startsAt.getTime() + durationMs);
+    return endsAt > new Date();
   });
 
   const allFreeSlots = freeSlots.slots || [];
@@ -251,9 +253,9 @@ export default function AdminDashboard() {
                     <Link to="/create" className="rounded-xl border border-[#2F80ED]/20 bg-white/60 dark:bg-[#0F1117]/50 px-4 py-3 text-sm hover:bg-[#F0F6FF] dark:hover:bg-[#020617] transition">
                       <span className="font-semibold text-[#2F80ED]">2.</span> Create your first appointment
                     </Link>
-                    <span className="rounded-xl border border-[#2F80ED]/20 bg-white/60 dark:bg-[#0F1117]/50 px-4 py-3 text-sm">
+                    <Link to="/" className="rounded-xl border border-[#2F80ED]/20 bg-white/60 dark:bg-[#0F1117]/50 px-4 py-3 text-sm hover:bg-[#F0F6FF] dark:hover:bg-[#020617] transition">
                       <span className="font-semibold text-[#2F80ED]">3.</span> Share your booking link with clients
-                    </span>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -503,7 +505,7 @@ export default function AdminDashboard() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <span className="text-xs font-semibold">{d.count}</span>
-                          <div className="w-full rounded-sm bg-[#2F80ED]/70 transition-all" style={{ height: `${h}px` }} />
+                          <div className="w-full rounded-sm bg-[#2F80ED]/70 dark:bg-[#60A5FA]/70 transition-all" style={{ height: `${h}px` }} />
                           <span className="text-[10px] text-[#94A3B8]">{d.date.slice(5)}</span>
                         </div>
                       );

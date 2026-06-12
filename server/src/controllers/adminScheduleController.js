@@ -160,7 +160,7 @@ adminScheduleController.get("/settings", async (_req, res) => {
   res.json(settings);
 });
 
-adminScheduleController.get("/lawyers", isAdmin, async (_req, res) => {
+adminScheduleController.get("/lawyers", async (_req, res) => {
   const lawyers = await User.find({ role: "Admin" })
     .select("firstName lastName username email phone")
     .lean();

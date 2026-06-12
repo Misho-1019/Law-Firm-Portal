@@ -31,14 +31,14 @@ const appointmentSchema = new Schema<IAppointment>({
   role: { type: String, enum: ["Admin", "Client"], default: "Client" },
   service: { type: String, required: true, trim: true, minLength: 1 },
   mode: { type: String, required: true, enum: ["In-Person", "Online"] },
-  startsAt: { type: Date, required: true, index: true },
+  startsAt: { type: Date, required: true },
   durationMin: { type: Number, min: 15, max: 480, required: true, default: 120 },
   status: { type: String, enum: ["PENDING", "CONFIRMED", "DECLINED", "CANCELLED"], default: "PENDING", index: true },
   notes: { type: String, trim: true },
   reminders: {
-    send24hAt: { type: Date, index: true },
+    send24hAt: { type: Date },
     sent24hAt: { type: Date, default: null },
-    send1hAt: { type: Date, index: true },
+    send1hAt: { type: Date },
     sent1hAt: { type: Date, default: null },
   },
 }, {

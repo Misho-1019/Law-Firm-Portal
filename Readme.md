@@ -32,14 +32,18 @@ The project was built to simulate **production-level requirements**, making it s
 - Service-type dropdown (Consultation, Contract Review, Court Hearing, Notary, etc.)
 - Weekly working schedule editor (load, modify, and save intervals)
 - Time-off and unavailability management (full-day and partial-day blocks)
+- BI dashboard with appointment stats, service breakdown, and 7-day trend
+- Multi-lawyer support — assign appointments to specific lawyers
 - Public availability sharing via link
 - Role-based access control
 
 ### Client
 - Book appointments through a shared availability link
 - Simple and guided booking flow
-- View and reschedule own appointments
+- View, reschedule, and cancel own appointments with confirmation modal
+- Appointment history with upcoming / past toggle
 - Password reset via email ("Forgot Password" flow)
+- Email notification preference toggle on Profile page
 
 ### Automation & Robustness
 - Cron-based reminder jobs (24h and 1h before appointment)
@@ -51,6 +55,10 @@ The project was built to simulate **production-level requirements**, making it s
 - Loading skeletons for all list and detail views
 - Empty states with helpful messages and CTAs
 - Structured JSON logging for Cloud Run & observability
+- TypeScript models for type safety
+- Code splitting and server-side pagination
+- Sentry error tracking (client + server)
+- 9 unit tests for availability logic
 
 ### Security
 - Password reset flow with time-limited email tokens
@@ -96,6 +104,15 @@ The project was built to simulate **production-level requirements**, making it s
 ### 🔟 Loading Skeleton States (NEW)
 > Screenshot: Skeleton placeholders during data loading on any page.
 
+### 1️⃣1️⃣ BI Dashboard (NEW)
+> Screenshot: Appointment stats and service-type breakdown on the admin dashboard.
+
+### 1️⃣2️⃣ Client History & Cancel Modal (NEW)
+> Screenshot: Client dashboard with upcoming/history tabs and cancel confirmation modal.
+
+### 1️⃣3️⃣ Email Notification Toggle (NEW)
+> Screenshot: Email notification preference toggle on the Profile page.
+
 ---
 
 ## 🌐 Live Demo
@@ -120,9 +137,10 @@ The project was built to simulate **production-level requirements**, making it s
 - Luxon (timezone-aware date handling)
 - Lucide React (icons)
 - React Toastify
+- Sentry (error tracking)
 
 **Backend**
-- Node.js (ES modules)
+- Node.js (ES modules with TypeScript via tsx)
 - Express 5
 - MongoDB + Mongoose 8
 - JWT Authentication (jsonwebtoken + bcrypt)
@@ -132,6 +150,8 @@ The project was built to simulate **production-level requirements**, making it s
 - node-cron + Cloud Scheduler (reminders)
 - Nodemailer (email via Gmail SMTP)
 - Luxon (DST-safe scheduling)
+- @sentry/node (error tracking)
+- vitest + supertest (testing)
 
 ---
 
@@ -213,12 +233,91 @@ The application follows a clear client–server architecture:
 
 ---
 
+### v1.2 — June 2026 (Milestones 10–21)
+
+**New Features**
+- Multi-lawyer support — per-lawyer schedules, bookings, and filtering
+- Client appointment history tab with upcoming/past switching
+- Cancel appointment modal with required reason
+- Email notification preference toggle on Profile page
+- BI dashboard with appointment stats, service breakdown, and 7-day trend
+- Sentry error tracking on both client and server
+- Configurable firm name via Settings model
+
+**Performance**
+- Code splitting with React.lazy — each page is a separate chunk
+- Server-side pagination on appointments catalog
+- Calendar month view batched from 90 queries to 3
+
+**Robustness**
+- Centralized config module replacing scattered process.env reads
+- 9 unit tests for availability slot computation
+- TypeScript migration for all models and config
+- Structured JSON logging throughout the server
+
+**UX Improvements**
+- Loading skeletons replacing text-based loading states in 8 components
+- Getting-started onboarding banner on admin dashboard
+- Confirmation modal replacing window.confirm on delete
+- Branded professional HTML templates for all 7 email types
+- Friendly date format in all emails ("Thu, 2026-06-12 at 14:00")
+- Sort preference persisted in localStorage
+- Server-side sorting applies to all pages, not just current page
+- Accessibility labels on icon-only buttons
+
+**Bug Fixes**
+- CORS fix for production CLIENT_URL parsing
+- Upcoming appointment card no longer affected by table sort
+- Cancel button navigates to confirmation modal instead of non-existent route
+- Missing todayAppts / goPrevDay / goNextDay / allFreeSlots variables added
+- tsx moved to production dependencies for Cloud Run deployment
+- Scheduler URL corrected with /api prefix for reminder jobs
+
+---
+
 ## ▶️ Running Locally
 
 ```bash
-cd server && npm install && npm run dev
-cd client && npm install && npm run dev
+cd server && npm install && npm run dev    # Express API on port 3000 (tsx)
+cd client && npm install && npm run dev    # Vite dev server on port 5173
 ```
+
+```bash
+cd server && npm test                       # Run 9 unit tests (vitest)
+```
+
+---
+
+## ⚙️ Environment Variables
+
+### Server (`server/.env`)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MONGO_URI` | Yes | — | MongoDB connection string |
+| `SECRET_KEY` | Yes | — | JWT signing secret |
+| `PORT` | No | `3000` | Server port |
+| `NODE_ENV` | No | `development` | Environment (`production` enables secure cookies) |
+| `CLIENT_URLS` | No | — | Comma-separated CORS origins |
+| `GMAIL_USER` | No | — | Gmail address for email sending |
+| `GMAIL_APP_PASS` | No | — | Gmail app password |
+| `ADMIN_EMAIL` | No | — | Admin notification email recipient |
+| `EMAILS_DISABLED` | No | `0` | Disable all email sending (`1` to disable) |
+| `FIRM_NAME` | No | `LexSchedule` | Firm name shown in email from field |
+| `REMINDERS_DISABLED` | No | `0` | Disable cron reminders (`1` to disable) |
+| `REMINDER_BATCH_LIMIT` | No | `100` | Max reminders per batch |
+| `USE_INTERNAL_CRON` | No | `false` | Use node-cron (dev) vs Cloud Scheduler (prod) |
+| `CRON_SECRET` | No | — | Shared secret for Cloud Scheduler requests |
+| `COOKIE_SECURE` | No | `isProd` | Require HTTPS for cookies |
+| `COOKIE_SAMESITE` | No | `lax` | Cookie SameSite policy |
+| `SENTRY_DSN` | No | — | Sentry DSN for server error tracking |
+
+### Client (`client/.env` / `.env.production`)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VITE_API_URL` | No | — | API base URL (e.g. `http://localhost:3000/api` or `/api`) |
+| `VITE_SENTRY_DSN` | No | — | Sentry DSN for client error tracking |
 
 ---
 

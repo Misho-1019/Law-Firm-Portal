@@ -97,7 +97,7 @@ export default function Catalog() {
           </div>
 
           {/* Filter bar (static/disabled) */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="hidden md:flex items-center gap-2">
               <ListFilter className="h-4 w-4 text-[#334155] dark:text-[#94A3B8]" />
               <select

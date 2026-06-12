@@ -158,6 +158,7 @@ export default function ProfilePage() {
 
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [emailNotifs, setEmailNotifs] = useState(true)
+  const [savingNotifs, setSavingNotifs] = useState(false)
 
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem("auth") || "{}");
@@ -373,7 +374,9 @@ export default function ProfilePage() {
                 </div>
                 <button
                   onClick={async () => {
+                    if (savingNotifs) return;
                     const newVal = !emailNotifs;
+                    setSavingNotifs(true);
                     try {
                       await request.put(`${api.auth}/users/me/notifications`, { emailNotifications: newVal });
                       setEmailNotifs(newVal);
@@ -382,8 +385,10 @@ export default function ProfilePage() {
                       localStorage.setItem("auth", JSON.stringify(auth));
                       showToast(newVal ? "Notifications enabled." : "Notifications disabled.", "success");
                     } catch { showToast("Failed to update.", "error"); }
+                    finally { setSavingNotifs(false); }
                   }}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${emailNotifs ? "bg-[#2F80ED]" : "bg-slate-300 dark:bg-slate-700"}`}
+                  disabled={savingNotifs}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${emailNotifs ? "bg-[#2F80ED]" : "bg-slate-300 dark:bg-slate-700"} disabled:opacity-50`}
                   role="switch"
                   aria-checked={emailNotifs}
                   aria-label="Toggle email notifications"

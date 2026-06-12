@@ -236,7 +236,7 @@ export default function ClientDashboard(){
                   <li className="rounded-xl border border-dashed border-[#E5E7EB] dark:border-[#1F2937]
                                  bg-white/40 dark:bg-[#0F1117]/40 p-3 text-sm text-[#334155]
                                  dark:text-[#94A3B8] flex items-center justify-between">
-                    <span>No appointments yet.</span>
+                    <span>{showHistory ? "No past appointments." : "No appointments yet."}</span>
                     <ChevronRight className="h-4 w-4" />
                   </li>
                 ) : (
