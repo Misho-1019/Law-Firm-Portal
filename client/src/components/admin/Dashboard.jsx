@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import Skeleton from "../Skeleton";
 import { motion } from "framer-motion";
@@ -20,6 +20,8 @@ import { useAppointments } from "../../api/appointmentApi";
 import { useTimeOffs } from "../../api/timeOffApi";
 import { useGetSlots } from "../../api/availabilityApi";
 import { formatSofiaDate, formatSofiaWhen } from "../../utils/dates";
+import { api } from "../../config/api";
+import request from "../../utils/request";
 
 /* ---- Framer Motion components (fix ESLint unused import) ---- */
 const MotionDiv = motion.div;
@@ -50,6 +52,16 @@ export default function AdminDashboard() {
   const dateParam = timestamp.toISOString().slice(0,10);
 
   const { freeSlots } = useGetSlots(dateParam, Number(durationMin))
+  const [stats, setStats] = useState(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    setStatsLoading(true);
+    request.get(`${api.admin}/stats`)
+      .then(setStats)
+      .catch(() => setStats(null))
+      .finally(() => setStatsLoading(false));
+  }, [])
 
   const allAppointments = appointments || [];
 
@@ -425,6 +437,83 @@ export default function AdminDashboard() {
               </ul>
             </div>
           </MotionAside>
+
+          {/* BI stats section */}
+          {!statsLoading && stats && (
+          <MotionSection
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="relative overflow-hidden lg:col-span-3 rounded-2xl bg-white dark:bg-[#111827]
+                       border border-[#E5E7EB] dark:border-[#1F2937] shadow-sm p-5"
+          >
+            <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#2F80ED]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+
+            <div className="relative">
+              <h2 className="text-base font-semibold mb-4">Overview</h2>
+              <div className="mx-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#2F80ED]/60 to-transparent mb-5" />
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+                <div className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
+                  <div className="text-xs text-[#94A3B8]">Total appointments</div>
+                  <div className="text-xl font-semibold mt-1">{stats.total}</div>
+                </div>
+                <div className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
+                  <div className="text-xs text-[#94A3B8]">Cancellation rate</div>
+                  <div className="text-xl font-semibold mt-1">{stats.cancellationRate}%</div>
+                </div>
+                <div className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
+                  <div className="text-xs text-[#94A3B8]">Confirmed</div>
+                  <div className="text-xl font-semibold mt-1 text-emerald-600">{stats.statusBreakdown.CONFIRMED}</div>
+                </div>
+                <div className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] p-3">
+                  <div className="text-xs text-[#94A3B8]">Pending</div>
+                  <div className="text-xl font-semibold mt-1 text-amber-600">{stats.statusBreakdown.PENDING}</div>
+                </div>
+              </div>
+
+              {stats.serviceBreakdown.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">By service type</h3>
+                  <div className="space-y-2">
+                    {stats.serviceBreakdown.map((s, i) => {
+                      const pct = stats.total > 0 ? Math.round((s.count / stats.total) * 100) : 0;
+                      return (
+                        <div key={i} className="flex items-center gap-3 text-sm">
+                          <span className="w-28 truncate text-[#334155] dark:text-[#94A3B8]">{s.service}</span>
+                          <div className="flex-1 h-4 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <div className="h-full rounded-full bg-[#2F80ED] transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="w-8 text-right font-semibold">{s.count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {stats.dailyTrend.length > 0 && (
+                <div className="mt-5">
+                  <h3 className="text-sm font-semibold mb-2">Last 7 days</h3>
+                  <div className="flex items-end gap-2 h-16">
+                    {stats.dailyTrend.map((d, i) => {
+                      const maxCount = Math.max(...stats.dailyTrend.map((x) => x.count), 1);
+                      const h = Math.round((d.count / maxCount) * 48);
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <span className="text-xs font-semibold">{d.count}</span>
+                          <div className="w-full rounded-sm bg-[#2F80ED]/70 transition-all" style={{ height: `${h}px` }} />
+                          <span className="text-[10px] text-[#94A3B8]">{d.date.slice(5)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </MotionSection>
+          )}
 
           {/* Activity feed / notices full width */}
           <MotionSection

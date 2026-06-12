@@ -5,6 +5,7 @@ import WorkingSchedule from "../models/WorkingSchedule.js";
 import TimeOff from "../models/TimeOff.js";
 import Settings from "../models/Settings.js";
 import User from "../models/User.js";
+import Appointment from "../models/Appointment.js";
 import { isAdmin } from "../middlewares/authMiddleware.js";
 import { getCalendarWeek, update } from "../services/availabilityService.js";
 
@@ -164,6 +165,41 @@ adminScheduleController.get("/lawyers", isAdmin, async (_req, res) => {
     .select("firstName lastName username email phone")
     .lean();
   res.json(lawyers);
+});
+
+adminScheduleController.get("/stats", isAdmin, async (_req, res) => {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const [total, statusGroup, serviceGroup, dailyTrend] = await Promise.all([
+    Appointment.countDocuments(),
+    Appointment.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]),
+    Appointment.aggregate([
+      { $group: { _id: "$service", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
+    Appointment.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]),
+  ]);
+
+  const statusBreakdown = { PENDING: 0, CONFIRMED: 0, DECLINED: 0, CANCELLED: 0 };
+  for (const s of statusGroup) statusBreakdown[s._id] = s.count;
+
+  const cancelledCount = statusBreakdown.CANCELLED || 0;
+  const cancellationRate = total > 0 ? Math.round((cancelledCount / total) * 100) : 0;
+
+  res.json({
+    total,
+    statusBreakdown,
+    serviceBreakdown: serviceGroup.map((s) => ({ service: s._id, count: s.count })),
+    cancellationRate,
+    dailyTrend: dailyTrend.map((d) => ({ date: d._id, count: d.count })),
+  });
 });
 
 adminScheduleController.put("/settings", isAdmin, [

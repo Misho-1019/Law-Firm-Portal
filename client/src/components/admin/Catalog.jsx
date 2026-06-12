@@ -42,7 +42,7 @@ export default function Catalog() {
   }, [search])
 
   useEffect(() => {
-    request.get("/admin/lawyers")
+    request.get(`${api.admin}/lawyers`)
       .then(setLawyers)
       .catch(() => {})
   }, [])
