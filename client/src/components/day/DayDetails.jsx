@@ -59,7 +59,13 @@ export default function DayDetailsPage() {
     const d = new Date(x?.startsAt)
     const isoDay = d.toISOString().slice(0, 10)
     return isoDay === dateParam
-  })  
+  })
+
+  const todayAppts = allAppointments.filter(x => {
+    const d = new Date(x?.startsAt);
+    const isoDay = d.toISOString().slice(0, 10);
+    return isoDay === dateParam;
+  });
 
   let hasTimeOff = timeOff.filter((x) => {
     if (!x?.dateFrom || !x?.dateTo) return false;
