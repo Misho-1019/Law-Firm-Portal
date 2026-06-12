@@ -92,26 +92,8 @@ The project was built to simulate **production-level requirements**, making it s
 ![Client Booking](views/Screenshot%202026-01-10%20021831.png)
 ![Client Booking](views/Screenshot%202026-01-10%20021725.png)
 
-### 7️⃣ Schedule Editor (NEW)
-> Screenshot: Working schedule editor with active days, time intervals, and save functionality.
-
-### 8️⃣ Password Reset (NEW)
-> Screenshot: Forgot password email form and reset password page.
-
-### 9️⃣ Client Search (NEW)
-> Screenshot: Appointments catalog with client name search bar.
-
-### 🔟 Loading Skeleton States (NEW)
-> Screenshot: Skeleton placeholders during data loading on any page.
-
-### 1️⃣1️⃣ BI Dashboard (NEW)
-> Screenshot: Appointment stats and service-type breakdown on the admin dashboard.
-
-### 1️⃣2️⃣ Client History & Cancel Modal (NEW)
-> Screenshot: Client dashboard with upcoming/history tabs and cancel confirmation modal.
-
-### 1️⃣3️⃣ Email Notification Toggle (NEW)
-> Screenshot: Email notification preference toggle on the Profile page.
+### 7️⃣ Schedule Editor
+![Schedule Editor](views/Screenshot%202026-06-13%20002855.png)
 
 ---
 
