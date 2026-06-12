@@ -16,7 +16,7 @@ export const useCreateAppointment = () => {
     }
 }
 
-export const useAppointments = (search = "", page = 1, pageSize = 10) => {
+export const useAppointments = (search = "", page = 1, pageSize = 10, sort = "startsAt:asc") => {
     const [appointments, setAppointments] = useState([])
     const [total, setTotal] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
@@ -30,6 +30,7 @@ export const useAppointments = (search = "", page = 1, pageSize = 10) => {
         if (search) params.set("search", search)
         params.set("limit", String(pageSize))
         params.set("skip", String((page - 1) * pageSize))
+        params.set("sort", sort)
         const qs = params.toString()
         request.get(`${baseUrl}${qs ? `?${qs}` : ""}`)
           .then((data) => {
@@ -38,7 +39,7 @@ export const useAppointments = (search = "", page = 1, pageSize = 10) => {
           })
           .catch(setError)
           .finally(() => setIsLoading(false))
-    }, [search, page, pageSize])
+    }, [search, page, pageSize, sort])
 
     return { appointments, total, isLoading, error }
 }

@@ -17,14 +17,14 @@ export default function Catalog() {
   const [pageSize, setPageSize] = useState(5)
   const [currentPage, setCurrentPage] = useState(1)
   const [defaultStatus, setDefaultStatus] = useState('ALL')
-  const [sortKey, setSortKey] = useState('startsAt:asc')
+  const [sortKey, setSortKey] = useState(() => localStorage.getItem('catalogSort') || 'startsAt:asc')
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
   const debounceRef = useRef(null)
   const [lawyerFilter, setLawyerFilter] = useState("")
   const [lawyers, setLawyers] = useState([])
 
-  const { appointments, total, isLoading } = useAppointments(search, currentPage, pageSize)
+  const { appointments, total, isLoading } = useAppointments(search, currentPage, pageSize, sortKey)
 
   useEffect(() => {
     request.get("/admin/lawyers")
@@ -32,7 +32,7 @@ export default function Catalog() {
       .catch(() => {})
   }, [])
 
-  useEffect(() => { setCurrentPage(1) }, [search, lawyerFilter, defaultStatus])
+  useEffect(() => { setCurrentPage(1) }, [search, lawyerFilter, defaultStatus, sortKey])
 
   function handleSearchChange(value) {
     setSearchInput(value)
@@ -139,6 +139,7 @@ export default function Catalog() {
               value={sortKey}
               onChange={(e) => {
                 setSortKey(e.target.value)
+                localStorage.setItem('catalogSort', e.target.value)
                 setCurrentPage(1)
               }}
               className="rounded-xl border border-slate-200/40 bg-slate-100/40 px-3 py-2 text-sm text-[#334155] opacity-60 dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-[#94A3B8]"

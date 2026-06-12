@@ -9,6 +9,7 @@ import {
 } from "../lib/time.js";
 import { sendEmail } from "../lib/mailer.js";
 import { getDateAndTime, getDateAndTimeDefaults } from "../lib/dates.js";
+import { wrap } from "../lib/authEmails.js";
 import config from "../config.js";
 
 const ADMIN_EMAIL = config.ADMIN_EMAIL;
@@ -70,11 +71,8 @@ function normalizeRange({ from, to, fromLocal, toLocal, timezone }) {
   return range;
 }
 
-function buildApptSummary(appt) {
-  const when =
-    typeof appt.startsAt === "string"
-      ? appt.startsAt
-      : toSofiaISO(appt.startsAt);
+function buildApptSummary(appt, friendlyWhen) {
+  const when = friendlyWhen || "—";
   const parts = [
     `<p><strong>When:</strong> ${when}</p>`,
     `<p><strong>Mode:</strong> ${appt.mode}</p>`,
@@ -95,14 +93,15 @@ async function emailCreated(apptDoc) {
   const clientName = appt.creator?.username || "there";
   const when = toSofiaISO(appt.startsAt);
   const { day, date, time } = getDateAndTime(when)
+  const friendlyWhen = `${day}, ${date} at ${time}`;
 
-  const subjectClient = `✅ Appointment created — Day: ${day} — Date: ${date} — Time: ${time}`;
-  const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was created successfully.</p>${buildApptSummary(
-    appt
-  )}`;
+  const subjectClient = `Appointment created — Day: ${day} — Date: ${date} — Time: ${time}`;
+  const htmlClient = wrap("Appointment created", `<p>Hi ${clientName},</p><p>Your appointment was created successfully.</p>${buildApptSummary(
+    appt, friendlyWhen
+  )}`);
 
-  const subjectAdmin = `📥 New appointment — ${clientName} @ ${date}`;
-  const textAdmin = `New appointment for ${clientName}\nWhen: ${date}\nStart: ${time}\nMode: ${appt.mode}\nService: ${appt.service}\nStatus: ${appt.status}`;
+  const subjectAdmin = `New appointment — ${clientName} @ ${date}`;
+  const textAdmin = `New appointment for ${clientName}\nWhen: ${friendlyWhen}\nMode: ${appt.mode}\nService: ${appt.service}\nStatus: ${appt.status}`;
 
   const tasks = [];
   if (clientEmail)
@@ -131,23 +130,24 @@ async function emailUpdated(prev, next) {
   const statusChanged = prev?.status !== appt.status;
   const when = toSofiaISO(appt.startsAt);
   const { date, time } = getDateAndTimeDefaults(when)
+  const friendlyWhen = `${date} at ${time}`;
 
   let subjectClient = `Appointment updated — ${date}`;
   if (statusChanged)
-    subjectClient = `Status: ${prev?.status ?? "?"} → ${appt.status} — ${date} -> ${time}`;
+    subjectClient = `Status: ${prev?.status ?? "?"} → ${appt.status} — ${date} at ${time}`;
   if (statusChanged && appt.status === "CONFIRMED")
-    subjectClient = `✅ Appointment confirmed — ${date} -> ${time}`;
+    subjectClient = `Appointment confirmed — ${date} at ${time}`;
   if (statusChanged && appt.status === "CANCELLED")
-    subjectClient = `❌ Appointment cancelled — ${date} -> ${time}`;
+    subjectClient = `Appointment cancelled — ${date} at ${time}`;
   if (timeChanged && !statusChanged)
-    subjectClient = `🗓️ Time changed — ${date} -> ${time}`;
+    subjectClient = `Time changed — ${date} at ${time}`;
 
-  const htmlClient = `<p>Hi ${clientName},</p><p>Your appointment was updated.</p>${buildApptSummary(
-    appt
-  )}`;
+  const htmlClient = wrap("Appointment updated", `<p>Hi ${clientName},</p><p>Your appointment was updated.</p>${buildApptSummary(
+    appt, friendlyWhen
+  )}`);
 
-  const subjectAdmin = `✏️ Appointment updated — ${clientName} @ ${date}`;
-  const textAdmin = `Updated appointment for ${clientName}\nWhen: ${date}\nStart: ${time}\nMode: ${appt.mode}\nStatus: ${appt.status}`;
+  const subjectAdmin = `Appointment updated — ${clientName} @ ${date}`;
+  const textAdmin = `Updated appointment for ${clientName}\nWhen: ${friendlyWhen}\nMode: ${appt.mode}\nStatus: ${appt.status}`;
 
   const tasks = [];
   if (clientEmail)

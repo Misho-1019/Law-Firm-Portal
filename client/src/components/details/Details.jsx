@@ -13,9 +13,11 @@ import {
   Trash2
 } from "lucide-react";
 import { Link as RRLink, useInRouterContext, useNavigate, useParams } from "react-router";
+import { useState } from "react";
 import { useAppointment, useDeleteAppointment } from "../../api/appointmentApi";
 import useAuth from "../../hooks/useAuth";
 import { showToast } from "../../utils/toastUtils";
+import Modal from "../Modal";
 
 const MotionSection = motion.section;
 
@@ -35,6 +37,8 @@ export default function AppointmentDetails() {
   const { appointment, isLoading } = useAppointment(appointmentId)
   const { deleteAppointment } = useDeleteAppointment()
   const { role, userId } = useAuth()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   if (isLoading || !appointment) {
     return (
@@ -47,26 +51,29 @@ export default function AppointmentDetails() {
               <Skeleton className="h-32 w-full rounded-xl" />
             </div>
           </main>
-        </div>
       </div>
-    );
+    </div>
+  );
   }
 
   const appointmentDeleteClickHandler = async () => {
-    const hasConfirm = confirm(`Are you sure you want to delete appointment(${appointmentId}) created by ${appointment.firstName} ${appointment.lastName}`)
-
-    if (!hasConfirm) return;
-
-    await deleteAppointment(appointmentId)
-
-    showToast('Appointment deleted successfully.', 'success');
-
-    navigate('/appointments')
+    setDeleting(true);
+    try {
+      await deleteAppointment(appointmentId)
+      showToast('Appointment deleted successfully.', 'success');
+      navigate('/appointments')
+    } catch {
+      showToast('Failed to delete appointment.', 'error');
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
   }
 
   const isOwner = role === 'Client' && appointment?.creator === userId;  
 
   return (
+    <>
     <div className="dark">
       <div className="min-h-screen bg-[#F5F7FA] dark:bg-[#0E1726] text-[#0B1220] dark:text-white transition-colors">
 
@@ -133,9 +140,8 @@ export default function AppointmentDetails() {
 
                   { role === 'Admin' && (
                     <button
-                      onClick={appointmentDeleteClickHandler}
+                      onClick={() => setShowDeleteModal(true)}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#ed2f2f] px-20 py-2 font-semibold text-white hover:bg-[#ffffff] hover:text-red-500 focus:outline-none focus:ring-4 focus:ring-[rgb(47,128,237)/0.40]"
-                      title="Open edit screen"
                     >
                       <Trash2 className="h-4 w-4" /> Delete
                     </button>
@@ -183,6 +189,31 @@ export default function AppointmentDetails() {
         </footer>
       </div>
     </div>
+
+    <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete appointment">
+      <p className="text-sm text-[#334155] dark:text-[#94A3B8] mb-4">
+        Are you sure you want to delete the appointment for{" "}
+        <strong className="text-[#0B1220] dark:text-white">{appointment.firstName} {appointment.lastName}</strong>?
+        This action cannot be undone.
+      </p>
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowDeleteModal(false)}
+          disabled={deleting}
+          className="rounded-xl border border-[#E5E7EB] dark:border-[#1F2937] px-4 py-2 text-sm text-[#334155] dark:text-[#94A3B8] hover:bg-[#F5F7FA] dark:hover:bg-[#0E1726]"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={appointmentDeleteClickHandler}
+          disabled={deleting}
+          className="rounded-xl bg-[#ed2f2f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d11a1a] disabled:opacity-50"
+        >
+          {deleting ? "Deleting..." : "Yes, delete"}
+        </button>
+      </div>
+    </Modal>
+    </>
   );
 }
 

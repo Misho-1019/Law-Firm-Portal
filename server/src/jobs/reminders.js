@@ -7,6 +7,7 @@ import Appointment from "../models/Appointment.js";
 import { sendEmail } from "../lib/mailer.js";
 import { toSofiaISO, SOFIA_TZ } from "../lib/time.js"; // 👈 use Sofia formatter + zone
 import { getDateAndTime } from "../lib/dates.js";
+import { wrap } from "../lib/authEmails.js";
 import config from "../config.js";
 import logger from "../utils/logger.js";
 
@@ -25,13 +26,15 @@ async function sendOneReminder(appt, kind) {
         ? `Reminder: your appointment is in 24 hours (Tomorrow, ${date} - ${time})`
         : `Reminder: your appointment is in 1 hour (Today at ${time})`;
 
-    const html = `
+    const html = wrap(
+      kind === "24h" ? "24-hour reminder" : "1-hour reminder",
+      `
       <p>Hi ${appt.creator?.username || "there"},</p>
-      <p>This is a ${kind} reminder for your appointment.</p>
-      <p><strong>When:</strong> ${`${day}, ${date} - ${time}`}</p>
+      <p>This is a ${kind} reminder for your upcoming appointment.</p>
+      <p><strong>When:</strong> ${`${day}, ${date} at ${time}`}</p>
       <p><strong>Mode:</strong> ${appt.mode}</p>
       <p><strong>Service:</strong> ${appt.service}</p>
-    `;
+    `);
 
     await sendEmail({ to: clientEmail, subject: subjectClient, html });
   }
