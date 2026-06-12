@@ -54,7 +54,7 @@ appointmentController.get("/", isAuth, isAdmin, async (req, res) => {
 });
 
 /**
- * Client: list my appointments (Sofia-aware filters)
+ * Client: list my appointments (Sofia-aware filters)  
  */
 appointmentController.get("/mine", isAuth, async (req, res) => {
   try {
